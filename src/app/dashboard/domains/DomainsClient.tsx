@@ -354,7 +354,7 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
     ...domainList.map((domain) => [
       domain.domain,
       domain.status,
-      domain.inboxCount,
+      String(domain.inboxCount),
       domain.forwardingUrl ?? "",
       domain.tags.join(";"),
       domain.businessName ?? "",
