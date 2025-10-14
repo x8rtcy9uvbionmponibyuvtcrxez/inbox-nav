@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const subId = order.stripeSubscriptionId ?? undefined
     let stripeError: string | null = null
-    if (subId) {
+    if (subId && stripe && typeof stripe.subscriptions === 'object') {
       try {
         // End-of-period cancellation per product policy
         await stripe.subscriptions.update(subId, { cancel_at_period_end: true })
@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
         stripeError = err instanceof Error ? err.message : 'Unknown Stripe error'
         // proceed to mark cancelled locally even if Stripe indicates already cancelled
       }
+    } else if (subId) {
+      stripeError = 'Stripe not configured - subscription will be cancelled locally only'
     }
 
     await prisma.$transaction(async (tx) => {
