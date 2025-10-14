@@ -306,7 +306,7 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
   if (error === "FAILED") {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-3xl border border-red-500/20 bg-red-500/10 px-10 py-16 text-center text-red-200">
-        <h2 className="text-lg font-semibold text-red-200">We couldn't load your domains.</h2>
+        <h2 className="text-lg font-semibold text-red-200">We couldn&apos;t load your domains.</h2>
         <p className="mt-3 max-w-md text-sm text-red-200/80">Please refresh the page or try again later.</p>
       </div>
     );

@@ -33,7 +33,7 @@ export default function CSVUpload({
   // Domain validation regex
   const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\.[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?)*$/;
 
-  const validateRow = (row: CSVRow, rowIndex: number, headers: string[]): ValidationError[] => {
+  const validateRow = (row: CSVRow, rowIndex: number): ValidationError[] => {
     const errors: ValidationError[] = [];
     const rowNumber = rowIndex + 2; // +2 because we start from 0 and skip header row
 
