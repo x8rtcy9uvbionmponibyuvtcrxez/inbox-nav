@@ -1,7 +1,8 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export type CSVRow = Record<string, string>;
@@ -45,8 +46,7 @@ export async function markOrderAsFulfilledAction(
       return { success: false, error: "Unauthorized" };
     }
 
-    const prisma = new PrismaClient();
-    await prisma.$connect();
+    // Using shared Prisma instance
 
     // Step 2: Get order with related data
     const order = await prisma.order.findUnique({
@@ -59,7 +59,6 @@ export async function markOrderAsFulfilledAction(
     });
 
     if (!order) {
-      await prisma.$disconnect();
       return { success: false, error: "Order not found" };
     }
 
@@ -132,9 +131,11 @@ export async function markOrderAsFulfilledAction(
 
     console.log("[FULFILLMENT] ✅ Order fulfilled successfully");
     
-    await prisma.$disconnect();
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath('/admin/orders');
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/inboxes');
+    revalidatePath('/dashboard/domains');
     
     return { 
       success: true, 
@@ -150,7 +151,7 @@ export async function markOrderAsFulfilledAction(
   }
 }
 
-async function processOwnDomainsCsv(prisma: PrismaClient, orderId: string, csvData: CSVRow[]) {
+async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData: CSVRow[]) {
   console.log("[FULFILLMENT] Processing OWN domains CSV");
   
   const updates = [];
@@ -164,7 +165,7 @@ async function processOwnDomainsCsv(prisma: PrismaClient, orderId: string, csvDa
     }
 
     updates.push(
-      prisma.inbox.updateMany({
+      db.inbox.updateMany({
         where: { 
           orderId,
           email: email.trim()
@@ -181,7 +182,7 @@ async function processOwnDomainsCsv(prisma: PrismaClient, orderId: string, csvDa
   console.log(`[FULFILLMENT] ✅ Updated ${updates.length} inbox passwords`);
 }
 
-async function processBuyForMeCsv(prisma: PrismaClient, order: OrderWithRelations, csvData: CSVRow[]) {
+async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, csvData: CSVRow[]) {
   console.log("[FULFILLMENT] Processing BUY_FOR_ME CSV");
 
   const onboarding = Array.isArray(order.onboardingData)
@@ -273,58 +274,69 @@ async function processBuyForMeCsv(prisma: PrismaClient, order: OrderWithRelation
     });
   }
 
+  const now = new Date();
+
   const domainRecords = Array.from(domainMap.entries()).map(([domain, info]) => ({
     orderId: order.id,
     domain,
-    status: 'PENDING',
+    status: 'LIVE',
     inboxCount: info.emails.length,
     forwardingUrl: info.forwardingUrl ?? defaultForwarding,
     businessName: defaultBusinessName,
     tags,
+    fulfilledAt: now,
+    updatedAt: now,
   }));
 
   if (domainRecords.length > 0) {
-    await prisma.domain.createMany({
+    await db.domain.createMany({
       data: domainRecords,
       skipDuplicates: true,
     });
-    await Promise.all(
-      domainRecords.map((record) =>
-        prisma.domain.updateMany({
-          where: { orderId: order.id, domain: record.domain },
-          data: {
-            inboxCount: record.inboxCount,
-            forwardingUrl: record.forwardingUrl,
-            businessName: record.businessName,
-            tags: record.tags,
-            updatedAt: new Date(),
-          },
-        }),
-      ),
-    );
+    for (const record of domainRecords) {
+      await db.domain.updateMany({
+        where: { orderId: order.id, domain: record.domain },
+        data: {
+          inboxCount: record.inboxCount,
+          forwardingUrl: record.forwardingUrl,
+          businessName: record.businessName,
+          tags: record.tags,
+          status: 'LIVE',
+          fulfilledAt: now,
+          updatedAt: now,
+        },
+      });
+    }
     console.log(`[FULFILLMENT] ✅ Created/updated ${domainRecords.length} domains`);
   }
 
   if (inboxData.length > 0) {
-    await prisma.inbox.createMany({
-      data: inboxData,
+    const inboxCreatePayload = inboxData.map((inbox) => ({
+      ...inbox,
+      status: 'LIVE' as const,
+      fulfilledAt: now,
+      updatedAt: now,
+    }));
+
+    await db.inbox.createMany({
+      data: inboxCreatePayload,
       skipDuplicates: true,
     });
-    await Promise.all(
-      inboxData.map((inbox) =>
-        prisma.inbox.updateMany({
-          where: { orderId: order.id, email: inbox.email },
-          data: {
-            password: inbox.password,
-            espPlatform: inbox.espPlatform,
-            tags: inbox.tags,
-            businessName: inbox.businessName,
-            forwardingDomain: inbox.forwardingDomain,
-            updatedAt: new Date(),
-          },
-        }),
-      ),
-    );
+    for (const inbox of inboxCreatePayload) {
+      await db.inbox.updateMany({
+        where: { orderId: order.id, email: inbox.email },
+        data: {
+          password: inbox.password,
+          espPlatform: inbox.espPlatform,
+          tags: inbox.tags,
+          businessName: inbox.businessName,
+          forwardingDomain: inbox.forwardingDomain,
+          status: 'LIVE',
+          fulfilledAt: now,
+          updatedAt: now,
+        },
+      });
+    }
     console.log(`[FULFILLMENT] ✅ Created/updated ${inboxData.length} inboxes`);
   }
 }

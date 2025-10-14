@@ -52,6 +52,13 @@ const products: Product[] = [
   },
 ];
 
+const formatCurrency = (amountInDollars: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  }).format(amountInDollars);
+
 export default function ProductsPage() {
   const [quantities, setQuantities] = useState<Record<ProductType, number>>({
     GOOGLE: 10,
@@ -70,12 +77,15 @@ export default function ProductsPage() {
   );
 
   const handleQuantityChange = (productId: ProductType, value: number) => {
-    const clampedValue = Math.max(10, Math.min(2000, value));
+    // Allow temporary values below MOQ while typing; enforce hard caps 0..2000
+    const clampedValue = Math.max(0, Math.min(2000, value));
     setQuantities(prev => ({
       ...prev,
       [productId]: clampedValue,
     }));
   };
+
+  const getMoq = (productId: ProductType) => (productId === 'MICROSOFT' ? 50 : 10);
 
   const handleSelectPlan = async (productId: ProductType) => {
     const product = products.find(p => p.id === productId);
@@ -86,28 +96,24 @@ export default function ProductsPage() {
     setLoading(prev => ({ ...prev, [productId]: true }));
 
     try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: product.priceId,
-          quantity: quantity,
-          productType: productId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
+      if (productId === 'PREWARMED') {
+        // Direct to simple checkout for prewarmed
+        const response = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            priceId: product.priceId,
+            quantity,
+            productType: productId,
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to create checkout session');
+        if (data.url) window.location.href = data.url; else throw new Error('No checkout URL received');
       } else {
-        throw new Error('No checkout URL received');
+        // Route to configuration for Google/Microsoft
+        const url = `/checkout/configure?product=${productId}&qty=${quantity}`;
+        window.location.href = url;
       }
     } catch (error) {
       console.error('Checkout error:', error);
@@ -134,10 +140,10 @@ export default function ProductsPage() {
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
               Pick the inbox runway that matches your outreach ambitions.
             </h1>
-            <p className="text-sm text-white/50 sm:text-base">
-              Every inbox is warmed, reputation protected, and monitored. Scale campaigns with confidence—whether you need a handful of senders or a full fleet.
+            <p className="text-sm text-white/60 sm:text-base">
+              Every fleet ships with warming, deliverability monitoring, and human support. Scale campaigns with confidence—whether you need a handful of senders or an entire squadron.
             </p>
-            <div className="flex flex-wrap items-center gap-4 text-xs text-white/40">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-white/50">
               <span>⚡ Instant provisioning</span>
               <span>• Reputation-safe warmup</span>
               <span>• Concierge support included</span>
@@ -175,83 +181,99 @@ export default function ProductsPage() {
             return (
               <div
                 key={product.id}
-                className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-8 py-10 shadow-[0_25px_60px_-40px_rgba(0,0,0,0.8)] transition hover:border-white/20 hover:bg-white/[0.06]"
+                className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-8 pb-10 pt-12 shadow-[0_25px_60px_-40px_rgba(0,0,0,0.8)] transition hover:border-white/20 hover:bg-white/[0.06]"
               >
-                {product.badge && (
-                  <div className="absolute right-6 top-6 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60">
-                    {product.badge}
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
+                <div className="mb-8 flex items-start justify-between gap-3">
                   <div className="rounded-2xl bg-white/10 p-3 text-white/80">
                     <product.icon className="h-6 w-6" />
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs uppercase tracking-[0.3em] text-white/40">From</p>
+                  <div className="pt-1 text-right">
+                    <p className="text-xs uppercase tracking-[0.3em] text-white/40">Starting at</p>
                     <p className="text-3xl font-semibold text-white">
                       ${product.price}
-                      <span className="text-sm text-white/40"> /inbox</span>
+                      <span className="text-sm text-white/40"> / inbox</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-8 space-y-3">
+                <div className="space-y-3">
                   <h2 className="text-2xl font-semibold text-white">{product.name}</h2>
-                  <p className="text-sm text-white/50">{product.description}</p>
+                  <p className="text-sm text-white/55">{product.description}</p>
                 </div>
 
-                <ul className="mt-8 space-y-3 text-sm text-white/70">
+                <div className="mt-6 space-y-3 text-sm text-white/70">
                   {product.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3">
+                    <div key={feature} className="flex items-center gap-3">
                       <CheckIcon className="h-4 w-4 text-emerald-400" />
                       <span>{feature}</span>
-                    </li>
+                    </div>
                   ))}
                   {product.id === "MICROSOFT" && (
-                    <li className="flex items-center gap-3 text-amber-300">
+                    <div className="flex items-center gap-3 text-amber-300">
                       <StarIcon className="h-4 w-4" />
-                      Elite reputation floor & dedicated SPF records
-                    </li>
+                      <span>Elite reputation floor & dedicated SPF records</span>
+                    </div>
                   )}
-                </ul>
+                </div>
 
-                <div className="mt-10 space-y-3">
-                  <label className="text-xs uppercase tracking-[0.25em] text-white/40">
+                <div className="mt-8 space-y-3">
+                  <label className="text-xs uppercase tracking-[0.25em] text-white/45">
                     Inbox volume
                   </label>
                   <input
-                    type="number"
-                    min={product.id === "MICROSOFT" ? 50 : 10}
-                    max={2000}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder={product.id === "MICROSOFT" ? "50" : "10"}
                     value={quantities[product.id]}
-                    onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value, 10) || 10)}
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^0-9]/g, "");
+                      const num = parseInt(raw, 10);
+                      handleQuantityChange(
+                        product.id,
+                        Number.isFinite(num)
+                          ? num
+                          : (product.id === "MICROSOFT" ? 50 : 10)
+                      );
+                    }}
+                    className="w-full rounded-2xl border border-white/15 bg-black/40 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
                   />
-                  <p className="text-xs text-white/40">
-                    Total monthly: <span className="font-semibold text-white/80">${totalPrice.toLocaleString()}</span>
-                  </p>
+                  {quantities[product.id] < getMoq(product.id) && (
+                    <p className="mt-2 text-xs text-amber-300">
+                      We have a minimum order of {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
+                    </p>
+                  )}
                 </div>
 
-                <button
-                  onClick={() => handleSelectPlan(product.id)}
-                  disabled={loading[product.id]}
-                  className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/30 disabled:text-black/50"
-                >
-                  {loading[product.id] ? (
-                    <>
-                      <svg className="h-4 w-4 animate-spin text-black/70" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
-                      </svg>
-                      Processing
-                    </>
-                  ) : (
-                    <>
-                      Launch this fleet
-                      <ArrowRightIcon className="h-4 w-4" />
-                    </>
-                  )}
-                </button>
+                <div className="mt-auto space-y-6 pt-8">
+                  <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.3em] text-white/50">
+                    <span>Total monthly</span>
+                    <span className="text-xl font-semibold text-white">
+                      {formatCurrency(totalPrice)}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => handleSelectPlan(product.id)}
+                    disabled={loading[product.id] || quantities[product.id] < getMoq(product.id)}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/30 disabled:text-black/50"
+                  >
+                    {loading[product.id] ? (
+                      <>
+                        <svg className="h-4 w-4 animate-spin text-black/70" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
+                        </svg>
+                        Processing
+                      </>
+                    ) : (
+                      <>
+                        Launch this fleet
+                        <ArrowRightIcon className="h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             );
           })}

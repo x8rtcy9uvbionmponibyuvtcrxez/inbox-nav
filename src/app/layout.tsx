@@ -2,6 +2,7 @@ import { type Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Header from '@/components/Header'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
 
 const geistSans = Geist({
@@ -28,8 +29,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
-          <Header />
-          {children}
+          <ErrorBoundary>
+            <Header />
+            {children}
+          </ErrorBoundary>
         </body>
       </html>
     </ClerkProvider>

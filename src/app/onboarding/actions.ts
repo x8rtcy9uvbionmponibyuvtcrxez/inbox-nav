@@ -5,6 +5,7 @@ import { stripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
 import type { ProductType, OrderStatus } from '@prisma/client';
+import { encryptPassword } from '@/lib/encryption';
 import crypto from "node:crypto";
 
 export type SaveOnboardingInput = {
@@ -15,9 +16,14 @@ export type SaveOnboardingInput = {
   inboxesPerDomain?: number;
   providedDomains?: string[];
   domainList?: string[];
+  ownDomains?: string[]; // For OWN domains from onboarding form
   primaryForwardUrl: string;
+  // Registrar credentials for OWN domains
+  domainRegistrar?: string;
+  registrarUsername?: string;
+  registrarPassword?: string;
   personas: Array<{ firstName: string; lastName: string; profileImage?: string | null }>;
-  warmupTool: "Smartlead" | "Instantly" | "Plusvibe" | "EmailBison";
+  warmupTool: "Smartlead" | "Instantly" | "Plusvibe" | "EmailBison" | string; // Allow any string for "Other" tools
   accountId: string;
   password: string;
   apiKey: string;
@@ -70,7 +76,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     // Step 2: Validate required fields
     const validationErrors = [] as string[];
     if (!input.businessName?.trim()) validationErrors.push("Business name is required");
-    if (!input.primaryForwardUrl?.trim()) validationErrors.push("Primary forwarding URL is required");
+    // Primary forwarding URL is optional; may come from Stripe metadata or be omitted
     if (!input.accountId?.trim()) validationErrors.push("Account ID is required");
     if (!input.password?.trim()) validationErrors.push("Password is required");
     if (!input.apiKey?.trim()) validationErrors.push("API Key is required");
@@ -95,6 +101,14 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       totalAmountCents: totalAmountCents,
     });
 
+    // Stripe metadata-derived domain configuration (if available)
+    let sessionDomainSource: 'OWN' | 'BUY_FOR_ME' | undefined;
+    let sessionOwnDomains: string[] | undefined;
+    let sessionInboxesPerDomain: number | undefined;
+    let sessionForwardingUrl: string | undefined;
+    let sessionDomainsNeeded: number | undefined;
+    let sessionDomainTLD: '.com' | '.info' | undefined;
+
     // Step 4: Handle Order creation or retrieval
     let order;
     try {
@@ -116,7 +130,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           console.log("[ACTION] Order not found, fetching from Stripe...");
 
           try {
-            const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+            const session = await stripe.checkout.sessions.retrieve(input.sessionId, { expand: ['subscription'] });
             console.log("[ACTION] ✅ Stripe session retrieved:", {
               id: session.id,
               paymentStatus: session.payment_status,
@@ -144,11 +158,16 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
                   : 50;
             const sessionTotalAmountCents = sessionQuantity * productPrice * 100;
 
+            const subscriptionId = typeof session.subscription === 'string'
+              ? session.subscription
+              : (session.subscription && 'id' in session.subscription ? (session.subscription as { id?: string | null }).id ?? null : null);
+
             console.log("[ACTION] Creating order from Stripe session data:", {
               productType: sessionProductTypeCanonical,
               quantity: sessionQuantity,
               totalAmountCents: sessionTotalAmountCents,
               customer: session.customer,
+              subscriptionId,
             });
 
             order = await prisma.order.create({
@@ -158,7 +177,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
                 productType: sessionProductTypeCanonical,
                 quantity: sessionQuantity,
                 totalAmount: sessionTotalAmountCents,
-                status: "FULFILLED" as OrderStatus,
+                status: "PENDING" as OrderStatus, // Start as PENDING, admin will mark FULFILLED
                 stripeSessionId: input.sessionId,
                 stripeCustomerId:
                   typeof session.customer === "string"
@@ -166,8 +185,32 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
                     : session.customer && "id" in session.customer
                       ? ((session.customer as { id?: string | null }).id ?? null)
                       : null,
+                stripeSubscriptionId: subscriptionId ?? undefined,
               },
             });
+
+            // Extract domain configuration from session metadata
+            try {
+              const md = (session.metadata || {}) as Record<string, string | undefined>;
+              sessionDomainSource = md.domainSource === 'OWN' || md.domainSource === 'BUY_FOR_ME' ? md.domainSource : undefined;
+              sessionInboxesPerDomain = md.inboxesPerDomain ? parseInt(md.inboxesPerDomain, 10) : undefined;
+              sessionForwardingUrl = md.forwardingUrl;
+              sessionDomainsNeeded = md.domainsNeeded ? parseInt(md.domainsNeeded, 10) : undefined;
+              sessionDomainTLD = (md.domainTLD === '.com' || md.domainTLD === '.info') ? (md.domainTLD as '.com' | '.info') : undefined;
+              if (md.ownDomains) {
+                try { sessionOwnDomains = JSON.parse(md.ownDomains) as string[]; } catch { sessionOwnDomains = []; }
+              }
+              console.log('[ACTION] Stripe session domain metadata:', {
+                domainSource: sessionDomainSource,
+                inboxesPerDomain: sessionInboxesPerDomain,
+                forwardingUrl: sessionForwardingUrl,
+                domainsNeeded: sessionDomainsNeeded,
+                domainTLD: sessionDomainTLD,
+                ownDomains: sessionOwnDomains,
+              });
+            } catch (metaErr) {
+              console.warn('[ACTION] Failed parsing session metadata for domain config:', metaErr);
+            }
           } catch (stripeError) {
             console.error("[ACTION] ❌ Stripe session fetch failed:", stripeError);
             if (stripeError instanceof Error) console.error("[ACTION] Stripe error stack:", stripeError.stack);
@@ -209,22 +252,47 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       console.log("[ACTION] Step 2: Creating OnboardingData...");
       const orderProductType = coerceProductType(order.productType);
       
+      const domainPreferenceList =
+        sessionDomainSource === 'OWN'
+          ? sessionOwnDomains ?? []
+          : input.domainSource === 'OWN' || input.domainStatus === 'own'
+            ? input.providedDomains ?? input.domainList ?? []
+            : [];
+
       const onboardingData = {
         orderId: order.id, // Use the actual order ID (from existing or newly created)
         clerkUserId: userId,
         productType: orderProductType, // Normalized product type
         businessType: input.businessName,
-        website: input.primaryForwardUrl,
-        domainPreferences: (input.domainSource === 'OWN' || input.domainStatus === 'own') ? (input.providedDomains ?? input.domainList ?? []) : [],
+        website: sessionForwardingUrl ?? input.primaryForwardUrl,
+        domainPreferences: {
+          domains: domainPreferenceList,
+          espCredentials: {
+            accountId: input.accountId,
+            password: input.password,
+            apiKey: input.apiKey,
+          },
+          internalTags: input.internalTags ?? [],
+          espTags: input.espTags ?? [],
+        },
         personas: input.personas,
         espProvider: input.warmupTool,
         specialRequirements: input.specialRequirements ?? null,
         stepCompleted: 4,
         isCompleted: true,
-        domainSource: input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME'),
-        inboxesPerDomain: input.inboxesPerDomain ?? (orderProductType === 'GOOGLE' ? 3 : orderProductType === 'PREWARMED' ? 5 : 0),
-        providedDomains: (input.domainSource === 'OWN' || input.domainStatus === 'own') ? (input.providedDomains ?? input.domainList ?? []) : [],
-        calculatedDomainCount: null,
+        domainSource: sessionDomainSource ?? (input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME')),
+        inboxesPerDomain: sessionInboxesPerDomain ?? (input.inboxesPerDomain ?? (orderProductType === 'GOOGLE' ? 3 : orderProductType === 'PREWARMED' ? 3 : 50)),
+        providedDomains: sessionDomainSource === 'OWN'
+          ? sessionOwnDomains ?? []
+          : input.domainSource === 'OWN' || input.domainStatus === 'own'
+            ? input.ownDomains ?? input.providedDomains ?? input.domainList ?? []
+            : [],
+        calculatedDomainCount: sessionDomainsNeeded ?? null,
+        // Registrar credentials for OWN domains (password is encrypted)
+        domainRegistrar: input.domainRegistrar ?? null,
+        registrarAdminEmail: input.domainRegistrar ? 'team@inboxnavigator.com' : null,
+        registrarUsername: input.registrarUsername ?? null,
+        registrarPassword: input.registrarPassword ? encryptPassword(input.registrarPassword) : null,
       };
 
       console.log("[ACTION] 📝 OnboardingData payload:", {
@@ -258,7 +326,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     try {
       console.log("[ACTION] Step 3: Determining inbox generation strategy...");
 
-      const domainSource = input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME');
+      const domainSource = sessionDomainSource ?? (input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME'));
       const productType = coerceProductType(order.productType);
       const personasLite = (input.personas || []).map(p => ({ firstName: p.firstName, lastName: p.lastName }));
 
@@ -267,8 +335,8 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         domainSource,
         totalInboxes: input.inboxCount,
         personas: personasLite,
-        providedDomains: domainSource === 'OWN' ? (input.providedDomains ?? input.domainList ?? []) : [],
-        inboxesPerDomain: input.inboxesPerDomain,
+        providedDomains: domainSource === 'OWN' ? (sessionOwnDomains ?? (input.providedDomains ?? input.domainList ?? [])) : [],
+        inboxesPerDomain: sessionInboxesPerDomain ?? input.inboxesPerDomain,
         businessName: input.businessName,
       });
 
@@ -314,7 +382,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         status: 'PENDING' as const,
         tags: input.internalTags || [],
         inboxCount: domainInboxCounts.get(domain) || 0,
-        forwardingUrl: input.primaryForwardUrl || domain,
+        forwardingUrl: (sessionForwardingUrl ?? input.primaryForwardUrl) || domain,
         businessName: input.businessName,
       }));
 
@@ -339,7 +407,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           status: 'PENDING' as const,
           tags: input.internalTags || [],
           businessName: input.businessName,
-          forwardingDomain: input.primaryForwardUrl || allocation.domain,
+          forwardingDomain: (sessionForwardingUrl ?? input.primaryForwardUrl) || allocation.domain,
           password: null,
         }));
 

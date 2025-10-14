@@ -3,9 +3,7 @@
 import {
   SignInButton,
   SignUpButton,
-  SignedIn,
   SignedOut,
-  UserButton,
 } from '@clerk/nextjs'
 
 export default function Header() {
@@ -19,9 +17,6 @@ export default function Header() {
           </button>
         </SignUpButton>
       </SignedOut>
-      <SignedIn>
-        <UserButton />
-      </SignedIn>
     </header>
   )
 }

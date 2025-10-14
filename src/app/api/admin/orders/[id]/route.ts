@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
@@ -16,8 +16,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const prisma = new PrismaClient();
-    await prisma.$connect();
+    // Using shared Prisma instance
 
     const order = await prisma.order.findUnique({
       where: { id: resolvedParams.id },
@@ -28,7 +27,7 @@ export async function GET(
       }
     });
 
-    await prisma.$disconnect();
+    // Prisma connection managed by singleton
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });

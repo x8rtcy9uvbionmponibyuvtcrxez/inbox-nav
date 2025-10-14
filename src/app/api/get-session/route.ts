@@ -32,6 +32,23 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Check if session has expired
+    const now = Math.floor(Date.now() / 1000)
+    if (session.expires_at && session.expires_at < now) {
+      return NextResponse.json(
+        { error: 'Session has expired. Please start a new checkout.' },
+        { status: 410 } // Gone status for expired resources
+      )
+    }
+
+    // Check if session is still valid (not completed or expired)
+    if (session.status === 'expired') {
+      return NextResponse.json(
+        { error: 'Session has expired. Please start a new checkout.' },
+        { status: 410 }
+      )
+    }
+
     // Verify the session belongs to the current user
     if (session.metadata?.clerkUserId !== userId) {
       return NextResponse.json(
@@ -57,6 +74,7 @@ export async function GET(request: NextRequest) {
       quantity,
       paymentStatus: session.payment_status,
       customerEmail: session.customer_email,
+      metadata: session.metadata, // Include all metadata for onboarding
     })
   } catch (error) {
     console.error('Get session error:', error)

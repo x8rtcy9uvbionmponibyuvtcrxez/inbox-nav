@@ -1,7 +1,8 @@
 "use server";
 
 import { requireAdmin } from '@/lib/admin-auth';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { encryptPassword } from '@/lib/encryption';
 import { sendClerkInvitation } from '@/lib/clerk-invites';
 
@@ -126,7 +127,7 @@ export async function validateCSVAction(csvData: CSVRow[]): Promise<ValidationRe
 export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> {
   const actorUserId = await requireAdmin();
   
-  const prisma = new PrismaClient();
+  // Using shared Prisma instance
   await prisma.$connect();
   
   try {
@@ -306,7 +307,7 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
       message: 'Import failed: ' + (error instanceof Error ? error.message : 'Unknown error')
     };
   } finally {
-    await prisma.$disconnect();
+    // Prisma connection managed by singleton
   }
 }
 
@@ -314,7 +315,7 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
  * Links existing orders to users when they sign up
  */
 export async function linkOrdersToUserAction(userEmail: string, clerkUserId: string): Promise<void> {
-  const prisma = new PrismaClient();
+  // Using shared Prisma instance
   await prisma.$connect();
   
   try {
@@ -350,7 +351,7 @@ export async function linkOrdersToUserAction(userEmail: string, clerkUserId: str
   } catch (error) {
     console.error('[LINK] Error linking orders to user:', error);
   } finally {
-    await prisma.$disconnect();
+    // Prisma connection managed by singleton
   }
 }
 

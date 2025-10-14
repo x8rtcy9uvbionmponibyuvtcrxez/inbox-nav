@@ -19,6 +19,7 @@ enum ProductType {
 enum OrderStatus {
   PENDING
   FULFILLED
+  CANCELLED
 }
 
 model Order {
@@ -31,6 +32,9 @@ model Order {
   stripeSessionId      String?     @map("stripe_session_id")
   stripeCustomerId     String?     @map("stripe_customer_id")
   stripeSubscriptionId String?     @map("stripe_subscription_id")
+  subscriptionStatus   String      @default("active") @map("subscription_status")
+  cancelledAt          DateTime?   @map("cancelled_at")
+  cancellationReason   String?     @map("cancellation_reason")
   businessName         String?     @map("business_name")
   externalId           String?     @unique @map("external_id")
   createdAt            DateTime    @default(now()) @map("created_at")
@@ -67,6 +71,12 @@ model OnboardingData {
   inboxesPerDomain      Int      @default(3) @map("inboxes_per_domain")
   providedDomains       String[] @default([]) @map("provided_domains")
   calculatedDomainCount Int?     @map("calculated_domain_count")
+  
+  // Domain registrar credentials (for OWN domains)
+  domainRegistrar       String?  @map("domain_registrar")
+  registrarAdminEmail   String?  @map("registrar_admin_email")
+  registrarUsername     String?  @map("registrar_username")
+  registrarPassword     String?  @map("registrar_password")
   
   // Relations
   order                Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)

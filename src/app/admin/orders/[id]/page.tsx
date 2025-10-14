@@ -7,6 +7,12 @@ import { markOrderAsFulfilledAction, type CSVRow } from '../actions';
 
 type Persona = { firstName: string; lastName: string; profileImage?: string | null };
 
+type EspCredentials = {
+  accountId?: string | null;
+  password?: string | null;
+  apiKey?: string | null;
+};
+
 type OnboardingPayload = {
   businessType?: string;
   website?: string;
@@ -20,6 +26,12 @@ type OnboardingPayload = {
   calculatedDomainCount?: number | null;
   internalTags?: unknown;
   espTags?: unknown;
+  espCredentials?: EspCredentials | null;
+  // Registrar credentials
+  domainRegistrar?: string | null;
+  registrarAdminEmail?: string | null;
+  registrarUsername?: string | null;
+  registrarPassword?: string | null; // encrypted
 };
 
 type OrderData = {
@@ -30,6 +42,10 @@ type OrderData = {
   status: string;
   totalAmount?: number | null;
   createdAt: string;
+  stripeSubscriptionId?: string | null;
+  subscriptionStatus?: string | null;
+  cancelledAt?: string | null;
+  cancellationReason?: string | null;
   onboardingData?: OnboardingPayload | OnboardingPayload[];
   domains: Array<{
     id: string;
@@ -64,6 +80,7 @@ const statusStyles: Record<string, string> = {
   PAID: 'bg-blue-500/15 border border-blue-500/30 text-blue-300',
   PENDING: 'bg-amber-400/20 border border-amber-400/40 text-amber-200',
   PENDING_DOMAIN_PURCHASE: 'bg-purple-500/15 border border-purple-500/30 text-purple-200',
+  CANCELLED: 'bg-red-500/15 border border-red-500/30 text-red-300',
   DEFAULT: 'bg-gray-500/15 border border-gray-500/40 text-gray-300',
 };
 
@@ -218,10 +235,33 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
     const raw = Array.isArray(order.onboardingData) ? order.onboardingData[0] : order.onboardingData;
     if (!raw) return null;
 
-    const domainPreferences = normalizeStringArray(raw.domainPreferences);
+    const rawDomainPrefs = (raw as { domainPreferences?: unknown }).domainPreferences;
+    let domainPreferences = normalizeStringArray(rawDomainPrefs);
+    let espCredentials: EspCredentials | null = null;
     const personas = normalizePersonas(raw.personas);
-    const internalTags = normalizeStringArray((raw as { internalTags?: unknown }).internalTags);
-    const espTags = normalizeStringArray((raw as { espTags?: unknown }).espTags);
+    let internalTags = normalizeStringArray((raw as { internalTags?: unknown }).internalTags);
+    let espTags = normalizeStringArray((raw as { espTags?: unknown }).espTags);
+
+    if (rawDomainPrefs && typeof rawDomainPrefs === 'object' && !Array.isArray(rawDomainPrefs)) {
+      const prefsObject = rawDomainPrefs as Record<string, unknown>;
+      domainPreferences = normalizeStringArray(prefsObject.domains);
+      const candidateCredentials = prefsObject.espCredentials;
+      if (candidateCredentials && typeof candidateCredentials === 'object') {
+        const credObj = candidateCredentials as Record<string, unknown>;
+        const accountId = typeof credObj.accountId === 'string' ? credObj.accountId : credObj.accountId == null ? null : String(credObj.accountId);
+        const password = typeof credObj.password === 'string' ? credObj.password : credObj.password == null ? null : String(credObj.password);
+        const apiKey = typeof credObj.apiKey === 'string' ? credObj.apiKey : credObj.apiKey == null ? null : String(credObj.apiKey);
+        espCredentials = { accountId, password, apiKey };
+      }
+      const candidateInternal = prefsObject.internalTags;
+      if (candidateInternal !== undefined) {
+        internalTags = normalizeStringArray(candidateInternal);
+      }
+      const candidateEspTags = prefsObject.espTags;
+      if (candidateEspTags !== undefined) {
+        espTags = normalizeStringArray(candidateEspTags);
+      }
+    }
 
     return {
       ...raw,
@@ -229,6 +269,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
       personas,
       internalTags,
       espTags,
+      espCredentials,
     };
   }, [order?.onboardingData]);
 
@@ -334,6 +375,50 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
 
   const statusClass = statusStyles[order.status] ?? statusStyles.DEFAULT;
   const isFulfilled = order.status === 'FULFILLED';
+  const isCancelled = order.status === 'CANCELLED';
+  const hasSubscription = Boolean(order.stripeSubscriptionId);
+  const subscriptionStatusLabel = hasSubscription ? (isCancelled ? 'Cancelled' : 'Active') : '—';
+
+  const handleDownloadCsv = () => {
+    const rows: string[][] = [
+      ['Field', 'Value'],
+      ['Order ID', order.id],
+      ['Status', order.status],
+      ['Product', order.productType],
+      ['Quantity', String(order.quantity)],
+      ['Total Amount (cents)', String(order.totalAmount ?? order.quantity * 300)],
+      ['Business Name', onboarding?.businessType ?? ''],
+      ['Website', onboarding?.website ?? ''],
+      ['Domain Source', toTitle(onboarding?.domainSource ?? (isOwn ? 'OWN' : 'BUY_FOR_ME'))],
+      ['Stripe Subscription', order.stripeSubscriptionId ?? ''],
+      ['Subscription Status', subscriptionStatusLabel],
+      ['Cancelled On', order.cancelledAt ? formatDate(order.cancelledAt) : ''],
+      ['Cancellation Reason', order.cancellationReason ?? ''],
+      ['ESP Account ID', onboarding?.registrarUsername ?? ''],
+      ['ESP Password', onboarding?.registrarPassword ?? ''],
+      ['Warmup Tool', onboarding?.espProvider ?? ''],
+      ['Inboxes per Domain', onboarding?.inboxesPerDomain != null ? String(onboarding.inboxesPerDomain) : ''],
+      ['Domains Needed', onboarding?.calculatedDomainCount != null ? String(onboarding.calculatedDomainCount) : ''],
+      ['Personas', personas.map((persona) => `${persona.firstName} ${persona.lastName}`.trim()).join('; ')],
+      ['Inboxes', order.inboxes.map((inbox) => inbox.email).join('; ')],
+      ['Domains', order.domains.map((domain) => domain.domain).join('; ')],
+      ['Special Requirements', onboarding?.specialRequirements ?? ''],
+    ];
+
+    const csv = rows
+      .map((row) => row.map((value) => `"${String(value ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `admin-order-${order.id}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-8">
@@ -351,12 +436,18 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
           <p className="mt-1 text-sm text-gray-400">Placed {formatDate(order.createdAt)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleDownloadCsv}
+            className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-sm text-gray-100 transition hover:border-indigo-500 hover:text-white"
+          >
+            Download CSV
+          </button>
           <span
             className={`rounded-full px-3 py-1 text-xs font-medium ${statusClass}`}
           >
-            {isFulfilled ? 'Fulfilled' : order.status === 'PENDING' ? 'Pending' : toTitle(order.status)}
+            {isFulfilled ? 'Fulfilled' : order.status === 'PENDING' ? 'Pending' : order.status === 'CANCELLED' ? 'Cancelled' : toTitle(order.status)}
           </span>
-          {!isFulfilled && (
+          {!isFulfilled && !isCancelled && (
             <button
               onClick={handleMarkAsFulfilled}
               disabled={!canFulfill || fulfilling}
@@ -397,6 +488,44 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
         />
       </div>
 
+      {/* Subscription and Cancellation Details */}
+      {(hasSubscription || isCancelled) && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900/80 p-5">
+          <h2 className="text-sm font-semibold text-white mb-4">Subscription Details</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {order.stripeSubscriptionId && (
+              <InfoRow
+                label="Stripe Subscription ID"
+                value={<span className="font-mono text-xs">{order.stripeSubscriptionId}</span>}
+              />
+            )}
+            <InfoRow
+              label="Subscription Status"
+              value={<span className="capitalize">{subscriptionStatusLabel}</span>}
+            />
+            {isCancelled && order.cancelledAt && (
+              <InfoRow
+                label="Cancelled On"
+                value={formatDate(order.cancelledAt)}
+              />
+            )}
+            {isCancelled && order.cancellationReason && (
+              <InfoRow
+                label="Cancellation Reason"
+                value={order.cancellationReason}
+              />
+            )}
+          </div>
+          {isCancelled && (
+            <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
+              <p className="text-sm text-red-300">
+                ⚠️ This order has been cancelled. Fulfillment is disabled and related inboxes/domains have been marked as deleted.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <div className="grid gap-4 md:grid-cols-2">
@@ -406,6 +535,30 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
             <InfoRow
               label="Warmup Tool"
               value={onboarding?.espProvider ? toTitle(onboarding.espProvider) : '—'}
+            />
+            <InfoRow
+              label="ESP Account ID"
+              value={
+                onboarding?.espCredentials?.accountId
+                  ? <span className="font-mono text-xs text-indigo-200">{onboarding.espCredentials.accountId}</span>
+                  : '—'
+              }
+            />
+            <InfoRow
+              label="ESP Password"
+              value={
+                onboarding?.espCredentials?.password
+                  ? <span className="font-mono text-xs text-indigo-200">{onboarding.espCredentials.password}</span>
+                  : '—'
+              }
+            />
+            <InfoRow
+              label="ESP API Key"
+              value={
+                onboarding?.espCredentials?.apiKey
+                  ? <span className="font-mono text-xs text-indigo-200 break-all">{onboarding.espCredentials.apiKey}</span>
+                  : '—'
+              }
             />
             <InfoRow
               label="Inboxes per Domain"
@@ -426,6 +579,73 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
               )}
             />
           </div>
+
+          {/* Registrar Credentials Section (for OWN domains) */}
+          {onboarding?.domainSource === 'OWN' && onboarding?.domainRegistrar && (
+            <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-5">
+              <h2 className="text-sm font-semibold text-blue-300 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Registrar Credentials
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <InfoRow
+                  label="Registrar"
+                  value={<span className="font-semibold text-blue-200">{onboarding.domainRegistrar}</span>}
+                />
+                <InfoRow
+                  label="Admin Email Invite"
+                  value={
+                    <span className="font-mono text-sm text-blue-200">
+                      {onboarding.registrarAdminEmail || 'team@inboxnavigator.com'}
+                    </span>
+                  }
+                />
+                <InfoRow
+                  label="Username"
+                  value={
+                    onboarding.registrarUsername ? (
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm text-blue-200">{onboarding.registrarUsername}</span>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(onboarding.registrarUsername!)}
+                          className="text-xs text-blue-400 hover:text-blue-300"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    ) : (
+                      '—'
+                    )
+                  }
+                />
+                <InfoRow
+                  label="Password"
+                  value={
+                    onboarding.registrarPassword ? (
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm text-blue-200">{onboarding.registrarPassword}</span>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(onboarding.registrarPassword!)}
+                          className="text-xs text-blue-400 hover:text-blue-300"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    ) : (
+                      '—'
+                    )
+                  }
+                />
+              </div>
+              <div className="mt-4 rounded-lg border border-blue-400/30 bg-blue-400/5 p-3">
+                <p className="text-sm text-blue-200">
+                  ℹ️ Make sure <span className="font-mono font-semibold">team@inboxnavigator.com</span> has been invited as an admin to the customer&rsquo;s {onboarding.domainRegistrar} account.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5">
             <div className="mb-3 flex items-center justify-between gap-3">
@@ -574,62 +794,65 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border border-gray-800 bg-gray-900/80 p-5 space-y-6">
+          <div className={`rounded-xl border border-gray-800 bg-gray-900/80 p-5 space-y-6 ${isCancelled ? 'opacity-50' : ''}`}>
             <div>
               <h2 className="text-sm font-semibold text-white">
                 {isOwn ? 'Fulfillment — Customer Domains' : 'Fulfillment — Provision Domains'}
               </h2>
               <p className="mt-2 text-sm text-gray-400">
-                {isOwn
-                  ? 'Set one password for every inbox or upload a CSV with individual passwords when you have them.'
-                  : 'Upload the provisioning CSV to create domains and inboxes in one step. Include one row per inbox with its persona and password.'}
+                {isCancelled 
+                  ? 'Fulfillment is disabled for cancelled orders.'
+                  : isOwn
+                    ? 'Set one password for every inbox. Customer-domain orders do not require separate CSV uploads.'
+                    : 'Upload the provisioning CSV to create domains and inboxes in one step. Include one row per inbox with its persona and password.'}
               </p>
             </div>
 
-            {isOwn ? (
-              <div className="space-y-2">
-                <label className="block text-xs uppercase tracking-wide text-gray-500">Uniform password</label>
-                <input
-                  type="password"
-                  placeholder="Apply a single password to all inboxes"
-                  value={uniformPassword}
-                  onChange={(e) => setUniformPassword(e.target.value)}
-                  className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
-                <p className="text-xs text-gray-500">
-                  Leave blank if you prefer to manage passwords via CSV.
-                </p>
-              </div>
-            ) : null}
+            {!isCancelled && (
+              <>
+                {isOwn ? (
+                  <div className="space-y-2">
+                    <label className="block text-xs uppercase tracking-wide text-gray-500">Uniform password</label>
+                    <input
+                      type="password"
+                      placeholder="Apply a single password to all inboxes"
+                      value={uniformPassword}
+                      onChange={(e) => setUniformPassword(e.target.value)}
+                      className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Leave blank if you prefer to manage passwords via CSV.
+                    </p>
+                  </div>
+                ) : null}
 
-            <div className="space-y-2">
-              <label className="block text-xs uppercase tracking-wide text-gray-500">
-                {isOwn ? 'Password CSV (optional)' : 'Provisioning CSV'}
-              </label>
-              <CSVUpload
-                expectedHeaders={isOwn ? ['email', 'password'] : ['domain', 'email', 'personaName', 'password', 'forwardingUrl']}
-                onParsed={handleCsvParsed}
-                cta={isOwn ? 'Upload CSV with email,password' : 'Upload CSV with domain,email,personaName,password[,forwardingUrl]'}
-              />
-              {csvData && csvData.length > 0 ? (
-                <p className="text-xs text-emerald-400">{csvData.length} rows ready to process.</p>
-              ) : (
-                <p className="text-xs text-gray-500">
-                  {isOwn
-                    ? 'Columns: email,password'
-                    : 'Columns: domain,email,personaName,password,forwardingUrl(optional)'}
-                </p>
-              )}
-            </div>
+                {!isOwn && (
+                  <div className="space-y-2">
+                    <label className="block text-xs uppercase tracking-wide text-gray-500">Provisioning CSV</label>
+                    <CSVUpload
+                      expectedHeaders={['domain', 'email', 'personaName', 'password']}
+                      optionalHeaders={['forwardingUrl']}
+                      onParsed={handleCsvParsed}
+                      cta="Upload CSV with domain,email,personaName,password (+forwardingUrl optional)"
+                    />
+                    {csvData && csvData.length > 0 ? (
+                      <p className="text-xs text-emerald-400">{csvData.length} rows ready to process.</p>
+                    ) : (
+                      <p className="text-xs text-gray-500">Columns: domain,email,personaName,password,forwardingUrl(optional)</p>
+                    )}
+                  </div>
+                )}
 
-            <div>
-              <h3 className="text-xs uppercase tracking-wide text-gray-500">Workflow tips</h3>
-              <ul className="mt-2 space-y-1 text-sm text-gray-400">
-                <li>• “Buy for me” orders require a CSV before fulfillment can run.</li>
-                <li>• Customer-domain orders can be fulfilled with a CSV, a uniform password, or both.</li>
-                <li>• After marking fulfilled, the dashboard refreshes automatically.</li>
-              </ul>
-            </div>
+                <div>
+                  <h3 className="text-xs uppercase tracking-wide text-gray-500">Workflow tips</h3>
+                  <ul className="mt-2 space-y-1 text-sm text-gray-400">
+                    <li>• &ldquo;Buy for me&rdquo; orders require a CSV before fulfillment can run.</li>
+                    <li>• Customer-domain orders can be fulfilled with a uniform password (CSV optional).</li>
+                    <li>• After marking fulfilled, the dashboard refreshes automatically.</li>
+                  </ul>
+                </div>
+              </>
+            )}
           </div>
 
           {fulfillmentMessage ? (
