@@ -338,7 +338,7 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
     });
   };
 
-  const buildDomainCsvRows = (domainList: DomainRecord[]) => [
+  const buildDomainCsvRows = (domainList: DomainRecord[]): string[][] => [
     [
       "domain",
       "status",
