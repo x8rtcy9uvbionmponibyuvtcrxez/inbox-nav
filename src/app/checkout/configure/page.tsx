@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -24,7 +24,7 @@ function getPricePerInbox(product: ProductType): number {
   return product === "GOOGLE" ? 3 : product === "PREWARMED" ? 7 : 50;
 }
 
-export default function ConfigurePage() {
+function ConfigurePageContent() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -194,6 +194,21 @@ export default function ConfigurePage() {
       </div>
     </div>
     </ErrorBoundary>
+  );
+}
+
+export default function ConfigurePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-white/60">Loading configuration...</p>
+        </div>
+      </div>
+    }>
+      <ConfigurePageContent />
+    </Suspense>
   );
 }
 
