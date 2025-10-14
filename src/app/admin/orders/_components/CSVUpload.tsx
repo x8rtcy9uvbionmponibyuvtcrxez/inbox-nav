@@ -103,8 +103,8 @@ export default function CSVUpload({
         headers.forEach((h, idx) => row[h] = (cols[idx] || '').trim());
         rows.push(row);
         
-        // Validate each row
-        const rowErrors = validateRow(row, i - 1, headers);
+            // Validate each row
+            const rowErrors = validateRow(row, i - 1);
         allErrors.push(...rowErrors);
       }
       
