@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductType {
+  GOOGLE
+  PREWARMED
+  MICROSOFT
+}
+
+enum OrderStatus {
+  PENDING
+  FULFILLED
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  clerkUserId      String      @map("clerk_user_id")
+  productType      String      @map("product_type")
+  quantity         Int
+  totalAmount      Int         // Store cents instead of dollars
+  status           String      @default("PENDING")
+  stripeSessionId  String?     @map("stripe_session_id")
+  stripeCustomerId String?     @map("stripe_customer_id")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+  
+  // Relations
+  onboardingData   OnboardingData[]
+  inboxes          Inbox[]
+  domains          Domain[]
+  
+  @@map("orders")
+}
+
+model OnboardingData {
+  id                   String   @id @default(uuid())
+  orderId              String   @unique
+  clerkUserId          String
+  productType          String?  @map("product_type")
+  businessType         String?
+  industry             String?
+  companySize          String?
+  website              String?
+  domainPreferences    Json?
+  personas             Json?
+  espProvider          String?
+  specialRequirements  String?
+  stepCompleted        Int      @default(0)
+  isCompleted          Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // New fields for domain/inbox distribution
+  domainSource          String   @default("OWN") @map("domain_source")
+  inboxesPerDomain      Int      @default(3) @map("inboxes_per_domain")
+  providedDomains       String[] @default([]) @map("provided_domains")
+  calculatedDomainCount Int?     @map("calculated_domain_count")
+  
+  // Relations
+  order                Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@map("onboarding_data")
+}
+
+model Inbox {
+  id                String    @id @default(cuid())
+  orderId           String    @map("order_id")
+  order             Order     @relation(fields: [orderId], references: [id])
+  
+  // Core Fields
+  email             String    @unique
+  personaName       String    @map("persona_name")
+  espPlatform       String    @map("esp_platform") // Smartlead, Instantly, etc
+  status            String    @default("PENDING") // LIVE, DELETED, PENDING
+  tags              String[]  @default([])
+  businessName      String    @map("business_name")
+  forwardingDomain  String?   @map("forwarding_domain") // Can be null or "-"
+  password          String?   @map("password")
+  
+  // Dates
+  fulfilledAt       DateTime? @map("fulfilled_at") // Set when admin marks as fulfilled
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("inboxes")
+}
+
+model Domain {
+  id                String    @id @default(cuid())
+  orderId           String    @map("order_id")
+  order             Order     @relation(fields: [orderId], references: [id])
+  
+  // Core Fields
+  domain            String    @unique
+  status            String    @default("PENDING") // LIVE, DELETED, PENDING
+  tags              String[]  @default([])
+  inboxCount        Int       @default(0) @map("inbox_count")
+  forwardingUrl     String    @map("forwarding_url")
+  businessName      String    @map("business_name")
+  
+  // Dates
+  fulfilledAt       DateTime? @map("fulfilled_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("domains")
+}
