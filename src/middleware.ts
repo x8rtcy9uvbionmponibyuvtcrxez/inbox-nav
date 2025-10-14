@@ -1,10 +1,26 @@
-// Temporarily disabled middleware for testing - all routes are public
-import { NextRequest, NextResponse } from 'next/server'
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export function middleware(request: NextRequest) {
-  // Allow all requests to pass through without authentication
-  return NextResponse.next()
-}
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/api/webhooks/stripe-subscription',
+  '/api/webhooks/clerk',
+  '/api/checkout-with-domains',
+  '/api/checkout',
+  '/api/get-session',
+  '/api/cancel-subscription',
+  '/admin(.*)',
+  '/dashboard(.*)',
+  '/checkout(.*)',
+  '/onboarding(.*)',
+]);
+
+export default clerkMiddleware((auth, req) => {
+  if (!isPublicRoute(req)) {
+    auth.protect();
+  }
+});
 
 export const config = {
   matcher: [
@@ -13,4 +29,4 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
-}
+};
