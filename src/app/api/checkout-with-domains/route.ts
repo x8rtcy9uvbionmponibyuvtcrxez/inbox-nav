@@ -12,6 +12,12 @@ const INBOX_PRICING_USD: Record<ProductType, number> = {
   MICROSOFT: 50,
 }
 
+const INBOX_PRICE_IDS: Record<ProductType, string | undefined> = {
+  GOOGLE: process.env.STRIPE_PRICE_GOOGLE_INBOX,
+  PREWARMED: process.env.STRIPE_PRICE_PREWARMED_INBOX,
+  MICROSOFT: process.env.STRIPE_PRICE_MICROSOFT_INBOX,
+}
+
 const DOMAIN_PRICING_USD = {
   '.com': 12,
   '.info': 4,
@@ -46,9 +52,20 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`
 
+    const inboxPriceId = INBOX_PRICE_IDS[productType]
     const inboxUnitAmount = INBOX_PRICING_USD[productType] * 100
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-      {
+    
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = []
+    
+    if (inboxPriceId) {
+      // Use Stripe price ID if available
+      lineItems.push({
+        price: inboxPriceId,
+        quantity,
+      })
+    } else {
+      // Fallback to dynamic pricing
+      lineItems.push({
         price_data: {
           currency: 'usd',
           product_data: { name: `${quantity} ${productType} Inboxes` },
@@ -56,8 +73,8 @@ export async function POST(request: NextRequest) {
           unit_amount: inboxUnitAmount,
         },
         quantity,
-      },
-    ]
+      })
+    }
 
     if (body.domainSource === 'BUY_FOR_ME') {
       // Prefer explicit price ID when provided (for testing or preconfigured prices)
