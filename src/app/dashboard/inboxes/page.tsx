@@ -1,70 +1,49 @@
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from '@prisma/client';
 import Link from "next/link";
-import { InboxIcon, ShoppingCartIcon } from "@heroicons/react/24/outline";
+import { prisma } from "@/lib/prisma";
+import { InboxIcon, SparklesIcon, ShoppingCartIcon } from "@heroicons/react/24/outline";
 
-// Helper function to create fresh Prisma client
-async function withPrismaClient<T>(operation: (prisma: PrismaClient) => Promise<T>): Promise<T> {
-  const prisma = new PrismaClient();
-  try {
-    await prisma.$connect();
-    return await operation(prisma);
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-// Status badge component
-function StatusBadge({ status }: { status: string }) {
-  const getStatusStyles = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'LIVE':
-        return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'PENDING':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'DELETED':
-        return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    }
+type InboxRecord = {
+  id: string;
+  email: string;
+  personaName: string;
+  status: string;
+  tags: string[];
+  businessName: string | null;
+  forwardingDomain: string | null;
+  password: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  order: {
+    id: string;
+    productType: string;
+    quantity: number;
+    status: string;
   };
+};
 
+const STATUS_COLORS: Record<string, string> = {
+  LIVE: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+  PENDING: "bg-amber-400/25 text-amber-100 border border-amber-300/40",
+  DELETED: "bg-red-500/15 text-red-300 border border-red-500/30",
+  DEFAULT: "bg-white/10 text-white/50 border border-white/10",
+};
+
+function StatusPill({ status }: { status: string }) {
+  const pillClass = STATUS_COLORS[status.toUpperCase()] ?? STATUS_COLORS.DEFAULT;
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(status)}`}>
-      {status}
+    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${pillClass}`}>
+      {status.toLowerCase()}
     </span>
   );
 }
 
-// Tags component
-function TagsDisplay({ tags }: { tags: string[] }) {
-  if (!tags || tags.length === 0) {
-    return <span className="text-gray-500 text-sm">No tags</span>;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-1">
-      {tags.slice(0, 3).map((tag, index) => (
-        <span
-          key={index}
-          className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-        >
-          {tag}
-        </span>
-      ))}
-      {tags.length > 3 && (
-        <span className="text-gray-400 text-xs">+{tags.length - 3} more</span>
-      )}
-    </div>
-  );
-}
-
-// Format date helper
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
+function formatDate(value: Date | string) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   }).format(date);
 }
 
@@ -73,188 +52,169 @@ export default async function InboxesPage() {
 
   if (!userId) {
     return (
-      <div className="text-center py-12">
-        <div className="max-w-md mx-auto">
-          <h2 className="text-2xl font-semibold text-white mb-2">Authentication Required</h2>
-          <p className="text-gray-400">Please sign in to view your inboxes.</p>
-        </div>
+      <div className="flex min-h-[60vh] items-center justify-center rounded-3xl border border-white/10 bg-white/10/5 px-10 py-16 text-center text-white/70">
+        Sign in to view your inbox inventory.
       </div>
     );
   }
 
-  let inboxes: Array<{
-    id: string;
-    email: string;
-    personaName: string;
-    espPlatform: string;
-    status: string;
-    tags: string[];
-    businessName: string;
-    forwardingDomain: string | null;
-    createdAt: Date;
-    order: {
-      id: string;
-      productType: string;
-      quantity: number;
-      status: string;
-    };
-  }> = [];
+  let inboxes: InboxRecord[] = [];
   let error: string | null = null;
 
   try {
-    inboxes = await withPrismaClient(async (prisma) => {
-      return await prisma.inbox.findMany({
-        where: {
-          order: {
-            clerkUserId: userId
-          }
+    inboxes = await prisma.inbox.findMany({
+      where: {
+        order: {
+          clerkUserId: userId,
         },
-        include: {
-          order: {
-            select: {
-              id: true,
-              productType: true,
-              quantity: true,
-              status: true
-            }
-          }
+      },
+      include: {
+        order: {
+          select: {
+            id: true,
+            productType: true,
+            quantity: true,
+            status: true,
+          },
         },
-        orderBy: {
-          createdAt: 'desc'
-        }
-      });
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   } catch (err) {
-    console.error('Error fetching inboxes:', err);
-    error = 'Failed to load inboxes';
+    console.error("[Inboxes] Failed to load inboxes", err);
+    error = err instanceof Error ? err.message : "Unknown error";
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <div className="max-w-md mx-auto">
-          <h2 className="text-2xl font-semibold text-white mb-2">Error</h2>
-          <p className="text-red-400 mb-6">{error}</p>
-          <Link
-            href="/dashboard/products"
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-          >
-            <ShoppingCartIcon className="h-5 w-5" />
-            Buy Inboxes
-          </Link>
-        </div>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-3xl border border-red-500/20 bg-red-500/10 px-10 py-16 text-center text-red-200">
+        <h2 className="text-lg font-semibold text-red-200">We couldn’t load your inboxes.</h2>
+        <p className="mt-3 max-w-md text-sm text-red-200/80">{error}</p>
+        <button
+          onClick={() => globalThis.location?.reload()}
+          className="mt-6 inline-flex items-center gap-2 rounded-full border border-red-200/40 px-5 py-2 text-sm font-medium text-red-200 transition hover:border-red-200/60"
+        >
+          Try again
+        </button>
       </div>
     );
   }
 
-  if (inboxes.length === 0) {
+  if (!inboxes.length) {
     return (
-      <div className="text-center py-12">
-        <div className="max-w-md mx-auto">
-          <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <InboxIcon className="h-8 w-8 text-gray-400" />
-          </div>
-          <h2 className="text-2xl font-semibold text-white mb-2">No inboxes yet</h2>
-          <p className="text-gray-400 mb-6">
-            Your inboxes will appear here after fulfillment. Complete the onboarding process to get started.
-          </p>
-          <Link
-            href="/dashboard/products"
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-          >
-            <ShoppingCartIcon className="h-5 w-5" />
-            Buy Inboxes
-          </Link>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5/10 px-10 py-16 text-center text-white/70">
+        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
+          <InboxIcon className="h-8 w-8 text-white/70" />
         </div>
+        <h2 className="text-2xl font-semibold text-white">No inboxes yet</h2>
+        <p className="mt-3 max-w-sm text-sm text-white/50">
+          Your inboxes appear here once fulfillment is complete. Launch a package to start building out your fleet.
+        </p>
+        <Link
+          href="/dashboard/products"
+          className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90"
+        >
+          <SparklesIcon className="h-4 w-4" />
+          Create inboxes
+        </Link>
       </div>
     );
   }
+
+  const inboxCount = inboxes.length;
+  const liveCount = inboxes.filter((inbox) => inbox.status === "LIVE").length;
+  const pendingCount = inboxes.filter((inbox) => inbox.status === "PENDING").length;
+  const uniqueDomains = new Set<string>();
+  inboxes.forEach((inbox) => {
+    if (inbox.forwardingDomain) uniqueDomains.add(inbox.forwardingDomain);
+  });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-10 text-white">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Your Inboxes</h1>
-          <p className="text-gray-400">Manage and monitor your email inboxes</p>
+          <h1 className="text-3xl font-semibold text-white">Inbox inventory</h1>
+          <p className="mt-2 max-w-xl text-sm text-white/50">
+            Every sender you’ve provisioned, plus their current delivery status, tags, and linked orders.
+          </p>
         </div>
-        <div className="text-sm text-gray-400">
-          {inboxes.length} inbox{inboxes.length !== 1 ? 'es' : ''}
+        <Link
+          href="/dashboard/products"
+          className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white"
+        >
+          <ShoppingCartIcon className="h-5 w-5" />
+          Add more inboxes
+        </Link>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-3">
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.6)]">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/40">Total inboxes</p>
+          <p className="mt-3 text-3xl font-semibold text-white">{inboxCount}</p>
+          <p className="mt-1 text-xs text-white/40">Across all active orders</p>
+        </div>
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.6)]">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/40">Live senders</p>
+          <p className="mt-3 text-3xl font-semibold text-white">{liveCount}</p>
+          <p className="mt-1 text-xs text-white/40">Ready for campaigns</p>
+        </div>
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.6)]">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/40">Domains forwarding</p>
+          <p className="mt-3 text-3xl font-semibold text-white">{uniqueDomains.size}</p>
+          <p className="mt-1 text-xs text-white/40">Connected forwarding hosts</p>
         </div>
       </div>
 
-      <div className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
+      {pendingCount > 0 && (
+        <div className="rounded-3xl border border-amber-400/20 bg-amber-500/10 px-6 py-4 text-sm text-amber-100">
+          {pendingCount} inbox{pendingCount === 1 ? "" : "es"} are still warming. We’ll move them to “Live” automatically once the reputation is stable.
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-[0_30px_60px_-45px_rgba(0,0,0,0.8)]">
+        <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Inbox roster</h2>
+            <p className="text-xs text-white/50">Export tags, passwords, and domains for this workspace.</p>
+          </div>
+          <button className="text-xs font-medium text-white/50 transition hover:text-white">
+            Export CSV
+          </button>
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-800">
-            <thead className="bg-gray-800">
+          <table className="min-w-full divide-y divide-white/5 text-sm">
+            <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Persona
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  ESP Platform
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Tags
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Business
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Forwarding Domain
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Order
-                </th>
+                <th scope="col" className="px-6 py-3 text-left">Email</th>
+                <th scope="col" className="px-6 py-3 text-left">Persona</th>
+                <th scope="col" className="px-6 py-3 text-left">Status</th>
+                <th scope="col" className="px-6 py-3 text-left">Tags</th>
+                <th scope="col" className="px-6 py-3 text-left">Business</th>
+                <th scope="col" className="px-6 py-3 text-left">Forwarding</th>
+                <th scope="col" className="px-6 py-3 text-left">Order</th>
+                <th scope="col" className="px-6 py-3 text-left">Created</th>
               </tr>
             </thead>
-            <tbody className="bg-gray-900 divide-y divide-gray-800">
+            <tbody className="divide-y divide-white/5">
               {inboxes.map((inbox) => (
-                <tr key={inbox.id} className="hover:bg-gray-800/50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-white">{inbox.email}</div>
+                <tr key={inbox.id} className="transition hover:bg-white/[0.04]">
+                  <td className="px-6 py-4 font-mono text-xs text-white/80">{inbox.email}</td>
+                  <td className="px-6 py-4 text-white/70">{inbox.personaName}</td>
+                  <td className="px-6 py-4">
+                    <StatusPill status={inbox.status} />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-300">{inbox.personaName}</div>
+                  <td className="px-6 py-4 text-white/60">
+                    {inbox.tags.length ? inbox.tags.slice(0, 3).join(", ") : <span className="text-white/30">—</span>}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-300">{inbox.espPlatform}</div>
+                  <td className="px-6 py-4 text-white/70">
+                    {inbox.businessName || "—"}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge status={inbox.status} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <TagsDisplay tags={inbox.tags} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-300">{inbox.businessName}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-300">
-                      {inbox.forwardingDomain || '-'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-300">
-                      {formatDate(inbox.createdAt)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Link
-                      href={`/dashboard/orders/${inbox.order.id}`}
-                      className="text-indigo-400 hover:text-indigo-300 text-sm font-medium"
-                    >
-                      {inbox.order.id.slice(0, 8)}...
-                    </Link>
-                  </td>
+                  <td className="px-6 py-4 text-white/60">{inbox.forwardingDomain || "—"}</td>
+                  <td className="px-6 py-4 font-mono text-xs text-white/50">{inbox.order.id.slice(0, 8)}…</td>
+                  <td className="px-6 py-4 text-white/60">{formatDate(inbox.createdAt)}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,14 +1,37 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 export type CSVRow = Record<string, string>;
 
+type OrderWithRelations = Prisma.OrderGetPayload<{
+  include: {
+    onboardingData: true;
+    domains: true;
+    inboxes: true;
+  };
+}>;
+
+const normalizeStringArray = (value: unknown): string[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+  }
+  if (typeof value === 'string') {
+    return value
+      .split(/[\n,]/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
 export async function markOrderAsFulfilledAction(
   orderId: string,
-  csvData?: CSVRow[]
+  csvData?: CSVRow[],
+  uniformPassword?: string
 ) {
   try {
     console.log("[FULFILLMENT] Starting fulfillment process for order:", orderId);
@@ -60,8 +83,17 @@ export async function markOrderAsFulfilledAction(
         await processOwnDomainsCsv(prisma, orderId, csvData);
       } else {
         // BUY_FOR_ME: Create domains and inboxes from CSV
-        await processBuyForMeCsv(prisma, orderId, csvData);
+        await processBuyForMeCsv(prisma, order, csvData);
       }
+    }
+
+    // For OWN domains, support a single uniform password (no CSV needed)
+    if (isOwn && uniformPassword && (!csvData || csvData.length === 0)) {
+      console.log("[FULFILLMENT] Applying uniform password to all inboxes for order", orderId);
+      await prisma.inbox.updateMany({
+        where: { orderId },
+        data: { password: uniformPassword.trim(), updatedAt: new Date() }
+      });
     }
 
     // Step 4: Update order status and fulfillment timestamps
@@ -149,66 +181,150 @@ async function processOwnDomainsCsv(prisma: PrismaClient, orderId: string, csvDa
   console.log(`[FULFILLMENT] ✅ Updated ${updates.length} inbox passwords`);
 }
 
-async function processBuyForMeCsv(prisma: PrismaClient, orderId: string, csvData: CSVRow[]) {
+async function processBuyForMeCsv(prisma: PrismaClient, order: OrderWithRelations, csvData: CSVRow[]) {
   console.log("[FULFILLMENT] Processing BUY_FOR_ME CSV");
-  
-  // Group by domain to create domain records
-  const domainMap = new Map<string, string[]>();
-  const inboxData = [];
-  
+
+  const onboarding = Array.isArray(order.onboardingData)
+    ? order.onboardingData[0]
+    : order.onboardingData;
+  const onboardingRecord =
+    onboarding && typeof onboarding === 'object'
+      ? (onboarding as Record<string, unknown>)
+      : {};
+
+  const getField = (field: string): string | undefined => {
+    const value = onboardingRecord[field];
+    if (value == null) return undefined;
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => (typeof item === 'string' ? item : String(item ?? '')))
+        .join(',');
+    }
+    return String(value);
+  };
+
+  // Prefer Order businessName; fallback to onboarding data
+  const defaultBusinessName = getField('businessType') || getField('website') || '';
+  const defaultForwarding = getField('website') ?? '';
+  const tags = normalizeStringArray(onboardingRecord['internalTags']);
+  const espProvider = getField('espProvider') ?? 'Smartlead';
+
+  type DomainEntry = {
+    emails: string[];
+    forwardingUrl?: string;
+  };
+
+  const domainMap = new Map<string, DomainEntry>();
+  const inboxData: Array<{
+    orderId: string;
+    email: string;
+    personaName: string;
+    password: string;
+    espPlatform: string;
+    status: string;
+    tags: string[];
+    businessName: string;
+    forwardingDomain: string | null;
+  }> = [];
+
   for (const row of csvData) {
-    const { domain, email, personaName, password } = row;
-    
-    if (!domain || !email || !personaName || !password) {
+    const rawDomain =
+      row.domain ??
+      row.Domain ??
+      row.DOMAIN ??
+      (row.forwardingDomain ?? row.forwarding_url ?? row.forwardingUrl ?? '');
+    const { email, personaName, password } = row;
+
+    if (!rawDomain || !email || !personaName || !password) {
       console.warn("[FULFILLMENT] Skipping row with missing data:", row);
       continue;
     }
 
-    const domainName = domain.trim();
-    if (!domainMap.has(domainName)) {
-      domainMap.set(domainName, []);
+    const domainName = rawDomain.trim();
+    const forwardingValue =
+      (row.forwardingUrl ??
+        row.forwarding_url ??
+        row.forwardingDomain ??
+        row.forwardTo ??
+        row.forward ??
+        domainName)?.trim() || defaultForwarding;
+
+    const entry = domainMap.get(domainName) ?? { emails: [], forwardingUrl: undefined };
+    entry.emails.push(email.trim());
+    if (!entry.forwardingUrl && forwardingValue) {
+      entry.forwardingUrl = forwardingValue;
     }
-    domainMap.get(domainName)!.push(email.trim());
+    domainMap.set(domainName, entry);
+
+    // Row-level business name: CSV value overrides defaults; Order wins already applied above
+    const rowBusinessName = (row.business_name ?? row.businessName)?.trim() || defaultBusinessName;
 
     inboxData.push({
-      orderId,
+      orderId: order.id,
       email: email.trim(),
       personaName: personaName.trim(),
-      domain: domainName,
       password: password.trim(),
-      espPlatform: 'Smartlead', // Default, could be from onboarding data
+      espPlatform: espProvider,
       status: 'PENDING',
-      tags: [],
-      businessName: '', // Will be set from order data
-      forwardingDomain: null,
+      tags,
+      businessName: rowBusinessName,
+      forwardingDomain: forwardingValue || null,
     });
   }
 
-  // Create domains
-  const domainRecords = Array.from(domainMap.entries()).map(([domain, emails]) => ({
-    orderId,
+  const domainRecords = Array.from(domainMap.entries()).map(([domain, info]) => ({
+    orderId: order.id,
     domain,
     status: 'PENDING',
-    inboxCount: emails.length,
-    forwardingUrl: '',
-    businessName: '',
-    tags: []
+    inboxCount: info.emails.length,
+    forwardingUrl: info.forwardingUrl ?? defaultForwarding,
+    businessName: defaultBusinessName,
+    tags,
   }));
 
   if (domainRecords.length > 0) {
     await prisma.domain.createMany({
       data: domainRecords,
-      skipDuplicates: true
+      skipDuplicates: true,
     });
-    console.log(`[FULFILLMENT] ✅ Created ${domainRecords.length} domains`);
+    await Promise.all(
+      domainRecords.map((record) =>
+        prisma.domain.updateMany({
+          where: { orderId: order.id, domain: record.domain },
+          data: {
+            inboxCount: record.inboxCount,
+            forwardingUrl: record.forwardingUrl,
+            businessName: record.businessName,
+            tags: record.tags,
+            updatedAt: new Date(),
+          },
+        }),
+      ),
+    );
+    console.log(`[FULFILLMENT] ✅ Created/updated ${domainRecords.length} domains`);
   }
 
-  // Create inboxes
   if (inboxData.length > 0) {
     await prisma.inbox.createMany({
       data: inboxData,
-      skipDuplicates: true
+      skipDuplicates: true,
     });
-    console.log(`[FULFILLMENT] ✅ Created ${inboxData.length} inboxes`);
+    await Promise.all(
+      inboxData.map((inbox) =>
+        prisma.inbox.updateMany({
+          where: { orderId: order.id, email: inbox.email },
+          data: {
+            password: inbox.password,
+            espPlatform: inbox.espPlatform,
+            tags: inbox.tags,
+            businessName: inbox.businessName,
+            forwardingDomain: inbox.forwardingDomain,
+            updatedAt: new Date(),
+          },
+        }),
+      ),
+    );
+    console.log(`[FULFILLMENT] ✅ Created/updated ${inboxData.length} inboxes`);
   }
 }

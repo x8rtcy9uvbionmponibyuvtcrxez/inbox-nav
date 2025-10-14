@@ -4,45 +4,66 @@ export function generateEmailVariations(
   domain: string,
   count: number = 50
 ): string[] {
-  const fn = firstName.toLowerCase();
-  const ln = lastName.toLowerCase();
+  const targetCount = Math.max(1, count);
+  const fn = firstName.trim().toLowerCase();
+  const ln = lastName.trim().toLowerCase();
   const fi = fn.charAt(0);
   const li = ln.charAt(0);
-  
-  const variations: string[] = [];
-  
-  // Basic formats (10)
-  variations.push(`${fn}@${domain}`);
-  variations.push(`${fn}.${ln}@${domain}`);
-  variations.push(`${fn}.${li}@${domain}`);
-  variations.push(`${fi}.${ln}@${domain}`);
-  variations.push(`${fn}${ln}@${domain}`);
-  variations.push(`${fi}${ln}@${domain}`);
-  variations.push(`${fn}_${ln}@${domain}`);
-  variations.push(`${fn}-${ln}@${domain}`);
-  variations.push(`${ln}.${fn}@${domain}`);
-  variations.push(`${ln}${fn}@${domain}`);
-  
-  // With numbers 1-10
-  for (let i = 1; i <= 10; i++) {
-    variations.push(`${fn}${i}@${domain}`);
-  }
-  
-  // Combo + numbers
-  for (let i = 1; i <= 10; i++) {
-    variations.push(`${fn}.${ln}${i}@${domain}`);
-  }
-  
-  // Short + numbers
-  for (let i = 1; i <= 10; i++) {
-    variations.push(`${fi}${ln}${i}@${domain}`);
-  }
-  
-  // Professional prefixes
+
+  const variations = new Set<string>();
+  const add = (localPart: string) => {
+    if (!localPart) return;
+    const email = `${localPart}@${domain}`;
+    if (!variations.has(email) && variations.size < targetCount) {
+      variations.add(email);
+    }
+  };
+
+  // Basic human-friendly formats
+  [
+    fn,
+    `${fn}.${ln}`,
+    `${fn}.${li}`,
+    `${fi}.${ln}`,
+    `${fn}${ln}`,
+    `${fi}${ln}`,
+    `${fn}_${ln}`,
+    `${fn}-${ln}`,
+    `${ln}.${fn}`,
+    `${ln}${fn}`,
+  ].forEach(add);
+
   const prefixes = ['contact', 'info', 'sales', 'hello', 'hi', 'reach', 'meet', 'get', 'team', 'ask'];
-  prefixes.forEach(prefix => {
-    variations.push(`${prefix}.${fn}@${domain}`);
-  });
-  
-  return variations.slice(0, Math.min(count, 50));
+  prefixes.forEach(prefix => add(`${prefix}.${fn}`));
+
+  // Numeric permutations – keep iterating until we have enough entries
+  const numericPatterns: Array<(i: number) => string> = [
+    (i) => `${fn}${i}`,
+    (i) => `${fn}.${ln}${i}`,
+    (i) => `${fi}${ln}${i}`,
+    (i) => `${fn}${ln}${i}`,
+    (i) => `${fn}_${ln}${i}`,
+    (i) => `${fn}-${ln}${i}`,
+    (i) => `${ln}${fn}${i}`,
+    (i) => `${ln}.${fn}${i}`,
+    (i) => `${fn}${i.toString().padStart(2, '0')}`,
+  ];
+
+  let i = 1;
+  while (variations.size < targetCount && i < 1000) {
+    numericPatterns.forEach(pattern => add(pattern(i)));
+    i += 1;
+  }
+
+  // Fallback for extremely large counts: append alphabetical suffixes
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+  let suffixIndex = 0;
+  while (variations.size < targetCount && suffixIndex < alphabet.length ** 2) {
+    const first = alphabet[Math.floor(suffixIndex / alphabet.length)] ?? 'x';
+    const second = alphabet[suffixIndex % alphabet.length] ?? 'y';
+    add(`${fn}${ln}${first}${second}`);
+    suffixIndex += 1;
+  }
+
+  return Array.from(variations).slice(0, targetCount);
 }

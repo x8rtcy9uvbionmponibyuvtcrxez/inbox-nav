@@ -1,9 +1,10 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from '@prisma/client';
 import { stripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
+import { prisma } from '@/lib/prisma';
+import type { ProductType, OrderStatus } from '@prisma/client';
 import crypto from "node:crypto";
 
 export type SaveOnboardingInput = {
@@ -28,26 +29,12 @@ export type SaveOnboardingInput = {
   sessionId?: string; // Stripe session ID for existing orders
 };
 
-// Helper function to create and manage Prisma client
-async function withPrismaClient<T>(operation: (prisma: PrismaClient) => Promise<T>): Promise<T> {
-  const prisma = new PrismaClient();
-  try {
-    await prisma.$connect();
-    console.log("✅ Fresh Prisma client connected");
-    
-    // Add delay to ensure engine is ready
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const result = await operation(prisma);
-    return result;
-  } finally {
-    try {
-      await prisma.$disconnect();
-      console.log("🔌 Fresh Prisma client disconnected");
-    } catch (disconnectError) {
-      console.error("⚠️ Error disconnecting fresh Prisma client:", disconnectError);
-    }
-  }
+const PRODUCT_TYPES: ProductType[] = ['GOOGLE', 'PREWARMED', 'MICROSOFT'];
+
+function coerceProductType(value?: string | null): ProductType {
+  if (!value) return 'GOOGLE';
+  const candidate = value.toUpperCase() as ProductType;
+  return PRODUCT_TYPES.includes(candidate) ? candidate : 'GOOGLE';
 }
 
 export async function saveOnboardingAction(input: SaveOnboardingInput) {
@@ -95,8 +82,10 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       return { success: false, error: `Validation failed: ${validationErrors.join(", ")}` };
     }
 
+    const normalizedProductType = coerceProductType(input.productType);
+
     // Step 3: Calculate pricing (in cents)
-    const pricePerInbox = input.productType === 'GOOGLE' ? 3 : input.productType === 'PREWARMED' ? 7 : 50;
+    const pricePerInbox = normalizedProductType === 'GOOGLE' ? 3 : normalizedProductType === 'PREWARMED' ? 7 : 50;
     const totalAmountCents = input.inboxCount * pricePerInbox * 100; // Convert to cents
     console.log("[ACTION] 💰 Pricing calculation:", {
       productType: input.productType,
@@ -111,109 +100,98 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     try {
       if (input.sessionId) {
         console.log("[ACTION] Step 1: Processing Stripe session:", input.sessionId);
-        
-        order = await withPrismaClient(async (prisma) => {
-          // First, check if order already exists for this Stripe session
-          console.log('[ACTION] Checking for existing order by stripeSessionId');
-          const existingOrder = await prisma.order.findFirst({
-            where: {
-              stripeSessionId: input.sessionId,
-              clerkUserId: userId,
-            },
-          });
-          
-          if (existingOrder) {
-            console.log("[ACTION] ✅ Found existing order:", existingOrder.id);
-            return existingOrder;
-          }
-          
-          // Order doesn't exist yet, fetch from Stripe and create
+
+        console.log("[ACTION] Checking for existing order by stripeSessionId");
+        const existingOrder = await prisma.order.findFirst({
+          where: {
+            stripeSessionId: input.sessionId,
+            clerkUserId: userId,
+          },
+        });
+
+        if (existingOrder) {
+          console.log("[ACTION] ✅ Found existing order:", existingOrder.id);
+          order = existingOrder;
+        } else {
           console.log("[ACTION] Order not found, fetching from Stripe...");
-          
+
           try {
-            const session = await stripe.checkout.sessions.retrieve(input.sessionId!);
+            const session = await stripe.checkout.sessions.retrieve(input.sessionId);
             console.log("[ACTION] ✅ Stripe session retrieved:", {
               id: session.id,
               paymentStatus: session.payment_status,
               customer: session.customer,
               metadata: session.metadata,
             });
-            
-            // Validate session belongs to this user
+
             if (session.metadata?.clerkUserId !== userId) {
               throw new Error("Session does not belong to current user");
             }
-            
-            // Extract data from session metadata
+
             const sessionProductType = session.metadata?.productType;
-            const sessionQuantity = parseInt(session.metadata?.quantity || '0');
-            
+            const sessionQuantity = parseInt(session.metadata?.quantity || "0", 10);
+
             if (!sessionProductType || !sessionQuantity) {
               throw new Error("Invalid session metadata");
             }
-            
-            // Calculate pricing from session data
-            const getProductPrice = (productType: string) => {
-              switch (productType) {
-                case 'GOOGLE': return 3;
-                case 'PREWARMED': return 7;
-                case 'MICROSOFT': return 50;
-                default: return 3;
-              }
-            };
-            
-            const productPrice = getProductPrice(sessionProductType);
+
+            const sessionProductTypeCanonical = coerceProductType(sessionProductType);
+            const productPrice =
+              sessionProductTypeCanonical === "GOOGLE"
+                ? 3
+                : sessionProductTypeCanonical === "PREWARMED"
+                  ? 7
+                  : 50;
             const sessionTotalAmountCents = sessionQuantity * productPrice * 100;
-            
+
             console.log("[ACTION] Creating order from Stripe session data:", {
-              productType: sessionProductType,
+              productType: sessionProductTypeCanonical,
               quantity: sessionQuantity,
               totalAmountCents: sessionTotalAmountCents,
               customer: session.customer,
             });
-            
-            // Create new order with Stripe session data
-                return await prisma.order.create({
+
+            order = await prisma.order.create({
               data: {
                 id: crypto.randomUUID(),
                 clerkUserId: userId,
-                productType: sessionProductType,
+                productType: sessionProductTypeCanonical,
                 quantity: sessionQuantity,
                 totalAmount: sessionTotalAmountCents,
-                status: "PAID",
+                status: "FULFILLED" as OrderStatus,
                 stripeSessionId: input.sessionId,
-                    stripeCustomerId: typeof session.customer === 'string' 
-                      ? session.customer 
-                      : (session.customer && 'id' in session.customer ? (session.customer as { id?: string | null }).id ?? null : null),
+                stripeCustomerId:
+                  typeof session.customer === "string"
+                    ? session.customer
+                    : session.customer && "id" in session.customer
+                      ? ((session.customer as { id?: string | null }).id ?? null)
+                      : null,
               },
             });
           } catch (stripeError) {
             console.error("[ACTION] ❌ Stripe session fetch failed:", stripeError);
-            if (stripeError instanceof Error) console.error('[ACTION] Stripe error stack:', stripeError.stack);
-            throw new Error(`Failed to fetch Stripe session: ${stripeError instanceof Error ? stripeError.message : 'Unknown error'}`);
+            if (stripeError instanceof Error) console.error("[ACTION] Stripe error stack:", stripeError.stack);
+            throw new Error(`Failed to fetch Stripe session: ${stripeError instanceof Error ? stripeError.message : "Unknown error"}`);
           }
-        });
+        }
       } else {
-        // Create temporary order for non-Stripe flow
         const tempOrderId = crypto.randomUUID();
         console.log("[ACTION] 🆔 Generated temp order ID:", tempOrderId);
         console.log("[ACTION] Step 1: Creating temporary Order...");
-        
-        order = await withPrismaClient(async (prisma) => {
-          return await prisma.order.create({
-            data: {
-              id: tempOrderId,
-              clerkUserId: userId,
-              productType: input.productType || 'GOOGLE',
-              quantity: input.inboxCount,
-              totalAmount: totalAmountCents,
-              status: "PENDING",
-              stripeSessionId: `temp_${tempOrderId}`,
-            },
-          });
+
+        order = await prisma.order.create({
+          data: {
+            id: tempOrderId,
+            clerkUserId: userId,
+            productType: normalizedProductType,
+            quantity: input.inboxCount,
+            totalAmount: totalAmountCents,
+            status: "PENDING" as OrderStatus,
+            stripeSessionId: `temp_${tempOrderId}`,
+          },
         });
       }
-      
+
       console.log("[ACTION] ✅ Order processed:", order.id);
     } catch (orderError) {
       console.error("❌ Failed to process order - Full error:", orderError);
@@ -225,15 +203,16 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       return { success: false, error: `Failed to process order: ${orderError instanceof Error ? orderError.message : 'Unknown error'}` };
     }
 
-    // Step 5: Create OnboardingData record with fresh Prisma client
+    // Step 5: Create OnboardingData record
     let onboarding;
     try {
       console.log("[ACTION] Step 2: Creating OnboardingData...");
+      const orderProductType = coerceProductType(order.productType);
       
       const onboardingData = {
         orderId: order.id, // Use the actual order ID (from existing or newly created)
         clerkUserId: userId,
-        productType: order.productType, // Use productType from order (Stripe session data)
+        productType: orderProductType, // Normalized product type
         businessType: input.businessName,
         website: input.primaryForwardUrl,
         domainPreferences: (input.domainSource === 'OWN' || input.domainStatus === 'own') ? (input.providedDomains ?? input.domainList ?? []) : [],
@@ -243,7 +222,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         stepCompleted: 4,
         isCompleted: true,
         domainSource: input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME'),
-        inboxesPerDomain: input.inboxesPerDomain ?? (order.productType === 'GOOGLE' ? 3 : order.productType === 'PREWARMED' ? 5 : 0),
+        inboxesPerDomain: input.inboxesPerDomain ?? (orderProductType === 'GOOGLE' ? 3 : orderProductType === 'PREWARMED' ? 5 : 0),
         providedDomains: (input.domainSource === 'OWN' || input.domainStatus === 'own') ? (input.providedDomains ?? input.domainList ?? []) : [],
         calculatedDomainCount: null,
       };
@@ -260,10 +239,8 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         isCompleted: onboardingData.isCompleted,
       });
 
-      onboarding = await withPrismaClient(async (prisma) => {
-        return await prisma.onboardingData.create({
-          data: onboardingData,
-        });
+      onboarding = await prisma.onboardingData.create({
+        data: onboardingData,
       });
 
       console.log("[ACTION] ✅ OnboardingData created:", onboarding.id);
@@ -282,7 +259,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       console.log("[ACTION] Step 3: Determining inbox generation strategy...");
 
       const domainSource = input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME');
-      const productType = (order.productType as 'GOOGLE' | 'PREWARMED' | 'MICROSOFT');
+      const productType = coerceProductType(order.productType);
       const personasLite = (input.personas || []).map(p => ({ firstName: p.firstName, lastName: p.lastName }));
 
       const distribution = distributeInboxes({
@@ -304,21 +281,15 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
       if (!distribution.shouldCreateInboxes) {
         // BUY_FOR_ME branch - set order status and return
-        const prisma = new PrismaClient();
-        await prisma.$connect();
-        try {
-          await prisma.order.update({
-            where: { id: order.id },
-            data: { status: 'PENDING_DOMAIN_PURCHASE' }
-          });
-          // Optionally store calculatedDomainCount on onboarding
-          await prisma.onboardingData.update({
-            where: { id: onboarding.id },
-            data: { calculatedDomainCount: distribution.domainsNeeded }
-          });
-        } finally {
-          await prisma.$disconnect();
-        }
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { status: 'PENDING' as OrderStatus },
+        });
+        // Optionally store calculatedDomainCount on onboarding
+        await prisma.onboardingData.update({
+          where: { id: onboarding.id },
+          data: { calculatedDomainCount: distribution.domainsNeeded },
+        });
         return {
           success: true,
           orderId: order.id,
@@ -332,63 +303,56 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       console.log('[ACTION] ✅ Distribution validated (unique emails)');
       
       // Create domains and inboxes in a transaction
-      // Use a dedicated Prisma client and a single long-running transaction for domain + inbox generation
-      const prisma = new PrismaClient();
-      await prisma.$connect();
-      try {
-        console.log('[ACTION] Creating domains (batch)...');
-        const domainInboxCounts = new Map<string, number>();
-        for (const alloc of distribution.allocations) {
-          domainInboxCounts.set(alloc.domain, (domainInboxCounts.get(alloc.domain) || 0) + 1);
+      console.log('[ACTION] Creating domains (batch)...');
+      const domainInboxCounts = new Map<string, number>();
+      for (const alloc of distribution.allocations) {
+        domainInboxCounts.set(alloc.domain, (domainInboxCounts.get(alloc.domain) || 0) + 1);
+      }
+      const domainData = distribution.domainsUsed.map(domain => ({
+        orderId: order.id,
+        domain,
+        status: 'PENDING' as const,
+        tags: input.internalTags || [],
+        inboxCount: domainInboxCounts.get(domain) || 0,
+        forwardingUrl: input.primaryForwardUrl || domain,
+        businessName: input.businessName,
+      }));
+
+      await prisma.$transaction(async (tx) => {
+        // Batch create domains
+        if (domainData.length > 0) {
+          const domainResult = await tx.domain.createMany({
+            data: domainData,
+            skipDuplicates: true,
+          });
+          console.log(`[ACTION] ✅ Created domains: ${domainResult.count}`);
+        } else {
+          console.log('[ACTION] ✅ No domains to create');
         }
-        const domainData = distribution.domainsUsed.map(domain => ({
+
+        console.log('[ACTION] Creating inboxes...');
+        const inboxData = distribution.allocations.map(allocation => ({
           orderId: order.id,
-          domain,
+          email: allocation.email,
+          personaName: allocation.personaName,
+          espPlatform: input.warmupTool,
           status: 'PENDING' as const,
           tags: input.internalTags || [],
-          inboxCount: domainInboxCounts.get(domain) || 0,
-          forwardingUrl: input.primaryForwardUrl,
           businessName: input.businessName,
+          forwardingDomain: input.primaryForwardUrl || allocation.domain,
+          password: null,
         }));
 
-        await prisma.$transaction(async (tx) => {
-          // Batch create domains
-          if (domainData.length > 0) {
-            const domainResult = await tx.domain.createMany({
-              data: domainData,
-              skipDuplicates: true,
-            });
-            console.log(`[ACTION] ✅ Created domains: ${domainResult.count}`);
-          } else {
-            console.log('[ACTION] ✅ No domains to create');
-          }
-
-          console.log('[ACTION] Creating inboxes...');
-          const inboxData = distribution.allocations.map(allocation => ({
-            orderId: order.id,
-            email: allocation.email,
-            personaName: allocation.personaName,
-            espPlatform: input.warmupTool,
-            status: 'PENDING' as const,
-            tags: input.internalTags || [],
-            businessName: input.businessName,
-            forwardingDomain: input.primaryForwardUrl,
-            password: null,
-          }));
-
-          if (inboxData.length > 0) {
-            const inboxResult = await tx.inbox.createMany({
-              data: inboxData,
-              skipDuplicates: true,
-            });
-            console.log(`[ACTION] ✅ Created inboxes: ${inboxResult.count}`);
-          } else {
-            console.log('[ACTION] ✅ No inboxes to create');
-          }
-        }, { timeout: 60000, maxWait: 10000 });
-      } finally {
-        await prisma.$disconnect();
-      }
+        if (inboxData.length > 0) {
+          const inboxResult = await tx.inbox.createMany({
+            data: inboxData,
+            skipDuplicates: true,
+          });
+          console.log(`[ACTION] ✅ Created inboxes: ${inboxResult.count}`);
+        } else {
+          console.log('[ACTION] ✅ No inboxes to create');
+        }
+      }, { timeout: 60000, maxWait: 10000 });
       
       console.log("[ACTION] ✅ Inboxes and domains generated successfully!");
       
@@ -421,5 +385,3 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     };
   }
 }
-
-

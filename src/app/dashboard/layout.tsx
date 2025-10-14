@@ -11,49 +11,46 @@ export default async function DashboardLayout({
 }) {
   const user = await currentUser();
 
+  const displayName =
+    user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user?.fullName || user?.emailAddresses?.[0]?.emailAddress || "User";
+
   return (
-    <div className="min-h-screen bg-gray-950 flex">
-      {/* Sidebar */}
-      <div className="w-60 bg-gray-900 border-r border-gray-800 flex flex-col">
-        {/* Header */}
-        <div className="p-6 border-b border-gray-800">
-          <h1 className="text-xl font-bold text-white">Inbox Nav</h1>
-        </div>
-
-        {/* Buy Inboxes Button */}
-        <div className="p-6">
-          <Link
-            href="/dashboard/products"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
-          >
-            <ShoppingCartIcon className="h-5 w-5" />
-            Buy Inboxes
-          </Link>
-        </div>
-
-        {/* Navigation */}
-        <DashboardNav />
-
-        {/* User Info */}
-        <div className="p-4 border-t border-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-[#070707] via-[#0a0a0a] to-black text-white flex">
+      <aside className="w-72 border-r border-white/5 bg-black/40 backdrop-blur-xl flex flex-col">
+        <div className="px-6 pt-6 pb-5 border-b border-white/5">
           <div className="flex items-center gap-3">
             <UserButton afterSignOutUrl="/" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
-                {user?.emailAddresses?.[0]?.emailAddress || "User"}
-              </p>
-              <p className="text-xs text-gray-400">Dashboard</p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-white truncate">{displayName}</p>
+              <p className="text-xs text-white/50">Inbox Navigator</p>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <main className="flex-1 p-6">
-          {children}
-        </main>
-      </div>
+        <div className="px-6 pt-6">
+          <Link
+            href="/dashboard/products"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/20"
+          >
+            <ShoppingCartIcon className="h-5 w-5" />
+            Create Inboxes
+          </Link>
+        </div>
+
+        <div className="mt-6 flex-1">
+          <DashboardNav />
+        </div>
+
+        <div className="px-6 py-6 border-t border-white/5 text-xs text-white/40">
+          © {new Date().getFullYear()} Inbox Navigator
+        </div>
+      </aside>
+
+      <main className="flex-1 overflow-y-auto">
+        <div className="px-8 py-10">{children}</div>
+      </main>
     </div>
   );
 }

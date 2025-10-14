@@ -13,7 +13,7 @@ function StatusBadge({ status }: { status: string }) {
   return <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${map(status)}`}>{status}</span>;
 }
 
-export default async function AdminOrdersPage({ searchParams }: { searchParams?: { status?: string; q?: string } }) {
+export default async function AdminOrdersPage({ searchParams }: { searchParams?: Promise<{ status?: string; q?: string }> }) {
   const { userId } = await auth();
   const adminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
   if (!userId || !adminIds.includes(userId)) {
@@ -22,28 +22,26 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams?:
     );
   }
 
+  const resolvedSearchParams = await searchParams;
   const prisma = new PrismaClient();
   await prisma.$connect();
 
   const where: Record<string, unknown> = {};
-  if (searchParams?.status && searchParams.status !== 'ALL') where.status = searchParams.status;
+  if (resolvedSearchParams?.status && resolvedSearchParams.status !== 'ALL') where.status = resolvedSearchParams.status;
   // Note: we don't persist customer email; allow searching by clerkUserId for now
-  if (searchParams?.q) where.clerkUserId = { contains: searchParams.q, mode: 'insensitive' };
+  if (resolvedSearchParams?.q) where.clerkUserId = { contains: resolvedSearchParams.q, mode: 'insensitive' };
 
   const orders = await prisma.order.findMany({
     where,
     orderBy: { createdAt: 'desc' },
     include: {
-      _count: {
-        select: { inboxes: true, domains: true }
-      },
       onboardingData: true,
     }
   });
   await prisma.$disconnect();
 
-  const currentStatus = searchParams?.status || 'ALL';
-  const q = searchParams?.q || '';
+  const currentStatus = resolvedSearchParams?.status || 'ALL';
+  const q = resolvedSearchParams?.q || '';
 
   const buildUrl = (s: string, qv: string) => {
     const params = new URLSearchParams();

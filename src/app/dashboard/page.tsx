@@ -1,247 +1,278 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import Link from "next/link";
-import { ShoppingCartIcon, UserIcon, InboxIcon, GlobeAltIcon, ClockIcon } from "@heroicons/react/24/outline";
+import { EnvelopeIcon, SparklesIcon, InboxIcon, GlobeAltIcon, CurrencyDollarIcon, ShoppingCartIcon } from "@heroicons/react/24/outline";
 
-// Removed unused LoadingSkeleton component
+type OrderWithRelations = Prisma.OnboardingDataGetPayload<{
+  include: {
+    order: {
+      include: {
+        inboxes: true;
+        domains: true;
+      };
+    };
+  };
+}>;
+
+const statusStyles: Record<string, string> = {
+  FULFILLED: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+  PAID: "bg-blue-500/15 text-blue-300 border border-blue-500/30",
+  PENDING: "bg-amber-400/20 text-amber-200 border border-amber-400/40",
+  PENDING_DOMAIN_PURCHASE: "bg-purple-500/15 text-purple-200 border border-purple-500/30",
+  DEFAULT: "bg-white/10 text-white/60 border border-white/10",
+};
+
+const cardAccent: Record<"inboxes" | "domains" | "revenue", string> = {
+  inboxes: "from-indigo-500/30 to-indigo-500/10 border-indigo-500/30",
+  domains: "from-cyan-500/20 to-sky-500/5 border-cyan-500/25",
+  revenue: "from-emerald-500/25 to-emerald-500/5 border-emerald-500/25",
+};
+
+function formatCurrency(amountInCents: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  }).format(amountInCents / 100);
+}
+
+function formatDate(input: Date | string | null | undefined) {
+  if (!input) return "—";
+  const date = typeof input === "string" ? new Date(input) : input;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function toTitle(value: string | null | undefined) {
+  if (!value) return "Unknown";
+  return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function SummaryCard({
+  label,
+  value,
+  icon: Icon,
+  accent,
+}: {
+  label: string;
+  value: string;
+  icon: typeof InboxIcon;
+  accent: string;
+}) {
+  return (
+    <div className={`relative overflow-hidden rounded-3xl border bg-gradient-to-br p-[1px] ${accent}`}>
+      <div className="relative h-full w-full rounded-[calc(1.5rem-1px)] bg-black/40 px-6 py-5 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.4)]">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-white/50">{label}</p>
+            <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
+          </div>
+          <div className="rounded-2xl bg-white/10 p-3 text-white/80">
+            <Icon className="h-6 w-6" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const style = statusStyles[status] ?? statusStyles.DEFAULT;
+  return (
+    <span className={`rounded-full px-3 py-1 text-xs font-medium tracking-wide ${style}`}>
+      {status === "FULFILLED" ? "Fulfilled" : status === "PENDING" ? "Pending" : toTitle(status)}
+    </span>
+  );
+}
 
 export default async function Dashboard() {
   const user = await currentUser();
-  
+
   if (!user) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-400">Please sign in to view your dashboard.</p>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-white/60">Please sign in to view your dashboard.</p>
       </div>
     );
   }
 
-  // Show loading skeleton while we fetch data
-  console.log("🔄 Starting dashboard data fetch...");
+  let orders: OrderWithRelations[] = [];
+  let fetchError: string | null = null;
 
-  // Retry function for Prisma queries
-  const retryQuery = async (queryFn: (prismaClient: typeof prisma) => Promise<unknown>, maxRetries = 3, delay = 2000) => {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      let tempPrisma = prisma;
-      try {
-        console.log(`🔄 Attempt ${attempt}/${maxRetries} - Fetching onboarding data for user:`, user.id);
-        
-        // Create a fresh Prisma client for this attempt
-        const { PrismaClient } = await import('@prisma/client');
-        tempPrisma = new PrismaClient();
-        
-        // Explicitly connect and wait for connection to be ready
-        await tempPrisma.$connect();
-        console.log(`✅ Prisma connected successfully (attempt ${attempt})`);
-        
-        // Add delay after connection to ensure engine is ready
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log(`⏳ Waiting for engine to be ready...`);
-        
-        // Test the connection with a simple query first
-        await tempPrisma.$queryRaw`SELECT 1`;
-        console.log(`✅ Engine is ready (attempt ${attempt})`);
-        
-        const result = await queryFn(tempPrisma);
-        console.log(`📊 Found onboarding data:`, Array.isArray(result) ? result.length : 'unknown', "records");
-        
-        // Clean up the temporary client
-        await tempPrisma.$disconnect();
-        return result;
-      } catch (error) {
-        console.error(`❌ Attempt ${attempt} failed:`, error);
-        console.error("Full error:", JSON.stringify(error, null, 2));
-        console.error("Error type:", typeof error);
-        console.error("Error name:", error instanceof Error ? error.name : 'Unknown');
-        console.error("Error message:", error instanceof Error ? error.message : 'Unknown error');
-        console.error("Error stack:", error instanceof Error ? error.stack : undefined);
-        
-        // Clean up the temporary client on error
-        try {
-          await tempPrisma.$disconnect();
-        } catch (disconnectError) {
-          console.error("⚠️ Error disconnecting temp Prisma client:", disconnectError);
-        }
-        
-        if (attempt === maxRetries) {
-          console.error(`💥 All ${maxRetries} attempts failed`);
-          throw error;
-        }
-        
-        console.log(`⏳ Waiting ${delay}ms before retry...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
-  };
-
-  // Fetch user's onboarding data with retry logic
-  let onboardingData: Array<{
-    id: string;
-    orderId: string;
-    clerkUserId: string;
-    productType: string | null;
-    businessType: string | null;
-    website: string | null;
-    domainPreferences: unknown;
-    personas: unknown;
-    espProvider: string | null;
-    specialRequirements: string | null;
-    stepCompleted: number;
-    isCompleted: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-    order: {
-      id: string;
-      clerkUserId: string;
-      productType: string;
-      quantity: number;
-      totalAmount: number;
-      status: string;
-      stripeSessionId: string | null;
-      stripeCustomerId: string | null;
-      createdAt: Date;
-      updatedAt: Date;
-    };
-  }> = [];
-  let fetchError: unknown = null;
-  
   try {
-    onboardingData = await retryQuery(async (prismaClient) => {
-      return await prismaClient.onboardingData.findMany({
-        where: {
-          clerkUserId: user.id,
+    orders = await prisma.onboardingData.findMany({
+      where: { clerkUserId: user.id },
+      include: {
+        order: {
+          include: {
+            inboxes: true,
+            domains: true,
+          },
         },
-        include: {
-          order: true,
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-    }) as typeof onboardingData;
+      },
+      orderBy: { createdAt: "desc" },
+    });
   } catch (error) {
-    console.error("❌ All retry attempts failed:", error);
-    fetchError = error;
-    onboardingData = [];
+    console.error("[Dashboard] Failed to load orders", error);
+    fetchError = error instanceof Error ? error.message : "Unknown error occurred";
+    orders = [];
   }
 
-  if (onboardingData.length === 0) {
+  if (!orders.length) {
     return (
-      <div className="text-center py-12">
-        <div className="max-w-md mx-auto">
-          <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <InboxIcon className="h-8 w-8 text-gray-400" />
-          </div>
-          <h2 className="text-2xl font-semibold text-white mb-2">
-            {fetchError ? "Error Loading Data" : "No orders yet"}
-          </h2>
-          <p className="text-gray-400 mb-6">
-            {fetchError 
-              ? "There was an error loading your data. Please try refreshing the page."
-              : "Complete the onboarding process to get started with your inbox setup."
-            }
+      <div className="flex min-h-[70vh] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5/10 px-10 py-16 text-center backdrop-blur-xl">
+        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
+          <SparklesIcon className="h-8 w-8 text-white/80" />
+        </div>
+        <h2 className="text-2xl font-semibold text-white">Welcome to Inbox Navigator</h2>
+        <p className="mt-3 max-w-md text-sm text-white/60">
+          {fetchError
+            ? "We hit a snag loading your workspace. Refresh or drop us a note and we’ll take a look immediately."
+            : "You don’t have any active orders yet. Grab your first inbox package to kick things off."}
+        </p>
+        {fetchError ? (
+          <p className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300">
+            {fetchError}
           </p>
-          {fetchError ? (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-6 text-left">
-              <p className="text-red-400 text-sm font-medium mb-2">Error Details:</p>
-              <p className="text-red-300 text-xs font-mono break-all">
-                {fetchError instanceof Error ? fetchError.message : 'Unknown error occurred'}
-              </p>
-            </div>
-          ) : null}
-          <div className="flex gap-3 justify-center">
-            <Link
-              href="/dashboard/products"
-              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-            >
-              <ShoppingCartIcon className="h-5 w-5" />
-              Buy Inboxes
-            </Link>
-            {fetchError ? (
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-              >
-                Refresh Page
-              </Link>
-            ) : null}
-          </div>
+        ) : null}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/dashboard/products"
+            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white/80"
+          >
+            <ShoppingCartIcon className="h-4 w-4" />
+            Create Inboxes
+          </Link>
+          <a
+            href="mailto:contact@inboxnavigator.com"
+            className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white"
+          >
+            <EnvelopeIcon className="h-4 w-4" />
+            Talk to Support
+          </a>
         </div>
       </div>
     );
   }
 
+  const totalInboxes = orders.reduce((sum, record) => {
+    const order = record.order;
+    if (!order) return sum;
+    if (order.inboxes?.length) return sum + order.inboxes.length;
+    return sum + (order.quantity ?? 0);
+  }, 0);
+
+  const domainSet = new Set<string>();
+  orders.forEach((record) => {
+    record.order?.domains?.forEach((domain) => domainSet.add(domain.domain));
+  });
+  const totalDomains = domainSet.size;
+
+  const totalMonthlySpend = orders.reduce((sum, record) => {
+    const amount = record.order?.totalAmount ?? 0;
+    return sum + amount;
+  }, 0);
+
+  const displayName = user.firstName
+    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+    : user.fullName || user.emailAddresses?.[0]?.emailAddress || "there";
+
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-        <p className="text-gray-400">Manage your inbox orders and track fulfillment status.</p>
+    <div className="space-y-10 text-white">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-sm text-white/50">Welcome back, {displayName}.</p>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">
+            Your mission control for every inbox.
+          </h1>
+          <p className="mt-3 text-sm text-white/50">
+            Track fulfillment in real time, review order history, and spin up new inboxes whenever you’re ready.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/dashboard/products"
+            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)] transition hover:bg-white/90"
+          >
+            <SparklesIcon className="h-5 w-5" />
+            Create Inboxes
+          </Link>
+          <a
+            href="mailto:contact@inboxnavigator.com"
+            className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white"
+          >
+            <EnvelopeIcon className="h-5 w-5" />
+            Talk to Support
+          </a>
+        </div>
       </div>
 
-      <div className="grid gap-6">
-        {onboardingData.map((data) => (
-          <div key={data.id} className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-1">
-                  {data.businessType || data.website || "Untitled Order"}
-                </h3>
-                <p className="text-gray-400 text-sm">
-                  Submitted {new Date(data.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
-                <ClockIcon className="h-4 w-4" />
-                Pending Fulfillment
-              </span>
-            </div>
+      <div className="grid gap-5 md:grid-cols-3">
+        <SummaryCard label="Total inboxes live" value={totalInboxes.toString()} icon={InboxIcon} accent={cardAccent.inboxes} />
+        <SummaryCard label="Domains under management" value={totalDomains.toString()} icon={GlobeAltIcon} accent={cardAccent.domains} />
+        <SummaryCard label="Monthly subscription" value={formatCurrency(totalMonthlySpend)} icon={CurrencyDollarIcon} accent={cardAccent.revenue} />
+      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <InboxIcon className="h-5 w-5 text-gray-400" />
-                <div>
-                  <p className="text-sm text-gray-400">Inboxes</p>
-                  <p className="font-medium text-white">{data.order?.quantity || 0}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <UserIcon className="h-5 w-5 text-gray-400" />
-                <div>
-                  <p className="text-sm text-gray-400">Personas</p>
-                  <p className="font-medium text-white">
-                    {Array.isArray(data.personas) ? data.personas.length : 0}
-                  </p>
-                </div>
-              </div>
-              
-                  <div className="flex items-center gap-3">
-                    <GlobeAltIcon className="h-5 w-5 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-400">Warmup Tool</p>
-                      <p className="font-medium text-white">{data.espProvider || "Not specified"}</p>
-                    </div>
-                  </div>
+      {fetchError ? (
+        <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          We had trouble syncing the latest data. The view below may be stale. Refresh the page or reach out if this persists.
+        </div>
+      ) : null}
 
-                  <div className="flex items-center gap-3">
-                    <div className="h-5 w-5 bg-green-500 rounded-full flex items-center justify-center">
-                      <span className="text-xs font-bold text-white">$</span>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-400">Total Amount</p>
-                      <p className="font-medium text-white">${data.order?.totalAmount ? (data.order.totalAmount / 100).toFixed(2) : "0.00"}</p>
-                    </div>
-                  </div>
-            </div>
-
-            {data.website && (
-              <div className="pt-4 border-t border-gray-800">
-                <p className="text-sm text-gray-400 mb-1">Primary URL</p>
-                <p className="text-white font-mono text-sm break-all">{data.website}</p>
-              </div>
-            )}
+      <div className="rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_80px_-60px_rgba(7,7,7,0.9)] backdrop-blur-xl">
+        <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Order history</h2>
+            <p className="text-xs text-white/50">Your most recent onboarding submissions and fulfillment progress.</p>
           </div>
-        ))}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-white/5 text-sm">
+            <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/60">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left">Order</th>
+                <th scope="col" className="px-6 py-3 text-left">Business</th>
+                <th scope="col" className="px-6 py-3 text-left">Inboxes</th>
+                <th scope="col" className="px-6 py-3 text-left">Total</th>
+                <th scope="col" className="px-6 py-3 text-left">Submitted</th>
+                <th scope="col" className="px-6 py-3 text-left">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {orders.map((record) => {
+                const order = record.order;
+                const businessLabel = record.businessType || record.website || "Untitled order";
+                const inboxCount = order?.inboxes?.length ?? order?.quantity ?? 0;
+                const totalCost = order?.totalAmount ?? inboxCount * 300;
+                return (
+                  <tr key={record.id} className="transition hover:bg-white/5">
+                    <td className="px-6 py-4">
+                      <div className="font-mono text-xs text-white/80">
+                        {order?.id ? `${order.id.slice(0, 8)}…` : "—"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-white">{businessLabel}</div>
+                      <div className="text-xs text-white/40">
+                        {order?.productType ? toTitle(order.productType) : "—"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-white/80">{inboxCount}</td>
+                    <td className="px-6 py-4 text-white/80">{formatCurrency(totalCost)}</td>
+                    <td className="px-6 py-4 text-white/60">{formatDate(record.createdAt)}</td>
+                    <td className="px-6 py-4">
+                      {order?.status ? <StatusBadge status={order.status} /> : <span className="text-xs text-white/40">Unknown</span>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

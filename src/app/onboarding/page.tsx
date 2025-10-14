@@ -32,7 +32,6 @@ function OnboardingPage() {
   const [businessName, setBusinessName] = useState("");
   const [domainSource, setDomainSource] = useState<'OWN' | 'BUY_FOR_ME'>('BUY_FOR_ME');
   const [inboxesPerDomain, setInboxesPerDomain] = useState<number>(3);
-  const [providedDomains, setProvidedDomains] = useState<string[]>([]);
   const [domainListRaw, setDomainListRaw] = useState("");
   const [primaryForwardUrl, setPrimaryForwardUrl] = useState("");
 
@@ -607,5 +606,4 @@ function fileToBase64(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
-
 

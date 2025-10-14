@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { CheckIcon, StarIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import { useMemo, useState } from "react";
+import { CheckIcon, StarIcon, ShieldCheckIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 
 type ProductType = "GOOGLE" | "PREWARMED" | "MICROSOFT";
 
@@ -64,7 +64,10 @@ export default function ProductsPage() {
     MICROSOFT: false,
   });
   const [error, setError] = useState<string | null>(null);
-  // Removed unused router import
+  const hasLargeQuantity = useMemo(
+    () => Math.max(...Object.values(quantities)) > 500,
+    [quantities],
+  );
 
   const handleQuantityChange = (productId: ProductType, value: number) => {
     const clampedValue = Math.max(10, Math.min(2000, value));
@@ -120,164 +123,148 @@ export default function ProductsPage() {
     return product.price * quantities[productId];
   };
 
-  const getColorClasses = (color: string) => {
-    switch (color) {
-      case "blue":
-        return {
-          border: "border-blue-500/30",
-          bg: "bg-blue-500/10",
-          text: "text-blue-400",
-          button: "bg-blue-600 hover:bg-blue-700",
-        };
-      case "green":
-        return {
-          border: "border-green-500/30",
-          bg: "bg-green-500/10",
-          text: "text-green-400",
-          button: "bg-green-600 hover:bg-green-700",
-        };
-      case "purple":
-        return {
-          border: "border-purple-500/30",
-          bg: "bg-purple-500/10",
-          text: "text-purple-400",
-          button: "bg-purple-600 hover:bg-purple-700",
-        };
-      default:
-        return {
-          border: "border-gray-500/30",
-          bg: "bg-gray-500/10",
-          text: "text-gray-400",
-          button: "bg-gray-600 hover:bg-gray-700",
-        };
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-950 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Choose Your Plan</h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Select the inbox package that fits your needs
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#090909] to-black px-6 pb-24 pt-16 text-white">
+      <div className="mx-auto max-w-6xl space-y-20">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl space-y-5">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs font-semibold tracking-[0.3em] text-white/60 uppercase">
+              Plans
+            </span>
+            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              Pick the inbox runway that matches your outreach ambitions.
+            </h1>
+            <p className="text-sm text-white/50 sm:text-base">
+              Every inbox is warmed, reputation protected, and monitored. Scale campaigns with confidence—whether you need a handful of senders or a full fleet.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 text-xs text-white/40">
+              <span>⚡ Instant provisioning</span>
+              <span>• Reputation-safe warmup</span>
+              <span>• Concierge support included</span>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/5/20 px-6 py-4 backdrop-blur">
+            <p className="text-xs uppercase tracking-[0.25em] text-white/40">Need a custom fleet?</p>
+            <p className="mt-2 text-sm text-white/70">Talk to us about tiered enterprise pricing and dedicated deliverability ops.</p>
+            <a
+              href="mailto:contact@inboxnavigator.com"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-white transition hover:text-white/70"
+            >
+              Contact sales
+              <ArrowRightIcon className="h-4 w-4" />
+            </a>
+          </div>
         </div>
 
-        {/* Error Display */}
         {error && (
-          <div className="max-w-6xl mx-auto mb-8">
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                <p className="text-red-400 font-medium">Error</p>
-              </div>
-              <p className="text-red-300 text-sm mt-1">{error}</p>
-              <button
-                onClick={() => setError(null)}
-                className="text-red-400 hover:text-red-300 text-sm mt-2 underline"
-              >
+          <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-sm text-red-200">
+            <div className="flex items-center justify-between">
+              <p>{error}</p>
+              <button onClick={() => setError(null)} className="text-xs text-red-200 underline hover:text-red-100">
                 Dismiss
               </button>
             </div>
           </div>
         )}
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid gap-8 lg:grid-cols-3">
           {products.map((product) => {
-            const colorClasses = getColorClasses(product.color);
             const totalPrice = getTotalPrice(product.id);
-            
+
             return (
               <div
                 key={product.id}
-                className={`relative bg-gray-900 border ${colorClasses.border} rounded-xl p-8 hover:border-opacity-60 transition-all duration-300 hover:scale-105 hover:shadow-2xl`}
+                className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-8 py-10 shadow-[0_25px_60px_-40px_rgba(0,0,0,0.8)] transition hover:border-white/20 hover:bg-white/[0.06]"
               >
-                {/* Badge */}
                 {product.badge && (
-                  <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 rounded-full text-sm font-medium ${
-                    product.badge === "Popular" 
-                      ? "bg-green-600 text-white" 
-                      : "bg-purple-600 text-white"
-                  }`}>
+                  <div className="absolute right-6 top-6 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60">
                     {product.badge}
                   </div>
                 )}
-
-                {/* Icon */}
-                <div className={`w-12 h-12 ${colorClasses.bg} rounded-lg flex items-center justify-center mb-6`}>
-                  <product.icon className={`h-6 w-6 ${colorClasses.text}`} />
-                </div>
-
-                {/* Product Info */}
-                <h3 className="text-2xl font-bold text-white mb-2">{product.name}</h3>
-                <div className="text-3xl font-bold text-white mb-2">
-                  ${product.price}
-                  <span className="text-lg text-gray-400 font-normal">/inbox/month</span>
-                </div>
-                <p className="text-gray-400 mb-6">{product.description}</p>
-
-                {/* Features */}
-                <ul className="space-y-3 mb-8">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-gray-300">
-                      <CheckIcon className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Quantity Input */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Number of Inboxes
-                  </label>
-                  <input
-                    type="number"
-                    min="10"
-                    max="2000"
-                    value={quantities[product.id]}
-                    onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value) || 10)}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* Total Price */}
-                <div className="mb-6 p-4 bg-gray-800 rounded-lg">
-                  <div className="text-center">
-                    <div className="text-sm text-gray-400">Total</div>
-                    <div className="text-2xl font-bold text-white">
-                      ${totalPrice.toLocaleString()}/month
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div className="rounded-2xl bg-white/10 p-3 text-white/80">
+                    <product.icon className="h-6 w-6" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs uppercase tracking-[0.3em] text-white/40">From</p>
+                    <p className="text-3xl font-semibold text-white">
+                      ${product.price}
+                      <span className="text-sm text-white/40"> /inbox</span>
+                    </p>
                   </div>
                 </div>
 
-                {/* Select Button */}
+                <div className="mt-8 space-y-3">
+                  <h2 className="text-2xl font-semibold text-white">{product.name}</h2>
+                  <p className="text-sm text-white/50">{product.description}</p>
+                </div>
+
+                <ul className="mt-8 space-y-3 text-sm text-white/70">
+                  {product.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-3">
+                      <CheckIcon className="h-4 w-4 text-emerald-400" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                  {product.id === "MICROSOFT" && (
+                    <li className="flex items-center gap-3 text-amber-300">
+                      <StarIcon className="h-4 w-4" />
+                      Elite reputation floor & dedicated SPF records
+                    </li>
+                  )}
+                </ul>
+
+                <div className="mt-10 space-y-3">
+                  <label className="text-xs uppercase tracking-[0.25em] text-white/40">
+                    Inbox volume
+                  </label>
+                  <input
+                    type="number"
+                    min={product.id === "MICROSOFT" ? 50 : 10}
+                    max={2000}
+                    value={quantities[product.id]}
+                    onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value, 10) || 10)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                  />
+                  <p className="text-xs text-white/40">
+                    Total monthly: <span className="font-semibold text-white/80">${totalPrice.toLocaleString()}</span>
+                  </p>
+                </div>
+
                 <button
                   onClick={() => handleSelectPlan(product.id)}
                   disabled={loading[product.id]}
-                  className={`w-full py-3 px-6 ${colorClasses.button} text-white font-medium rounded-lg transition-colors duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+                  className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/30 disabled:text-black/50"
                 >
-                  {loading[product.id] && (
-                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                  {loading[product.id] ? (
+                    <>
+                      <svg className="h-4 w-4 animate-spin text-black/70" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
+                      </svg>
+                      Processing
+                    </>
+                  ) : (
+                    <>
+                      Launch this fleet
+                      <ArrowRightIcon className="h-4 w-4" />
+                    </>
                   )}
-                  {loading[product.id] ? 'Processing...' : 'Select This Plan'}
                 </button>
               </div>
             );
           })}
         </div>
 
-        {/* Footer Note */}
-        <div className="text-center mt-12">
-          <p className="text-gray-500 text-sm">
-            All plans include 24/7 support and 99.9% uptime guarantee
-          </p>
-        </div>
+        {hasLargeQuantity ? (
+          <div className="rounded-3xl border border-white/10 bg-white/[0.04] px-8 py-6 text-sm text-white/60 backdrop-blur">
+            Scaling beyond 500 inboxes? We’ll layer in custom deliverability ops, pool management, and dedicated IP reputation monitoring.
+            <a href="mailto:contact@inboxnavigator.com" className="ml-2 text-white underline">
+              Reach out for enterprise pricing →
+            </a>
+          </div>
+        ) : null}
       </div>
     </div>
   );

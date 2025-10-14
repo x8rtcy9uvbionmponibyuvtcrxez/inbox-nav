@@ -22,16 +22,19 @@ enum OrderStatus {
 }
 
 model Order {
-  id               String      @id @default(cuid())
-  clerkUserId      String      @map("clerk_user_id")
-  productType      String      @map("product_type")
-  quantity         Int
-  totalAmount      Int         // Store cents instead of dollars
-  status           String      @default("PENDING")
-  stripeSessionId  String?     @map("stripe_session_id")
-  stripeCustomerId String?     @map("stripe_customer_id")
-  createdAt        DateTime    @default(now()) @map("created_at")
-  updatedAt        DateTime    @updatedAt @map("updated_at")
+  id                   String      @id @default(cuid())
+  clerkUserId          String?     @map("clerk_user_id") // Nullable for invited users
+  productType          String      @map("product_type")
+  quantity             Int
+  totalAmount          Int         // Store cents instead of dollars
+  status               String      @default("PENDING")
+  stripeSessionId      String?     @map("stripe_session_id")
+  stripeCustomerId     String?     @map("stripe_customer_id")
+  stripeSubscriptionId String?     @map("stripe_subscription_id")
+  businessName         String?     @map("business_name")
+  externalId           String?     @unique @map("external_id")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
   
   // Relations
   onboardingData   OnboardingData[]
@@ -82,9 +85,9 @@ model Inbox {
   espPlatform       String    @map("esp_platform") // Smartlead, Instantly, etc
   status            String    @default("PENDING") // LIVE, DELETED, PENDING
   tags              String[]  @default([])
-  businessName      String    @map("business_name")
+  businessName      String?   @map("business_name") // Made nullable for flexibility
   forwardingDomain  String?   @map("forwarding_domain") // Can be null or "-"
-  password          String?   @map("password")
+  password          String?   @map("password") // Encrypted at rest
   
   // Dates
   fulfilledAt       DateTime? @map("fulfilled_at") // Set when admin marks as fulfilled
@@ -105,7 +108,7 @@ model Domain {
   tags              String[]  @default([])
   inboxCount        Int       @default(0) @map("inbox_count")
   forwardingUrl     String    @map("forwarding_url")
-  businessName      String    @map("business_name")
+  businessName      String?   @map("business_name") // Made nullable for flexibility
   
   // Dates
   fulfilledAt       DateTime? @map("fulfilled_at")
@@ -113,4 +116,14 @@ model Domain {
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
   @@map("domains")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  actorUserId   String   @map("actor_user_id")
+  action        String
+  details       Json
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
 }

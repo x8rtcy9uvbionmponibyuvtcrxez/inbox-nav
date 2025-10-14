@@ -37,7 +37,6 @@ export function distributeInboxes(input: DistributionInput): DistributionResult 
     personas,
     providedDomains = [],
     inboxesPerDomain,
-    businessName
   } = input;
   
   // VALIDATION
@@ -198,6 +197,5 @@ export function validateDistribution(result: DistributionResult) {
     throw new Error(`Duplicate emails found: ${duplicates.join(', ')}`);
   }
   
-  // eslint-disable-next-line no-console
   console.log('[DISTRIBUTION] ✅ All emails unique');
 }

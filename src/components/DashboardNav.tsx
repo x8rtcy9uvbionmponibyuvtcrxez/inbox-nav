@@ -15,18 +15,18 @@ export default function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex-1 px-4 py-2">
-      <ul className="space-y-1">
+    <nav className="flex-1 px-6 py-4">
+      <ul className="space-y-2">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           return (
             <li key={item.name}>
               <Link
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                className={`flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition ${
                   isActive
-                    ? "bg-indigo-600 text-white"
-                    : "text-gray-300 hover:text-white hover:bg-gray-800"
+                    ? "bg-white/10 text-white shadow-[0_10px_40px_-20px_rgba(15,118,255,0.6)]"
+                    : "text-white/60 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 <item.icon className="h-5 w-5" />
