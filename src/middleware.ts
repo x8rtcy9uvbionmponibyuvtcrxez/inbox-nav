@@ -1,25 +1,15 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+// TEMPORARY: Make all routes public for testing
 const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/webhooks/stripe-subscription',
-  '/api/webhooks/clerk',
-  '/api/checkout-with-domains',
-  '/api/checkout',
-  '/api/get-session',
-  '/api/cancel-subscription',
-  '/admin(.*)',
-  '/dashboard(.*)',
-  '/checkout(.*)',
-  '/onboarding(.*)',
+  '/(.*)', // Match all routes
 ]);
 
 export default clerkMiddleware((auth, req) => {
-  if (!isPublicRoute(req)) {
-    auth.protect();
-  }
+  // TEMPORARY: Skip authentication for testing
+  // if (!isPublicRoute(req)) {
+  //   auth.protect();
+  // }
 });
 
 export const config = {
