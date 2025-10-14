@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from '@/lib/prisma';
 import { auth } from "@clerk/nextjs/server";
+import type { Prisma } from "@prisma/client";
 
 type StatusTone = {
   bg: string;
