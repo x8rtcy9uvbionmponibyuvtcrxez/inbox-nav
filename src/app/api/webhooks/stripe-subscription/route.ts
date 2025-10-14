@@ -121,7 +121,8 @@ export async function POST(request: NextRequest) {
         break
       }
       case 'invoice.payment_failed': {
-        const subscriptionId: string | undefined = (event.data.object as Stripe.Invoice | undefined)?.subscription?.toString()
+        const invoice = event.data.object as Stripe.Invoice
+        const subscriptionId: string | undefined = invoice?.subscription ? String(invoice.subscription) : undefined
         
         if (!subscriptionId) {
           console.warn('[Stripe Webhook] No subscription ID in payment failed event')
