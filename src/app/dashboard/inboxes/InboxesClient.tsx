@@ -903,23 +903,6 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
         </div>
 
 
-        <div className="flex flex-col gap-2 border-b border-white/5 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-white">Inboxes under management</h2>
-            <p className="text-xs text-white/50">Delivery status, persona, and fulfillment details at a glance.</p>
-          </div>
-          <button
-            onClick={handleExportView}
-            className="self-start text-xs font-medium text-white/60 transition hover:text-white"
-          >
-            Export view
-          </button>
-        </div>
-        {filteredInboxes.length ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-white/5 text-sm">
-              <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/50">
-                <tr>
                   <th className="px-6 py-3 text-left">
                     <input
                       type="checkbox"
