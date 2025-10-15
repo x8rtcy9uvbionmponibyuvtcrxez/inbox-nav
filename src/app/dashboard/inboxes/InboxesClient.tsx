@@ -8,6 +8,7 @@ import { InboxIcon, SparklesIcon, FunnelIcon, XMarkIcon } from "@heroicons/react
 import { TableSkeleton } from "@/components/skeletons";
 import { endOfDay, format, startOfDay, subDays } from "date-fns";
 import { useDebounce } from "@/hooks/useDebounce";
+import { Button } from "@/components/ui/Button";
 
 const STATUS_COLORS: Record<string, string> = {
   LIVE: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
@@ -601,24 +602,22 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs text-white/60">
-              <button
-                onClick={handleExportView}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/30 hover:text-white"
-              >
+              <Button variant="outline" size="sm" onClick={handleExportView}>
                 Export view
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleExportSelected}
                 disabled={!selectedIds.size}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/60 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:border-white/5 disabled:text-white/30"
               >
                 Export selected
-              </button>
+              </Button>
               <Popover.Root open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
                 <Popover.Trigger asChild>
-                  <button className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/30 hover:text-white">
+                  <Button variant="outline" size="sm" className="gap-2">
                     <FunnelIcon className="h-4 w-4" /> More filters
-                  </button>
+                  </Button>
                 </Popover.Trigger>
                 <Popover.Portal>
                   <Popover.Content sideOffset={8} align="end" className="z-50 w-72 rounded-2xl border border-white/15 bg-black/90 p-4 text-white shadow-xl backdrop-blur">
@@ -724,17 +723,14 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                           ))}
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-1">
-                        <button onClick={resetFilters} className="text-xs font-medium text-white/40 hover:text-white">
-                          Clear all
-                        </button>
-                        <button
-                          onClick={() => setIsFilterSheetOpen(false)}
-                          className="inline-flex items-center gap-1 rounded-full bg-white px-4 py-2 text-xs font-semibold text-black transition hover:bg-white/90"
-                        >
-                          Done
-                        </button>
-                      </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-white/60 hover:text-white">
+                        Clear all
+                      </Button>
+                      <Button variant="primary" size="sm" onClick={() => setIsFilterSheetOpen(false)}>
+                        Done
+                      </Button>
+                    </div>
                     </div>
                     <Popover.Arrow className="fill-white/10" />
                   </Popover.Content>
@@ -824,12 +820,9 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
         ) : (
           <div className="flex flex-col items-center gap-3 px-6 py-14 text-center text-white/60">
             <p className="text-sm">No inboxes match these filters.</p>
-            <button
-              onClick={resetFilters}
-              className="rounded-full border border-white/20 px-4 py-2 text-xs font-medium text-white/80 transition hover:border-white/40 hover:text-white"
-            >
+            <Button variant="outline" size="sm" onClick={resetFilters}>
               Clear filters
-            </button>
+            </Button>
           </div>
         )}
       </div>

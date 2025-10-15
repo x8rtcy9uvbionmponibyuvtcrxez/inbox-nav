@@ -1,8 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import DomainsClient from "./DomainsClient";
+import { Suspense } from "react";
+import { TableSkeleton } from "@/components/skeletons";
 
-export default async function DomainsPage() {
+async function DomainsContent() {
   const { userId } = await auth();
 
   if (!userId) {
@@ -16,7 +18,18 @@ export default async function DomainsPage() {
           clerkUserId: userId,
         },
       },
-      include: {
+      select: {
+        id: true,
+        orderId: true,
+        domain: true,
+        status: true,
+        tags: true,
+        inboxCount: true,
+        forwardingUrl: true,
+        businessName: true,
+        fulfilledAt: true,
+        createdAt: true,
+        updatedAt: true,
         order: {
           select: {
             id: true,
@@ -31,6 +44,7 @@ export default async function DomainsPage() {
       orderBy: {
         createdAt: "desc",
       },
+      take: 50, // Limit to 50 most recent domains
     });
 
     return <DomainsClient domains={domains} />;
@@ -38,4 +52,12 @@ export default async function DomainsPage() {
     console.error("[Domains] Failed to load domains", error);
     return <DomainsClient domains={[]} error="FAILED" />;
   }
+}
+
+export default function DomainsPage() {
+  return (
+    <Suspense fallback={<TableSkeleton />}>
+      <DomainsContent />
+    </Suspense>
+  );
 }

@@ -84,6 +84,11 @@ export async function GET(request: NextRequest) {
       paymentStatus: session.payment_status,
       customerEmail: session.customer_email,
       metadata: session.metadata, // Include all metadata for onboarding
+    }, {
+      headers: {
+        'Cache-Control': 'private, max-age=60', // Cache for 1 minute
+        'CDN-Cache-Control': 'private, max-age=0', // Don't cache on CDN
+      }
     })
   } catch (error) {
     console.error('Get session error:', error)

@@ -3,6 +3,7 @@ import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import DashboardNav from "@/components/DashboardNav";
+import { Button } from "@/components/ui/Button";
 
 export default async function DashboardLayout({
   children,
@@ -30,13 +31,12 @@ export default async function DashboardLayout({
         </div>
 
         <div className="px-6 pt-6">
-          <Link
-            href="/dashboard/products"
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/20"
-          >
-            <ShoppingCartIcon className="h-5 w-5" />
-            Create Inboxes
-          </Link>
+          <Button asChild variant="secondary" className="w-full gap-2 rounded-xl bg-white/10 px-4 py-3 text-sm text-white hover:bg-white/20">
+            <Link href="/dashboard/products">
+              <ShoppingCartIcon className="h-5 w-5" />
+              Create Inboxes
+            </Link>
+          </Button>
         </div>
 
         <div className="mt-6 flex-1">

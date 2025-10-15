@@ -6,6 +6,7 @@ import { EnvelopeIcon, SparklesIcon, InboxIcon, GlobeAltIcon, CurrencyDollarIcon
 import OrderDetailsModal from "./OrderDetailsModal";
 import { OrderSkeleton, StatsSkeleton } from "@/components/skeletons";
 import type { Prisma } from "@prisma/client";
+import { Button } from "@/components/ui/Button";
 
 type OrderWithRelations = Prisma.OnboardingDataGetPayload<{
   include: {
@@ -208,20 +209,18 @@ export default function DashboardClient({
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link
-            href="/dashboard/products"
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)] transition hover:bg-white/90"
-          >
-            <SparklesIcon className="h-5 w-5" />
-            Create Inboxes
-          </Link>
-          <a
-            href="mailto:contact@inboxnavigator.com"
-            className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white"
-          >
-            <EnvelopeIcon className="h-5 w-5" />
-            Talk to Support
-          </a>
+          <Button asChild variant="primary" className="gap-2 shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)]">
+            <Link href="/dashboard/products">
+              <SparklesIcon className="h-5 w-5" />
+              Create Inboxes
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="gap-2">
+            <a href="mailto:contact@inboxnavigator.com">
+              <EnvelopeIcon className="h-5 w-5" />
+              Talk to Support
+            </a>
+          </Button>
         </div>
       </div>
 
@@ -306,12 +305,9 @@ export default function DashboardClient({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleOpenOrderDetails(record)}
-                        className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/80 hover:border-white/40 hover:text-white transition-colors"
-                      >
+                      <Button size="sm" variant="secondary" onClick={() => handleOpenOrderDetails(record)}>
                         View Details
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 );

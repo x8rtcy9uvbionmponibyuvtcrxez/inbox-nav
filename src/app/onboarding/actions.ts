@@ -79,7 +79,6 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     // Primary forwarding URL is optional; may come from Stripe metadata or be omitted
     if (!input.accountId?.trim()) validationErrors.push("Account ID is required");
     if (!input.password?.trim()) validationErrors.push("Password is required");
-    if (!input.apiKey?.trim()) validationErrors.push("API Key is required");
     if (!input.personas || input.personas.length === 0) validationErrors.push("At least one persona is required");
     if (input.inboxCount < 10 || input.inboxCount > 2000) validationErrors.push("Inbox count must be between 10 and 2000");
 
@@ -280,7 +279,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           espCredentials: {
             accountId: input.accountId.trim(),
             password: protectSecret(input.password.trim()),
-            apiKey: protectSecret(input.apiKey.trim()),
+            apiKey: input.apiKey?.trim() ? protectSecret(input.apiKey.trim()) : null,
           },
           internalTags: input.internalTags ?? [],
           espTags: input.espTags ?? [],

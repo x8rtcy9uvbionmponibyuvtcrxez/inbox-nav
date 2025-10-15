@@ -7,6 +7,7 @@ import { saveOnboardingAction } from "@/app/onboarding/actions";
 import { useRouter, useSearchParams } from "next/navigation";
 import TagInput from "./components/TagInput";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { Button } from "@/components/ui/Button";
 
 type Persona = { firstName: string; lastName: string; profileImage?: string | null };
 
@@ -299,31 +300,32 @@ const canNext = useMemo(() => {
       // For BUY_FOR_ME, collect forwarding URL
       if (domainSource === 'BUY_FOR_ME' && !primaryForwardUrl.trim()) return false;
     }
-    if (step === 2) {
-      if (numPersonas < 1) return false;
-      for (const p of personas.slice(0, numPersonas)) {
-        if (!p.firstName.trim() || !p.lastName.trim()) return false;
-      }
+  if (step === 2) {
+    if (numPersonas < 1) return false;
+    for (const p of personas.slice(0, numPersonas)) {
+      if (!p.firstName.trim() || !p.lastName.trim()) return false;
     }
-    if (step === 3) {
-      if (!warmupTool) return false;
-      if (warmupTool === 'Other' && !warmupToolOther.trim()) return false;
-      if (!accountId.trim()) return false;
-      if (!password.trim()) return false;
-      if (!apiKey.trim()) return false;
-    }
+  }
+  if (step === 3) {
+    if (!warmupTool) return false;
+    if (warmupTool === 'Other' && !warmupToolOther.trim()) return false;
+    if (!accountId.trim()) return false;
+    if (!password.trim()) return false;
+  }
   return true;
-}, [step, inboxCount, businessName, primaryForwardUrl, domainSource, ownDomainsRaw, domainRegistrar, registrarOtherName, registrarUsername, registrarPassword, numPersonas, personas, warmupTool, warmupToolOther, accountId, password, apiKey, productType]);
+}, [step, inboxCount, businessName, primaryForwardUrl, domainSource, ownDomainsRaw, domainRegistrar, registrarOtherName, registrarUsername, registrarPassword, numPersonas, personas, warmupTool, warmupToolOther, accountId, password, productType]);
+
+const personaCountOptions = [1, 2, 3, 4];
 
 const handlePersonaCountChange = (value: number) => {
-    const next = Math.max(1, Math.min(20, value || 1));
-    setNumPersonas(next);
-    setPersonas((prev) => {
-      const copy = [...prev];
-      while (copy.length < next) copy.push({ firstName: "", lastName: "", profileImage: null });
-      return copy.slice(0, next);
-    });
-  };
+  const next = Math.max(1, Math.min(20, value || 1));
+  setNumPersonas(next);
+  setPersonas((prev) => {
+    const copy = [...prev];
+    while (copy.length < next) copy.push({ firstName: "", lastName: "", profileImage: null });
+    return copy.slice(0, next);
+  });
+};
 
   const handleImageChange = async (index: number, file: File | null) => {
     if (!file) {
@@ -362,6 +364,13 @@ const domainPlanSummary =
 const isOwnDomainFlow = domainSource === 'OWN' && (productType === 'GOOGLE' || productType === 'MICROSOFT');
 const isBuyForMeFlow = domainSource === 'BUY_FOR_ME' && (productType === 'GOOGLE' || productType === 'MICROSOFT');
 const currentStepTitle = STEP_META[step - 1]?.title ?? '';
+const personaSummaryNames = personas
+  .slice(0, numPersonas)
+  .map((persona, index) => {
+    const fullName = `${persona.firstName} ${persona.lastName}`.trim();
+    return fullName || `Persona ${index + 1}`;
+  })
+  .join(', ');
 
   const handleSubmit = async () => {
     console.log('[ONBOARDING] Handle submit start');
@@ -723,20 +732,28 @@ const currentStepTitle = STEP_META[step - 1]?.title ?? '';
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-2">
+                <div>
                   <label className="text-sm font-medium text-white">How many personas do you need?</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={20}
-                    value={numPersonas}
-                    onChange={(e) => handlePersonaCountChange(parseInt(e.target.value, 10))}
-                    className="mt-1 w-28 rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                  />
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {personaCountOptions.map((option) => {
+                      const isActive = numPersonas === option;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => handlePersonaCountChange(option)}
+                          className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-sm font-medium transition ${
+                            isActive
+                              ? 'border-white bg-white text-black shadow'
+                              : 'border-white/20 bg-black/30 text-white/70 hover:border-white/40 hover:text-white'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <p className="text-xs text-white/45">
-                  Tip: we see the best performance with 3–6 personas rotating across the fleet.
-                </p>
               </div>
 
               <div className="space-y-4">
@@ -864,14 +881,13 @@ const currentStepTitle = STEP_META[step - 1]?.title ?? '';
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white">API key</label>
+                <label className="text-sm font-medium text-white">API key (optional)</label>
                 <input
                   type="text"
                   className="mt-1 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                  placeholder="Paste the key with warmup permissions"
+                  placeholder="Paste the key with warmup permissions (optional)"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  required
                 />
               </div>
 
@@ -879,14 +895,10 @@ const currentStepTitle = STEP_META[step - 1]?.title ?? '';
                 <label className="text-sm font-medium text-white">Additional notes (optional)</label>
                 <textarea
                   className="mt-1 h-28 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                  placeholder="Share any quirks about your warmup workflow, cadence, or integrations we should know about."
+                  placeholder="Please let us know which workspace to add them to (if applicable)."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
-              </div>
-
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-xs text-white/60">
-                We store credentials with restricted access, rotate them after setup, and can delete them any time—just email <a className="text-white underline" href="mailto:contact@inboxnavigator.com">contact@inboxnavigator.com</a>.
               </div>
             </div>
           )}
@@ -942,6 +954,7 @@ const currentStepTitle = STEP_META[step - 1]?.title ?? '';
                     { label: 'Inboxes', value: `${inboxCount}` },
                     { label: 'Forwarding URL', value: primaryForwardUrl || '—' },
                     { label: 'Personas', value: `${numPersonas}` },
+                    { label: 'Persona names', value: personaSummaryNames || '—' },
                     { label: 'Warmup tool', value: warmupTool === 'Other' ? warmupToolOther || 'Other' : warmupTool },
                     { label: 'Account ID', value: accountId || '—' },
                     { label: 'Internal tags', value: internalTags.length ? internalTags.join(', ') : '—' },
@@ -987,34 +1000,35 @@ const currentStepTitle = STEP_META[step - 1]?.title ?? '';
           )}
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              className="inline-flex items-center justify-center rounded-full border border-white/15 px-5 py-2 text-sm font-medium text-white/80 transition hover:border-white/35 hover:text-white disabled:cursor-not-allowed disabled:border-white/10 disabled:opacity-40"
+            <Button
+              variant="outline"
               onClick={goPrev}
               disabled={step === 1 || loading}
             >
               Back
-            </button>
+            </Button>
             <div className="flex flex-col items-start gap-2 text-xs text-white/45 sm:items-end">
               <span>{hasLoadedDraft ? 'Progress auto-saves to this browser.' : 'Restoring previous progress…'}</span>
               {step < 4 ? (
-                <button
-                  className="inline-flex items-center justify-center rounded-full bg-white px-6 py-2 text-sm font-semibold text-black shadow hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-black/60"
+                <Button
+                  variant="primary"
                   onClick={goNext}
                   disabled={!canNext || loading}
                 >
                   {loading ? 'Saving…' : nextLabel}
-                </button>
+                </Button>
               ) : (
-                <button
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-emerald-950 shadow shadow-emerald-500/30 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-500/40 disabled:text-emerald-900"
+                <Button
+                  variant="primary"
                   onClick={handleSubmit}
                   disabled={loading}
+                  className="gap-2"
                 >
                   {loading && (
-                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-emerald-950 border-r-transparent" />
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black border-r-transparent" />
                   )}
-                  Launch onboarding
-                </button>
+                  Complete Order
+                </Button>
               )}
             </div>
           </div>

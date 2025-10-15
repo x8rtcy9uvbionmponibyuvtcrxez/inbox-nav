@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
 import type { Prisma } from "@prisma/client";
 import { GlobeAltIcon, FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { TableSkeleton } from "@/components/skeletons";
 import { endOfDay, format, startOfDay, subDays } from "date-fns";
+import { useDebounce } from "@/hooks/useDebounce";
+import { Button } from "@/components/ui/Button";
 
 const STATUS_COLORS: Record<string, string> = {
   LIVE: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
@@ -147,12 +149,15 @@ function getStatusLabel(value: string) {
   }
 }
 
-export default function DomainsClient({ domains, error, isLoading = false }: Props) {
+function DomainsClient({ domains, error, isLoading = false }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [showDeleted, setShowDeleted] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  
+  // Debounce search term to avoid excessive filtering
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const safeDomains = useMemo(() => domains ?? [], [domains]);
 
@@ -190,7 +195,7 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
   const totalInboxSlots = useMemo(() => safeDomains.reduce((sum, domain) => sum + domain.inboxCount, 0), [safeDomains]);
 
   const filteredDomains = useMemo(() => {
-    const searchLower = searchTerm.trim().toLowerCase();
+    const searchLower = debouncedSearchTerm.trim().toLowerCase();
     const dateFrom = filters.dateRange.from ? startOfDay(filters.dateRange.from) : null;
     const dateTo = filters.dateRange.to ? endOfDay(filters.dateRange.to) : null;
 
@@ -246,7 +251,7 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
         matchesDate
       );
     });
-  }, [safeDomains, searchTerm, filters, showDeleted]);
+  }, [safeDomains, debouncedSearchTerm, filters, showDeleted]);
 
   if (isLoading) {
     return (
@@ -517,19 +522,17 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
               <p className="text-xs text-white/50">Forwarding configuration, inbox allocation, and status at a glance.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
-              <button
-                onClick={handleExportView}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/30 hover:text-white"
-              >
+              <Button variant="outline" size="sm" onClick={handleExportView}>
                 Export view
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleExportSelected}
                 disabled={!selectedIds.size}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/60 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:border-white/5 disabled:text-white/30"
               >
                 Export selected
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -584,9 +587,9 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
             </div>
             <Popover.Root open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
               <Popover.Trigger asChild>
-                <button className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/30 hover:text-white">
+                <Button variant="outline" size="sm" className="gap-2">
                   <FunnelIcon className="h-4 w-4" /> More filters
-                </button>
+                </Button>
               </Popover.Trigger>
               <Popover.Portal>
                 <Popover.Content sideOffset={8} align="end" className="z-50 w-72 rounded-2xl border border-white/15 bg-black/90 p-4 text-white shadow-xl backdrop-blur">
@@ -683,15 +686,12 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-1">
-                      <button onClick={resetFilters} className="text-xs font-medium text-white/40 hover:text-white">
+                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-white/60 hover:text-white">
                         Clear all
-                      </button>
-                      <button
-                        onClick={() => setIsFilterSheetOpen(false)}
-                        className="inline-flex items-center gap-1 rounded-full bg-white px-4 py-2 text-xs font-semibold text-black transition hover:bg-white/90"
-                      >
+                      </Button>
+                      <Button variant="primary" size="sm" onClick={() => setIsFilterSheetOpen(false)}>
                         Done
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <Popover.Arrow className="fill-white/10" />
@@ -776,15 +776,14 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
         ) : (
           <div className="flex flex-col items-center gap-3 px-6 py-14 text-center text-white/60">
             <p className="text-sm">No domains match these filters.</p>
-            <button
-              onClick={resetFilters}
-              className="rounded-full border border-white/20 px-4 py-2 text-xs font-medium text-white/80 transition hover:border-white/40 hover:text-white"
-            >
+            <Button variant="outline" size="sm" onClick={resetFilters}>
               Clear filters
-            </button>
+            </Button>
           </div>
         )}
       </div>
     </div>
   );
 }
+
+export default memo(DomainsClient);
