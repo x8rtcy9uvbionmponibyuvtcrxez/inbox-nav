@@ -480,15 +480,15 @@ const personaSummaryNames = personas
     <ErrorBoundary>
     <div className="min-h-screen bg-gradient-to-br from-[#06040f] via-[#0b0d1f] to-[#050509] px-4 py-10 text-slate-100">
       <div className="mx-auto w-full max-w-4xl">
-        <header className="mb-8 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/50">
+        <header className="mb-8 space-y-3 text-brand-primary">
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-brand-muted-strong">
             Step {step} of {STEP_META.length}
           </p>
-          <h1 className="text-3xl font-semibold text-white sm:text-4xl">Launch your inbox fleet</h1>
-          <p className="max-w-3xl text-sm text-white/60">
+          <h1 className="text-3xl font-semibold text-brand-primary sm:text-4xl">Launch your inbox fleet</h1>
+          <p className="max-w-3xl text-base text-brand-secondary">
             We’ll use these details to provision inboxes, align forwarding, and plug into your warmup tooling. Everything auto-saves in this browser so you can come back any time.
           </p>
-          <p className="text-xs uppercase tracking-[0.25em] text-white/45">Current focus: <span className="text-white">{currentStepTitle}</span></p>
+          <p className="text-xs uppercase tracking-[0.25em] text-brand-muted-strong">Current focus: <span className="text-brand-primary">{currentStepTitle}</span></p>
         </header>
 
         <ol className="mb-8 grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
@@ -505,7 +505,7 @@ const personaSummaryNames = personas
                 <div className="flex items-center gap-3">
                   <span
                     className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
-                      isCompleted ? 'bg-emerald-400 text-emerald-950' : isActive ? 'bg-white text-black' : 'bg-white/10 text-white/60'
+                      isCompleted ? 'bg-emerald-400 text-emerald-950' : isActive ? 'bg-white text-black' : 'bg-white/10 text-brand-muted'
                     }`}
                   >
                     {isCompleted ? (
@@ -521,11 +521,11 @@ const personaSummaryNames = personas
                     )}
                   </span>
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Step {meta.id}</p>
-                    <p className="mt-1 text-sm font-semibold text-white">{meta.title}</p>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-brand-muted-strong">Step {meta.id}</p>
+                    <p className="mt-1 text-sm font-semibold text-brand-primary">{meta.title}</p>
                   </div>
                 </div>
-                <p className="mt-3 text-xs text-white/55">{meta.caption}</p>
+                <p className="mt-3 text-sm text-brand-secondary">{meta.caption}</p>
               </li>
             );
           })}

@@ -103,6 +103,30 @@
     color: var(--text-muted-strong);
   }
 
+  /* Legacy opacity utilities tuned for readability */
+  .text-white\/80 {
+    color: var(--text-primary);
+  }
+
+  .text-white\/70,
+  .text-white\/60 {
+    color: var(--text-secondary);
+  }
+
+  .text-white\/55,
+  .text-white\/50 {
+    color: var(--text-muted);
+  }
+
+  .text-white\/45,
+  .text-white\/40 {
+    color: rgba(189, 202, 255, 0.62);
+  }
+
+  .text-white\/30 {
+    color: rgba(189, 202, 255, 0.45);
+  }
+
   .surface-card {
     background: var(--surface-1);
     border: 1px solid var(--border-subtle);

@@ -15,7 +15,7 @@ const STATUS_COLORS: Record<string, string> = {
   PENDING: "bg-amber-400/25 text-amber-100 border border-amber-300/40",
   DELETED: "bg-red-500/15 text-red-300 border border-red-500/30",
   CANCELLED: "bg-orange-500/15 text-orange-300 border border-orange-500/30",
-  DEFAULT: "bg-white/10 text-white/50 border border-white/10",
+  DEFAULT: "bg-white/10 text-brand-muted border border-white/10",
 };
 
 const STATUS_DISPLAY_ORDER = ["LIVE", "PENDING", "DELETED"];
@@ -487,11 +487,11 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
 
   if (isLoading) {
     return (
-      <div className="space-y-8 text-white">
+      <div className="space-y-8 text-brand-primary">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-white">Inboxes</h1>
-            <p className="mt-2 text-sm text-white/60">Manage your email inboxes</p>
+            <h1 className="text-3xl font-semibold text-brand-primary">Inboxes</h1>
+            <p className="mt-2 text-base text-brand-secondary">Manage your email inboxes</p>
           </div>
         </div>
         <TableSkeleton rows={5} cols={6} />
@@ -501,7 +501,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
 
   if (error === "UNAUTHORIZED") {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center rounded-3xl border border-white/10 bg-white/10/5 px-10 py-16 text-center text-white/70">
+      <div className="flex min-h-[60vh] items-center justify-center rounded-3xl border border-white/10 bg-white/10/5 px-10 py-16 text-center text-brand-secondary">
         Sign in to view your inbox inventory.
       </div>
     );
@@ -518,12 +518,12 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
 
   if (!safeInboxes.length) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5/10 px-10 py-16 text-center text-white/70">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5/10 px-10 py-16 text-center text-brand-secondary">
         <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
-          <InboxIcon className="h-8 w-8 text-white/70" />
+          <InboxIcon className="h-8 w-8 text-brand-secondary" />
         </div>
-        <h2 className="text-2xl font-semibold text-white">No inboxes yet</h2>
-        <p className="mt-3 max-w-sm text-sm text-white/50">
+        <h2 className="text-2xl font-semibold text-brand-primary">No inboxes yet</h2>
+        <p className="mt-3 max-w-sm text-base text-brand-secondary">
           Your inboxes appear here once fulfillment is complete. Launch a package to start building out your fleet.
         </p>
         <Link
@@ -538,7 +538,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
   }
 
   return (
-    <div className="space-y-8 text-white">
+    <div className="space-y-8 text-brand-primary">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-brand-primary text-3xl font-semibold">Inbox inventory</h1>
@@ -624,7 +624,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                   </Button>
                 </Popover.Trigger>
                 <Popover.Portal>
-                  <Popover.Content sideOffset={8} align="end" className="z-50 w-72 rounded-2xl border border-white/15 bg-black/90 p-4 text-white shadow-xl backdrop-blur">
+                  <Popover.Content sideOffset={8} align="end" className="surface-pop z-50 w-72 p-4 text-brand-primary backdrop-blur">
                     <div className="space-y-4 text-xs text-brand-secondary">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Show deleted inboxes</span>
@@ -753,25 +753,25 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
           </div>
 
           {activeFilterChips.length ? (
-            <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-brand-secondary">
               {activeFilterChips.map((chip) => (
                 <button
                   key={chip.id}
                   onClick={chip.onClear}
-                  className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-white/70 transition hover:border-white/30 hover:text-white"
+                  className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 transition hover:border-white/30 hover:text-brand-primary"
                 >
                   {chip.label}
                   <XMarkIcon className="h-3 w-3" />
                 </button>
               ))}
-              <button onClick={resetFilters} className="text-xs text-white/40 underline hover:text-white">
+              <button onClick={resetFilters} className="text-xs text-brand-muted underline hover:text-brand-primary">
                 Clear all filters
               </button>
             </div>
           ) : null}
         </div>
         {filteredInboxes.length > 0 ? (
-          <div className="overflow-hidden rounded-xl border border-white/10">
+          <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
             <table className="min-w-full divide-y divide-white/5">
           <thead>
             <tr>
@@ -789,6 +789,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
               <th scope="col" className="px-6 py-3 text-left">Tags</th>
               <th scope="col" className="px-6 py-3 text-left">Business</th>
               <th scope="col" className="px-6 py-3 text-left">Domain</th>
+              <th scope="col" className="px-6 py-3 text-left">Password</th>
               <th scope="col" className="px-6 py-3 text-left">Product</th>
               <th scope="col" className="px-6 py-3 text-left">ESP</th>
               <th scope="col" className="px-6 py-3 text-left">Order</th>
@@ -804,26 +805,29 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                         <input
                           type="checkbox"
                           checked={selectedIds.has(inbox.id)}
-                          onChange={() => handleToggleSelect(inbox.id)}
-                          className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
-                        />
-                      </td>
-                      <td className="px-6 py-4 font-mono text-xs text-white/80">{inbox.email}</td>
+                      onChange={() => handleToggleSelect(inbox.id)}
+                      className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
+                    />
+                  </td>
+                      <td className="px-6 py-4 font-mono text-xs text-brand-primary">{inbox.email}</td>
                       <td className="px-6 py-4">
                         <StatusPill status={inbox.status} order={inbox.order} />
                       </td>
-                      <td className="px-6 py-4 text-white/70">{[inbox.firstName, inbox.lastName].filter(Boolean).join(' ') || '—'}</td>
-                      <td className="px-6 py-4 text-white/60">
-                        {inbox.tags.length ? inbox.tags.slice(0, 3).join(", ") : <span className="text-white/30">—</span>}
+                      <td className="px-6 py-4 text-brand-secondary">{[inbox.firstName, inbox.lastName].filter(Boolean).join(' ') || '—'}</td>
+                      <td className="px-6 py-4 text-brand-secondary">
+                        {inbox.tags.length ? inbox.tags.slice(0, 3).join(", ") : <span className="text-brand-muted">—</span>}
                       </td>
-                      <td className="px-6 py-4 text-white/70">{inbox.businessName || "—"}</td>
-                      <td className="px-6 py-4 text-white/60">{domain || "—"}</td>
-                      <td className="px-6 py-4 text-white/70">{getProductLabel(inbox.order?.productType)}</td>
-                      <td className="px-6 py-4 text-white/60">{inbox.espPlatform || "—"}</td>
-                      <td className="px-6 py-4 font-mono text-[11px] text-white/50">
+                      <td className="px-6 py-4 text-brand-secondary">{inbox.businessName || "—"}</td>
+                      <td className="px-6 py-4 text-brand-muted">{domain || "—"}</td>
+                      <td className="px-6 py-4 font-mono text-xs text-brand-secondary">
+                        {inbox.password ? inbox.password : "—"}
+                      </td>
+                      <td className="px-6 py-4 text-brand-secondary">{getProductLabel(inbox.order?.productType)}</td>
+                      <td className="px-6 py-4 text-brand-muted">{inbox.espPlatform || "—"}</td>
+                      <td className="px-6 py-4 font-mono text-[11px] text-brand-muted">
                         {inbox.order?.id ? `${inbox.order.id.slice(0, 8)}…` : "—"}
                       </td>
-                      <td className="px-6 py-4 text-white/60">{formatDate(inbox.createdAt)}</td>
+                      <td className="px-6 py-4 text-brand-muted">{formatDate(inbox.createdAt)}</td>
                     </tr>
                   );
                 })}
@@ -831,7 +835,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
             </table>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-3 px-6 py-14 text-center text-white/60">
+          <div className="flex flex-col items-center gap-3 px-6 py-14 text-center text-brand-secondary">
             <p className="text-sm">No inboxes match these filters.</p>
             <Button variant="outline" size="sm" onClick={resetFilters}>
               Clear filters

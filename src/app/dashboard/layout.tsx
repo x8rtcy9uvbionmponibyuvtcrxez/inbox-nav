@@ -49,7 +49,7 @@ export default async function DashboardLayout({
       </aside>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="px-8 pt-6 pb-10">{children}</div>
+        <div className="px-8 pt-4 pb-10">{children}</div>
       </main>
     </div>
   );

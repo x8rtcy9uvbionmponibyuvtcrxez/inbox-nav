@@ -35,7 +35,7 @@ const statusStyles: Record<string, string> = {
   PENDING: "bg-amber-400/20 text-amber-200 border border-amber-400/40",
   PENDING_DOMAIN_PURCHASE: "bg-purple-500/15 text-purple-200 border border-purple-500/30",
   CANCELLED: "bg-red-500/15 text-red-300 border border-red-500/30",
-  DEFAULT: "bg-white/10 text-white/60 border border-white/10",
+  DEFAULT: "bg-white/10 text-brand-muted border border-white/10",
 };
 
 const cardAccent: Record<"inboxes" | "domains" | "revenue", string> = {
@@ -83,10 +83,10 @@ function SummaryCard({
       <div className="relative h-full w-full rounded-[calc(1.5rem-1px)] bg-black/40 px-6 py-5 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.4)]">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-white/50">{label}</p>
-            <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-brand-muted-strong">{label}</p>
+            <p className="mt-3 text-2xl font-semibold text-brand-primary">{value}</p>
           </div>
-          <div className="rounded-2xl bg-white/10 p-3 text-white/80">
+          <div className="rounded-2xl bg-white/10 p-3 text-brand-primary">
             <Icon className="h-6 w-6" />
           </div>
         </div>
@@ -140,15 +140,15 @@ export default function DashboardClient({
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-white">Welcome back, {displayName}</h1>
-            <p className="mt-2 text-sm text-white/60">Here&rsquo;s what&rsquo;s happening with your inbox fleet</p>
+            <h1 className="text-3xl font-semibold text-brand-primary">Welcome back, {displayName}</h1>
+            <p className="mt-2 text-base text-brand-secondary">Here&rsquo;s what&rsquo;s happening with your inbox fleet</p>
           </div>
         </div>
-        
+
         <StatsSkeleton />
-        
+
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-white">Recent Orders</h2>
+          <h2 className="text-xl font-semibold text-brand-primary">Recent Orders</h2>
           <div className="space-y-4">
             {[1, 2, 3].map(i => <OrderSkeleton key={i} />)}
           </div>
@@ -161,10 +161,10 @@ export default function DashboardClient({
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5/10 px-10 py-16 text-center backdrop-blur-xl">
         <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
-          <SparklesIcon className="h-8 w-8 text-white/80" />
+          <SparklesIcon className="h-8 w-8 text-brand-primary" />
         </div>
-        <h2 className="text-2xl font-semibold text-white">Welcome to Inbox Navigator</h2>
-        <p className="mt-3 max-w-md text-sm text-white/60">
+        <h2 className="text-2xl font-semibold text-brand-primary">Welcome to Inbox Navigator</h2>
+        <p className="mt-3 max-w-md text-base text-brand-secondary">
           {fetchError
             ? "We hit a snag loading your workspace. Refresh or drop us a note and we&rsquo;ll take a look immediately."
             : "You don&rsquo;t have any active orders yet. Grab your first inbox package to kick things off."}
@@ -175,36 +175,34 @@ export default function DashboardClient({
           </p>
         ) : null}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/dashboard/products"
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white/80"
-          >
-            <ShoppingCartIcon className="h-4 w-4" />
-            Create Inboxes
-          </Link>
-          <a
-            href="mailto:contact@inboxnavigator.com"
-            className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white"
-          >
-            <EnvelopeIcon className="h-4 w-4" />
-            Talk to Support
-          </a>
+          <Button asChild variant="primary" size="md" className="gap-2">
+            <Link href="/dashboard/products">
+              <ShoppingCartIcon className="h-4 w-4" />
+              Create inboxes
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="md" className="gap-2">
+            <a href="mailto:contact@inboxnavigator.com">
+              <EnvelopeIcon className="h-4 w-4" />
+              Talk to support
+            </a>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 text-white -mt-4">
+    <div className="space-y-6 text-brand-primary">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm text-white/50">
+          <p className="text-base text-brand-secondary">
             {hasVisited ? `Welcome back, ${displayName}.` : "Welcome to Inbox Nav — we're excited to have you here!"}
           </p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-brand-primary">
             {hasVisited ? 'Your mission control for every inbox.' : 'Let’s launch your inbox fleet.'}
           </h1>
-          <p className="mt-3 text-sm text-white/50">
+          <p className="mt-3 text-base text-brand-secondary">
             Track fulfillment in real time, review order history, and spin up new inboxes whenever you&rsquo;re ready.
           </p>
         </div>
@@ -239,13 +237,13 @@ export default function DashboardClient({
       <div className="rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_80px_-60px_rgba(7,7,7,0.9)] backdrop-blur-xl">
         <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
           <div>
-            <h2 className="text-lg font-semibold text-white">Order history</h2>
-            <p className="text-xs text-white/50">Your most recent onboarding submissions and fulfillment progress.</p>
+            <h2 className="text-lg font-semibold text-brand-primary">Order history</h2>
+            <p className="text-sm text-brand-secondary">Your most recent onboarding submissions and fulfillment progress.</p>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-white/5 text-sm">
-            <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/60">
+            <thead className="bg-white/5 text-xs uppercase tracking-wider text-brand-muted">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left">Forwarding URL</th>
                 <th scope="col" className="px-6 py-3 text-left">Business</th>
@@ -275,22 +273,22 @@ export default function DashboardClient({
                 return (
                   <tr key={record.id} className={`transition hover:bg-white/5 ${isCancelled ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4">
-                      <div className="text-xs text-white/60 max-w-[240px] truncate" title={forwardingLabel}>
+                      <div className="max-w-[240px] truncate text-xs text-brand-muted" title={forwardingLabel}>
                         {forwardingLabel}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-white">{businessLabel}</div>
-                      <div className="text-xs text-white/40">{record.website ? record.website : "—"}</div>
+                      <div className="text-base text-brand-primary">{businessLabel}</div>
+                      <div className="text-xs text-brand-muted">{record.website ? record.website : "—"}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-white/70">
+                      <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-brand-secondary">
                         {order?.productType ? toTitle(order.productType) : "—"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-white/80">{inboxCount}</td>
-                    <td className="px-6 py-4 text-white/80">{formatCurrency(totalCost)}</td>
-                    <td className="px-6 py-4 text-white/60">{formatDate(record.createdAt)}</td>
+                    <td className="px-6 py-4 text-brand-secondary">{inboxCount}</td>
+                    <td className="px-6 py-4 text-brand-secondary">{formatCurrency(totalCost)}</td>
+                    <td className="px-6 py-4 text-brand-muted">{formatDate(record.createdAt)}</td>
                     <td className="px-6 py-4">
                       <div className="space-y-2">
                         {order?.subscriptionStatus === 'cancel_at_period_end' || order?.status === 'CANCELLED' ? (
@@ -300,7 +298,7 @@ export default function DashboardClient({
                         ) : order?.status ? (
                           <StatusBadge status={order.status} />
                         ) : (
-                          <span className="text-xs text-white/40">Unknown</span>
+                          <span className="text-xs text-brand-muted">Unknown</span>
                         )}
                       </div>
                     </td>

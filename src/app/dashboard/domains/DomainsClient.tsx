@@ -16,7 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
   DELETED: "bg-red-500/15 text-red-300 border border-red-500/30",
   DECOMMISSIONED: "bg-red-500/15 text-red-300 border border-red-500/30",
   CANCELLED: "bg-orange-500/15 text-orange-300 border border-orange-500/30",
-  DEFAULT: "bg-white/10 text-white/50 border border-white/10",
+  DEFAULT: "bg-white/10 text-brand-muted border border-white/10",
 };
 
 const STATUS_DISPLAY_ORDER = ["LIVE", "PENDING", "DECOMMISSIONED", "DELETED"];
@@ -255,11 +255,11 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
 
   if (isLoading) {
     return (
-      <div className="space-y-8 text-white">
+      <div className="space-y-8 text-brand-primary">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-white">Domains</h1>
-            <p className="mt-2 text-sm text-white/60">Manage your email domains</p>
+            <h1 className="text-3xl font-semibold text-brand-primary">Domains</h1>
+            <p className="mt-2 text-base text-brand-secondary">Manage your email domains</p>
           </div>
         </div>
         <TableSkeleton rows={5} cols={6} />
@@ -269,7 +269,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
 
   if (error === "UNAUTHORIZED") {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center rounded-3xl border border-white/10 bg-white/10/5 px-10 py-16 text-center text-white/70">
+      <div className="flex min-h-[60vh] items-center justify-center rounded-3xl border border-white/10 bg-white/10/5 px-10 py-16 text-center text-brand-secondary">
         Sign in to review the domains under management.
       </div>
     );
@@ -337,19 +337,36 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
     ]),
   ];
 
-  const handleExportSelected = () => {
-    if (!selectedIds.size) return;
-    const selectedDomains = safeDomains.filter((domain) => selectedIds.has(domain.id));
-    if (!selectedDomains.length) return;
-    downloadCsv(buildDomainCsvRows(selectedDomains), "domains-selected.csv");
-  };
+  const hasSelection = selectedIds.size > 0;
 
-  const handleExportView = () => {
-    const source = selectedIds.size
+  const hasFiltersApplied = useMemo(() => {
+    if (searchTerm.trim()) return true;
+    if (showDeleted) return true;
+    if (filters.statuses.length) return true;
+    if (filters.product) return true;
+    if (filters.tags.length) return true;
+    if (filters.business) return true;
+    if (filters.orderId) return true;
+    if (filters.forwarding) return true;
+    if (filters.datePreset !== "ALL") return true;
+    if (filters.dateRange.from) return true;
+    if (filters.dateRange.to) return true;
+    return false;
+  }, [filters, searchTerm, showDeleted]);
+
+  const canExport = hasSelection || filteredDomains.length > 0;
+  const exportButtonLabel = hasSelection ? "Export selected as CSV" : "Export as CSV";
+
+  const handleExportCsv = () => {
+    const source = hasSelection
       ? safeDomains.filter((domain) => selectedIds.has(domain.id))
       : filteredDomains;
     if (!source.length) return;
-    const filename = selectedIds.size ? "domains-selected.csv" : "domains-filtered.csv";
+    const filename = hasSelection
+      ? "domains-selected.csv"
+      : hasFiltersApplied
+        ? "domains-filtered.csv"
+        : "domains.csv";
     downloadCsv(buildDomainCsvRows(source), filename);
   };
 
@@ -376,6 +393,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
     setSearchTerm("");
+    setShowDeleted(false);
   };
 
   type FilterChip = {
@@ -468,49 +486,43 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
 
   if (!safeDomains.length) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5/10 px-10 py-16 text-center text-white/70">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5/10 px-10 py-16 text-center text-brand-secondary">
         <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
-          <GlobeAltIcon className="h-8 w-8 text-white/70" />
+          <GlobeAltIcon className="h-8 w-8 text-brand-secondary" />
         </div>
-        <h2 className="text-2xl font-semibold text-white">No domains yet</h2>
-        <p className="mt-3 max-w-sm text-sm text-white/50">
+        <h2 className="text-2xl font-semibold text-brand-primary">No domains yet</h2>
+        <p className="mt-3 max-w-sm text-base text-brand-secondary">
           Once we fulfill your order, managed domains appear here with forwarding targets and inbox counts.
         </p>
-        <Link
-          href="/dashboard/products"
-          className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90"
-        >
-          Buy more inboxes
-        </Link>
+        <Button asChild variant="primary" size="md" className="mt-8">
+          <Link href="/dashboard/products">Buy more inboxes</Link>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-10 text-white">
+    <div className="space-y-10 text-brand-primary">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-white">Domain portfolio</h1>
-          <p className="mt-2 max-w-xl text-sm text-white/50">
+          <h1 className="text-3xl font-semibold text-brand-primary">Domain portfolio</h1>
+          <p className="mt-2 max-w-xl text-base text-brand-secondary">
             Track every sending domain, forwarding target, and the inbox capacity we’ve associated with it.
           </p>
         </div>
-        <Link
-          href="/dashboard/products"
-          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black shadow-[0_10px_30px_-20px_rgba(255,255,255,0.6)] transition hover:bg-white/90"
-        >
-          Buy more inboxes
-        </Link>
+        <Button asChild variant="primary" size="md" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)]">
+          <Link href="/dashboard/products">Buy more inboxes</Link>
+        </Button>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.6)]">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/40">Total domains</p>
-          <p className="mt-3 text-3xl font-semibold text-white">{domains.length}</p>
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Total domains</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{domains.length}</p>
         </div>
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.6)]">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/40">Total inbox capacity</p>
-          <p className="mt-3 text-3xl font-semibold text-white">{totalInboxSlots}</p>
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Total inbox capacity</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{totalInboxSlots}</p>
         </div>
       </div>
 
@@ -518,20 +530,17 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
         <div className="space-y-4 border-b border-white/5 px-6 py-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-white">Domains under management</h2>
-              <p className="text-xs text-white/50">Forwarding configuration, inbox allocation, and status at a glance.</p>
+              <h2 className="text-lg font-semibold text-brand-primary">Domains under management</h2>
+              <p className="text-sm text-brand-secondary">Forwarding configuration, inbox allocation, and status at a glance.</p>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
-              <Button variant="outline" size="sm" onClick={handleExportView}>
-                Export view
-              </Button>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-brand-secondary">
               <Button
                 variant="outline"
-                size="sm"
-                onClick={handleExportSelected}
-                disabled={!selectedIds.size}
+                size="md"
+                onClick={handleExportCsv}
+                disabled={!canExport}
               >
-                Export selected
+                {exportButtonLabel}
               </Button>
             </div>
           </div>
@@ -543,12 +552,12 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Search domain, business, order…"
-                className="flex-1 min-w-[220px] rounded-full border border-white/15 bg-black/25 px-4 py-2 text-sm text-white focus:border-white/35 focus:outline-none focus:ring-0"
+                className="flex-1 min-w-[220px] rounded-full border border-white/15 bg-black/25 px-4 py-2 text-sm text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
               />
               <select
                 value={filters.product}
                 onChange={(event) => setFilterValue("product", event.target.value)}
-                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-xs text-white focus:border-white/35 focus:outline-none focus:ring-0"
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-sm text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
               >
                 <option value="">All products</option>
                 {productFilterOptions.map((product) => (
@@ -560,7 +569,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
               <select
                 value={filters.business}
                 onChange={(event) => setFilterValue("business", event.target.value)}
-                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-xs text-white focus:border-white/35 focus:outline-none focus:ring-0"
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-sm text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
               >
                 <option value="">All businesses</option>
                 {uniqueBusinesses.map((business) => (
@@ -569,15 +578,15 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                   </option>
                 ))}
               </select>
-              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-white">
+              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-sm text-brand-secondary">
                 {STATUS_DISPLAY_ORDER.map((status) => (
                   <button
                     key={status}
                     onClick={() => toggleStatus(status)}
-                    className={`rounded-full px-3 py-1 font-medium uppercase tracking-wide ${
+                    className={`rounded-full px-3 py-1.5 font-medium uppercase tracking-wide ${
                       filters.statuses.includes(status)
                         ? STATUS_COLORS[status] ?? STATUS_COLORS.DEFAULT
-                        : 'bg-transparent text-white/50 border border-white/15'
+                        : 'bg-transparent text-brand-muted border border-white/15'
                     }`}
                   >
                     {getStatusLabel(status)}
@@ -592,26 +601,26 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                 </Button>
               </Popover.Trigger>
               <Popover.Portal>
-                <Popover.Content sideOffset={8} align="end" className="z-50 w-72 rounded-2xl border border-white/15 bg-black/90 p-4 text-white shadow-xl backdrop-blur">
-                  <div className="space-y-4 text-xs text-white/70">
+                <Popover.Content sideOffset={8} align="end" className="surface-pop z-50 w-72 p-4 text-brand-primary backdrop-blur">
+                  <div className="space-y-4 text-xs text-brand-secondary">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] uppercase tracking-[0.3em] text-white/40">Show deleted domains</span>
-                      <label className="inline-flex items-center gap-2 text-white/70">
+                      <span className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Show deleted domains</span>
+                      <label className="inline-flex items-center gap-2 text-brand-secondary">
                         <input type="checkbox" checked={showDeleted} onChange={(e) => setShowDeleted(e.target.checked)} />
                         <span>Show</span>
                       </label>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Forwarding contains</label>
+                      <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Forwarding contains</label>
                       <input
                         value={filters.forwarding}
                         onChange={(event) => setFilterValue("forwarding", event.target.value)}
                         placeholder="domain.com"
-                        className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                        className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Tags</label>
+                      <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Tags</label>
                       <div className="flex flex-wrap gap-2">
                         {uniqueTags.length ? (
                           uniqueTags.map((tag) => {
@@ -620,28 +629,28 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                               <button
                                 key={tag}
                                 onClick={() => toggleTag(tag)}
-                                className={`rounded-full px-3 py-1 ${active ? 'bg-white text-black' : 'border border-white/20 text-white/60'}`}
+                                className={`rounded-full px-3 py-1 ${active ? 'bg-white text-black' : 'border border-white/20 text-brand-muted'}`}
                               >
                                 {tag}
                               </button>
                             );
                           })
                         ) : (
-                          <span className="text-white/40">No tags yet.</span>
+                          <span className="text-brand-muted">No tags yet.</span>
                         )}
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Order ID</label>
+                      <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Order ID</label>
                       <input
                         value={filters.orderId}
                         onChange={(event) => setFilterValue("orderId", event.target.value)}
                         placeholder="Lookup by order"
-                        className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                        className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Created</label>
+                      <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Created</label>
                       <div className="flex items-center gap-2">
                         <input
                           type="date"
@@ -654,7 +663,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                               dateRange: { ...prev.dateRange, from: value },
                             }));
                           }}
-                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
                         />
                         <input
                           type="date"
@@ -667,10 +676,10 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                               dateRange: { ...prev.dateRange, to: value },
                             }));
                           }}
-                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
                         />
                       </div>
-                      <div className="flex items-center gap-2 text-white/50">
+                      <div className="flex items-center gap-2 text-brand-muted">
                         {(['ALL', '7', '30', '90'] as DatePreset[]).map((preset) => (
                           <button
                             key={preset}
@@ -678,7 +687,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                               const range = applyDatePreset(preset);
                               setFilters((prev) => ({ ...prev, datePreset: preset, dateRange: range }));
                             }}
-                            className={`rounded-full px-3 py-1 ${filters.datePreset === preset ? 'bg-white/90 text-black' : 'border border-white/15'}`}
+                            className={`rounded-full px-3 py-1 ${filters.datePreset === preset ? 'bg-white/90 text-black' : 'border border-white/15 text-brand-muted'}`}
                           >
                           {preset === 'ALL' ? 'All' : `Last ${preset}d`}
                           </button>
@@ -686,7 +695,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-1">
-                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-white/60 hover:text-white">
+                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-brand-secondary hover:text-brand-primary">
                         Clear all
                       </Button>
                       <Button variant="primary" size="sm" onClick={() => setIsFilterSheetOpen(false)}>
@@ -701,18 +710,18 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
           </div>
 
           {activeFilterChips.length ? (
-            <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-brand-secondary">
               {activeFilterChips.map((chip) => (
                 <button
                   key={chip.id}
                   onClick={chip.onClear}
-                  className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-white/70 transition hover:border-white/30 hover:text-white"
+                  className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 transition hover:border-white/30 hover:text-brand-primary"
                 >
                   {chip.label}
                   <XMarkIcon className="h-3 w-3" />
                 </button>
               ))}
-              <button onClick={resetFilters} className="text-xs text-white/40 underline hover:text-white">
+              <button onClick={resetFilters} className="text-xs text-brand-muted underline hover:text-brand-primary">
                 Clear all filters
               </button>
             </div>
@@ -721,7 +730,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
         {filteredDomains.length ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-white/5 text-sm">
-              <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/50">
+              <thead className="bg-white/5 text-xs uppercase tracking-wider text-brand-muted">
                 <tr>
                   <th className="px-6 py-3 text-left">
                     <input
@@ -753,28 +762,28 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                         className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
                       />
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-white/80">{domain.domain}</td>
+                    <td className="px-6 py-4 font-mono text-xs text-brand-primary">{domain.domain}</td>
                     <td className="px-6 py-4">
                       <StatusPill status={domain.status} order={domain.order} />
                     </td>
-                    <td className="px-6 py-4 text-white/70">{domain.inboxCount}</td>
-                    <td className="px-6 py-4 text-white/60">{domain.forwardingUrl || "—"}</td>
-                    <td className="px-6 py-4 text-white/60">
-                      {domain.tags.length ? domain.tags.slice(0, 3).join(", ") : <span className="text-white/30">—</span>}
+                    <td className="px-6 py-4 text-brand-secondary">{domain.inboxCount}</td>
+                    <td className="px-6 py-4 text-brand-muted">{domain.forwardingUrl || "—"}</td>
+                    <td className="px-6 py-4 text-brand-secondary">
+                      {domain.tags.length ? domain.tags.slice(0, 3).join(", ") : <span className="text-brand-muted">—</span>}
                     </td>
-                    <td className="px-6 py-4 text-white/70">{domain.businessName || "—"}</td>
-                    <td className="px-6 py-4 text-white/70">{getProductLabel(domain.order?.productType)}</td>
-                    <td className="px-6 py-4 font-mono text-[11px] text-white/50">
+                    <td className="px-6 py-4 text-brand-secondary">{domain.businessName || "—"}</td>
+                    <td className="px-6 py-4 text-brand-secondary">{getProductLabel(domain.order?.productType)}</td>
+                    <td className="px-6 py-4 font-mono text-[11px] text-brand-muted">
                       {domain.order?.id ? `${domain.order.id.slice(0, 8)}…` : "—"}
                     </td>
-                    <td className="px-6 py-4 text-white/60">{formatDate(domain.createdAt)}</td>
+                    <td className="px-6 py-4 text-brand-muted">{formatDate(domain.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-3 px-6 py-14 text-center text-white/60">
+          <div className="flex flex-col items-center gap-3 px-6 py-14 text-center text-brand-secondary">
             <p className="text-sm">No domains match these filters.</p>
             <Button variant="outline" size="sm" onClick={resetFilters}>
               Clear filters
