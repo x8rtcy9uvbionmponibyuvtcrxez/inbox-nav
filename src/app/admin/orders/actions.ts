@@ -246,8 +246,17 @@ export async function markOrderAsFulfilledAction(
 async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData: CSVRow[]) {
   console.log("[FULFILLMENT] Processing OWN domains CSV");
   
+  // Get order and onboarding data for business name
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    include: { onboardingData: true }
+  });
+  
+  const businessName = order?.onboardingData?.[0]?.businessType || order?.businessName || '';
+  
   const updates = [];
   const creates = [];
+  const domainsToCreate = new Set<string>();
   
   for (const row of csvData) {
     const { email, password, domain, personaName } = row;
@@ -255,6 +264,11 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
     if (!email || !password) {
       console.warn("[FULFILLMENT] Skipping row with missing email or password:", row);
       continue;
+    }
+
+    // Track domains that need to be created
+    if (domain) {
+      domainsToCreate.add(domain.trim());
     }
 
     // Check if inbox already exists
@@ -289,12 +303,34 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
         espPlatform: 'Smartlead',
         status: 'LIVE' as const,
         tags: [],
-        businessName: '',
+        businessName,
         forwardingDomain: domain || null,
         createdAt: new Date(),
         updatedAt: new Date()
       });
     }
+  }
+
+  // Create domains first
+  if (domainsToCreate.size > 0) {
+    const domainInserts = Array.from(domainsToCreate).map(domain => ({
+      orderId,
+      domain,
+      status: 'LIVE' as const,
+      inboxCount: 0, // Will be updated after inbox creation
+      forwardingUrl: order?.onboardingData?.[0]?.website || '',
+      tags: [],
+      businessName,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }));
+    
+    await db.domain.createMany({
+      data: domainInserts,
+      skipDuplicates: true
+    });
+    
+    console.log(`[FULFILLMENT] ✅ Created ${domainInserts.length} domains`);
   }
 
   // Execute updates and creates
@@ -309,6 +345,17 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
       skipDuplicates: true
     });
     console.log(`[FULFILLMENT] ✅ Created ${creates.length} new inboxes`);
+    
+    // Update domain inbox counts
+    for (const domain of domainsToCreate) {
+      const count = creates.filter(c => c.forwardingDomain === domain).length;
+      await db.domain.updateMany({
+        where: { orderId, domain },
+        data: { inboxCount: count }
+      });
+    }
+    
+    console.log(`[FULFILLMENT] ✅ Updated domain inbox counts`);
   }
 }
 
