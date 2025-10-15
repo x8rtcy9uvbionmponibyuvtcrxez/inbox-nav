@@ -322,19 +322,37 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     ]),
   ];
 
-  const handleExportSelected = () => {
-    if (!selectedIds.size) return;
-    const selectedInboxes = safeInboxes.filter((inbox) => selectedIds.has(inbox.id));
-    if (!selectedInboxes.length) return;
-    downloadCsv(buildInboxCsvRows(selectedInboxes), "inboxes-selected.csv");
-  };
+  const hasSelection = selectedIds.size > 0;
 
-  const handleExportView = () => {
-    const source = selectedIds.size
+  const hasFiltersApplied = useMemo(() => {
+    if (searchTerm.trim()) return true;
+    if (showDeleted) return true;
+    if (filters.statuses.length) return true;
+    if (filters.product) return true;
+    if (filters.persona) return true;
+    if (filters.tags.length) return true;
+    if (filters.business) return true;
+    if (filters.orderId) return true;
+    if (filters.platforms.length) return true;
+    if (filters.datePreset !== "ALL") return true;
+    if (filters.dateRange.from) return true;
+    if (filters.dateRange.to) return true;
+    return false;
+  }, [filters, searchTerm, showDeleted]);
+
+  const canExport = hasSelection || filteredInboxes.length > 0;
+  const exportButtonLabel = hasSelection ? "Export selected as CSV" : "Export as CSV";
+
+  const handleExportCsv = () => {
+    const source = hasSelection
       ? safeInboxes.filter((inbox) => selectedIds.has(inbox.id))
       : filteredInboxes;
     if (!source.length) return;
-    const filename = selectedIds.size ? "inboxes-selected.csv" : "inboxes-filtered.csv";
+    const filename = hasSelection
+      ? "inboxes-selected.csv"
+      : hasFiltersApplied
+        ? "inboxes-filtered.csv"
+        : "inboxes.csv";
     downloadCsv(buildInboxCsvRows(source), filename);
   };
 
@@ -564,7 +582,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
               <select
                 value={filters.product}
                 onChange={(event) => setFilterValue("product", event.target.value)}
-                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-xs text-white focus:border-white/35 focus:outline-none focus:ring-0"
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-sm text-white/90 focus:border-white/35 focus:outline-none focus:ring-0"
               >
                 <option value="">All products</option>
                 {productFilterOptions.map((product) => (
@@ -576,7 +594,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
               <select
                 value={filters.persona}
                 onChange={(event) => setFilterValue("persona", event.target.value)}
-                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-xs text-white focus:border-white/35 focus:outline-none focus:ring-0"
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-sm text-white/90 focus:border-white/35 focus:outline-none focus:ring-0"
               >
                 <option value="">All personas</option>
                 {uniquePersonas.map((persona) => (
@@ -585,15 +603,15 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                   </option>
                 ))}
               </select>
-              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-white">
+              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-sm text-white/80">
                 {STATUS_DISPLAY_ORDER.map((status) => (
                   <button
                     key={status}
                     onClick={() => toggleStatus(status)}
-                    className={`rounded-full px-3 py-1 font-medium uppercase tracking-wide ${
+                    className={`rounded-full px-3 py-1.5 font-medium uppercase tracking-wide ${
                       filters.statuses.includes(status)
                         ? STATUS_COLORS[status] ?? STATUS_COLORS.DEFAULT
-                        : 'bg-transparent text-white/50 border border-white/15'
+                        : 'bg-transparent text-white/75 border border-white/20'
                     }`}
                   >
                     {status.toLowerCase()}
@@ -601,18 +619,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                 ))}
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-white/60">
-              <Button variant="outline" size="sm" onClick={handleExportView}>
-                Export view
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportSelected}
-                disabled={!selectedIds.size}
-              >
-                Export selected
-              </Button>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-white/70">
               <Popover.Root open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
                 <Popover.Trigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
@@ -732,10 +739,19 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                       </Button>
                     </div>
                     </div>
-                    <Popover.Arrow className="fill-white/10" />
-                  </Popover.Content>
-                </Popover.Portal>
+                  <Popover.Arrow className="fill-white/10" />
+                </Popover.Content>
+              </Popover.Portal>
               </Popover.Root>
+              <Button
+                variant="outline"
+                size="md"
+                onClick={handleExportCsv}
+                disabled={!canExport}
+                className="whitespace-nowrap"
+              >
+                {exportButtonLabel}
+              </Button>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
+import { getCachedData } from '@/lib/redis';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,53 +23,59 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const inboxes = await prisma.inbox.findMany({
-      where: {
-        order: {
-          clerkUserId: userId,
-        },
-      },
-      select: {
-        id: true,
-        orderId: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        status: true,
-        espPlatform: true,
-        tags: true,
-        businessName: true,
-        forwardingDomain: true,
-        password: true,
-        fulfilledAt: true,
-        createdAt: true,
-        updatedAt: true,
-        order: {
+    const inboxes = await getCachedData(
+      `inboxes:${userId}`,
+      async () => {
+        return await prisma.inbox.findMany({
+          where: {
+            order: {
+              clerkUserId: userId,
+            },
+          },
           select: {
             id: true,
-            clerkUserId: true,
-            productType: true,
-            quantity: true,
-            totalAmount: true,
+            orderId: true,
+            email: true,
+            firstName: true,
+            lastName: true,
             status: true,
-            stripeSessionId: true,
-            stripeCustomerId: true,
-            stripeSubscriptionId: true,
-            subscriptionStatus: true,
-            cancelledAt: true,
-            cancellationReason: true,
+            espPlatform: true,
+            tags: true,
             businessName: true,
-            externalId: true,
+            forwardingDomain: true,
+            password: true,
+            fulfilledAt: true,
             createdAt: true,
             updatedAt: true,
-          }
-        }
+            order: {
+              select: {
+                id: true,
+                clerkUserId: true,
+                productType: true,
+                quantity: true,
+                totalAmount: true,
+                status: true,
+                stripeSessionId: true,
+                stripeCustomerId: true,
+                stripeSubscriptionId: true,
+                subscriptionStatus: true,
+                cancelledAt: true,
+                cancellationReason: true,
+                businessName: true,
+                externalId: true,
+                createdAt: true,
+                updatedAt: true,
+              }
+            }
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 100,
+        });
       },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 100,
-    });
+      300 // 5 minutes cache
+    );
 
     return NextResponse.json(inboxes, {
       headers: {

@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { invalidateCache } from '@/lib/redis';
 
 export type CSVRow = Record<string, string>;
 
@@ -229,6 +230,12 @@ export async function markOrderAsFulfilledAction(
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/inboxes');
     revalidatePath('/dashboard/domains');
+    
+    // Invalidate Redis cache for this user
+    if (order.clerkUserId) {
+      await invalidateCache(`inboxes:${order.clerkUserId}`);
+      await invalidateCache(`domains:${order.clerkUserId}`);
+    }
     
     return { 
       success: true, 

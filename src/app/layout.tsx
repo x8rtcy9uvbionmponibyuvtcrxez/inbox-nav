@@ -3,6 +3,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { PerformanceMonitor } from '@/components/PerformanceMonitor'
 import Header from '@/components/Header'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
@@ -40,6 +41,7 @@ export default function RootLayout({
           </ErrorBoundary>
           <Analytics />
           <SpeedInsights />
+          <PerformanceMonitor />
         </body>
       </html>
     </ClerkProvider>

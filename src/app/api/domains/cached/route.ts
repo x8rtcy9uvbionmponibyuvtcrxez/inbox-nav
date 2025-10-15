@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
+import { getCachedData } from '@/lib/redis';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,40 +23,46 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const domains = await prisma.domain.findMany({
-      where: {
-        order: {
-          clerkUserId: userId,
-        },
-      },
-      select: {
-        id: true,
-        orderId: true,
-        domain: true,
-        status: true,
-        tags: true,
-        inboxCount: true,
-        forwardingUrl: true,
-        businessName: true,
-        fulfilledAt: true,
-        createdAt: true,
-        updatedAt: true,
-        order: {
+    const domains = await getCachedData(
+      `domains:${userId}`,
+      async () => {
+        return await prisma.domain.findMany({
+          where: {
+            order: {
+              clerkUserId: userId,
+            },
+          },
           select: {
             id: true,
-            productType: true,
-            quantity: true,
+            orderId: true,
+            domain: true,
             status: true,
-            subscriptionStatus: true,
-            cancelledAt: true,
+            tags: true,
+            inboxCount: true,
+            forwardingUrl: true,
+            businessName: true,
+            fulfilledAt: true,
+            createdAt: true,
+            updatedAt: true,
+            order: {
+              select: {
+                id: true,
+                productType: true,
+                quantity: true,
+                status: true,
+                subscriptionStatus: true,
+                cancelledAt: true,
+              },
+            },
           },
-        },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 50,
+        });
       },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 50,
-    });
+      300 // 5 minutes cache
+    );
 
     return NextResponse.json(domains, {
       headers: {
