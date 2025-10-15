@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback, memo } from "react";
+import { useMemo, useState, useCallback, memo, useEffect } from "react";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
 import type { Prisma } from "@prisma/client";
@@ -9,6 +9,7 @@ import { TableSkeleton } from "@/components/skeletons";
 import { endOfDay, format, startOfDay, subDays } from "date-fns";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/Button";
+import Pagination from "@/components/Pagination";
 
 const STATUS_COLORS: Record<string, string> = {
   LIVE: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
@@ -20,6 +21,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const STATUS_DISPLAY_ORDER = ["LIVE", "PENDING", "DELETED"];
 const PRODUCT_DISPLAY_ORDER = ["GOOGLE", "PREWARMED", "MICROSOFT"];
+const ITEMS_PER_PAGE = 50;
 
 const PRODUCT_LABELS: Record<string, string> = {
   GOOGLE: "Google",
@@ -149,6 +151,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
   const [showDeleted, setShowDeleted] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Debounce search term to avoid excessive filtering
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -253,6 +256,17 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     });
   }, [safeInboxes, debouncedSearchTerm, filters, showDeleted]);
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, filters, showDeleted]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredInboxes.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedInboxes = filteredInboxes.slice(startIndex, endIndex);
+
   const inboxCount = safeInboxes.length;
   const uniqueDomains = useMemo(() => {
     const set = new Set<string>();
@@ -277,19 +291,21 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     });
   }, []);
 
-  const allFilteredSelected = filteredInboxes.length > 0 && filteredInboxes.every((inbox) => selectedIds.has(inbox.id));
+  const allPaginatedSelected = paginatedInboxes.length > 0 && paginatedInboxes.every((inbox) => selectedIds.has(inbox.id));
 
   const handleToggleSelectAll = useCallback(() => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (allFilteredSelected) {
-        filteredInboxes.forEach((inbox) => next.delete(inbox.id));
+      if (allPaginatedSelected) {
+        // Only deselect current page items
+        paginatedInboxes.forEach((inbox) => next.delete(inbox.id));
       } else {
-        filteredInboxes.forEach((inbox) => next.add(inbox.id));
+        // Select all current page items
+        paginatedInboxes.forEach((inbox) => next.add(inbox.id));
       }
       return next;
     });
-  }, [allFilteredSelected, filteredInboxes]);
+  }, [allPaginatedSelected, paginatedInboxes]);
 
   const buildInboxCsvRows = (inboxList: InboxRecord[]) => [
     [
@@ -778,7 +794,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
               <th className="px-6 py-3 text-left">
                 <input
                   type="checkbox"
-                  checked={allFilteredSelected}
+                  checked={allPaginatedSelected}
                   onChange={handleToggleSelectAll}
                   className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
                 />
@@ -797,7 +813,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
             </tr>
           </thead>
               <tbody className="divide-y divide-white/5">
-                {filteredInboxes.map((inbox) => {
+                {paginatedInboxes.map((inbox) => {
                   const domain = parseInboxDomain(inbox);
                   return (
                     <tr key={inbox.id} className="transition hover:bg-white/[0.04]">
@@ -841,6 +857,18 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
               Clear filters
             </Button>
           </div>
+        )}
+
+        {/* Pagination Controls */}
+        {filteredInboxes.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredInboxes.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+            disabled={isLoading}
+          />
         )}
       </div>
     </div>

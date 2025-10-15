@@ -18,41 +18,8 @@ async function InboxesContent() {
           clerkUserId: userId,
         },
       },
-      select: {
-        id: true,
-        orderId: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        status: true,
-        espPlatform: true,
-        tags: true,
-        businessName: true,
-        forwardingDomain: true,
-        password: true,
-        fulfilledAt: true,
-        createdAt: true,
-        updatedAt: true,
-        order: {
-          select: {
-            id: true,
-            clerkUserId: true,
-            productType: true,
-            quantity: true,
-            totalAmount: true,
-            status: true,
-            stripeSessionId: true,
-            stripeCustomerId: true,
-            stripeSubscriptionId: true,
-            subscriptionStatus: true,
-            cancelledAt: true,
-            cancellationReason: true,
-            businessName: true,
-            externalId: true,
-            createdAt: true,
-            updatedAt: true,
-          }
-        }
+      include: {
+        order: true
       },
       orderBy: {
         createdAt: "desc",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, memo } from "react";
+import { useMemo, useState, memo, useEffect } from "react";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
 import type { Prisma } from "@prisma/client";
@@ -9,6 +9,7 @@ import { TableSkeleton } from "@/components/skeletons";
 import { endOfDay, format, startOfDay, subDays } from "date-fns";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/Button";
+import Pagination from "@/components/Pagination";
 
 const STATUS_COLORS: Record<string, string> = {
   LIVE: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
@@ -26,6 +27,7 @@ const STATUS_FILTER_MATCHERS: Record<string, string[]> = {
 };
 
 const PRODUCT_DISPLAY_ORDER = ["GOOGLE", "PREWARMED", "MICROSOFT"];
+const ITEMS_PER_PAGE = 50;
 
 const PRODUCT_LABELS: Record<string, string> = {
   GOOGLE: "Google",
@@ -155,6 +157,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
   const [showDeleted, setShowDeleted] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Debounce search term to avoid excessive filtering
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -253,6 +256,17 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
     });
   }, [safeDomains, debouncedSearchTerm, filters, showDeleted]);
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, filters, showDeleted]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredDomains.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedDomains = filteredDomains.slice(startIndex, endIndex);
+
   const hasSelection = selectedIds.size > 0;
 
   const hasFiltersApplied = useMemo(() => {
@@ -329,15 +343,17 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
     });
   };
 
-  const allFilteredSelected = filteredDomains.length > 0 && filteredDomains.every((domain) => selectedIds.has(domain.id));
+  const allPaginatedSelected = paginatedDomains.length > 0 && paginatedDomains.every((domain) => selectedIds.has(domain.id));
 
   const handleToggleSelectAll = () => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (allFilteredSelected) {
-        filteredDomains.forEach((domain) => next.delete(domain.id));
+      if (allPaginatedSelected) {
+        // Only deselect current page items
+        paginatedDomains.forEach((domain) => next.delete(domain.id));
       } else {
-        filteredDomains.forEach((domain) => next.add(domain.id));
+        // Select all current page items
+        paginatedDomains.forEach((domain) => next.add(domain.id));
       }
       return next;
     });
@@ -735,7 +751,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                   <th className="px-6 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={allFilteredSelected}
+                      checked={allPaginatedSelected}
                       onChange={handleToggleSelectAll}
                       className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
                     />
@@ -752,7 +768,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {filteredDomains.map((domain) => (
+                {paginatedDomains.map((domain) => (
                   <tr key={domain.id} className="transition hover:bg-white/[0.04]">
                     <td className="px-6 py-4">
                       <input
@@ -789,6 +805,18 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
               Clear filters
             </Button>
           </div>
+        )}
+
+        {/* Pagination Controls */}
+        {filteredDomains.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredDomains.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+            disabled={isLoading}
+          />
         )}
       </div>
     </div>

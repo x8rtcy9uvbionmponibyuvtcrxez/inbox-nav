@@ -18,18 +18,7 @@ async function DomainsContent() {
           clerkUserId: userId,
         },
       },
-      select: {
-        id: true,
-        orderId: true,
-        domain: true,
-        status: true,
-        tags: true,
-        inboxCount: true,
-        forwardingUrl: true,
-        businessName: true,
-        fulfilledAt: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
         order: {
           select: {
             id: true,
