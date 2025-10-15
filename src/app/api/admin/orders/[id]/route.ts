@@ -37,7 +37,8 @@ export async function GET(
     let clerkUserEmail: string | null = null;
     if (order.clerkUserId) {
       try {
-        const user = await clerkClient.users.getUser(order.clerkUserId);
+        const client = await clerkClient();
+        const user = await client.users.getUser(order.clerkUserId);
         clerkUserName =
           user.fullName?.trim() ||
           [user.firstName, user.lastName].filter(Boolean).join(' ').trim() ||
