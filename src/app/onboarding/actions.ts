@@ -5,6 +5,7 @@ import { assertStripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
 import type { ProductType, OrderStatus } from '@prisma/client';
+import { protectSecret } from '@/lib/encryption';
 import crypto from "node:crypto";
 
 export type SaveOnboardingInput = {
@@ -214,7 +215,15 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           } catch (stripeError) {
             console.error("[ACTION] ❌ Stripe session fetch failed:", stripeError);
             if (stripeError instanceof Error) console.error("[ACTION] Stripe error stack:", stripeError.stack);
-            throw new Error(`Failed to fetch Stripe session: ${stripeError instanceof Error ? stripeError.message : "Unknown error"}`);
+            const code =
+              typeof stripeError === 'object' && stripeError !== null && 'code' in stripeError
+                ? String((stripeError as { code?: string }).code ?? '')
+                : '';
+            const friendlyMessage =
+              code === 'resource_missing'
+                ? 'Your checkout session has expired or was already completed. Please start a new checkout.'
+                : 'We could not retrieve your checkout session. Please retry or start a new checkout.';
+            return { success: false, error: friendlyMessage };
           }
         }
       } else {
@@ -230,7 +239,8 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
             quantity: input.inboxCount,
             totalAmount: totalAmountCents,
             status: "PENDING" as OrderStatus,
-            stripeSessionId: `temp_${tempOrderId}`,
+            stripeSessionId: null,
+            subscriptionStatus: 'manual',
           },
         });
       }
@@ -268,9 +278,9 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         domainPreferences: {
           domains: domainPreferenceList,
           espCredentials: {
-            accountId: input.accountId,
-            password: input.password,
-            apiKey: input.apiKey,
+            accountId: input.accountId.trim(),
+            password: protectSecret(input.password.trim()),
+            apiKey: protectSecret(input.apiKey.trim()),
           },
           internalTags: input.internalTags ?? [],
           espTags: input.espTags ?? [],
@@ -292,7 +302,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         domainRegistrar: input.domainRegistrar ?? null,
         registrarAdminEmail: input.domainRegistrar ? 'team@inboxnavigator.com' : null,
         registrarUsername: input.registrarUsername ?? null,
-        registrarPassword: input.registrarPassword ?? null,
+        registrarPassword: protectSecret(input.registrarPassword?.trim() || null),
       };
 
       console.log("[ACTION] 📝 OnboardingData payload:", {

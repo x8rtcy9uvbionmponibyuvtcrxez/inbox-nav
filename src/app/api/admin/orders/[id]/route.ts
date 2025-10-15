@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(
@@ -33,9 +33,32 @@ export async function GET(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
+    let clerkUserName: string | null = null;
+    let clerkUserEmail: string | null = null;
+    if (order.clerkUserId) {
+      try {
+        const user = await clerkClient.users.getUser(order.clerkUserId);
+        clerkUserName =
+          user.fullName?.trim() ||
+          [user.firstName, user.lastName].filter(Boolean).join(' ').trim() ||
+          user.username ||
+          null;
+        const primaryEmailId = user.primaryEmailAddressId;
+        const primaryEmail = user.emailAddresses?.find((addr) => addr.id === primaryEmailId);
+        clerkUserEmail =
+          primaryEmail?.emailAddress ??
+          user.emailAddresses?.[0]?.emailAddress ??
+          null;
+      } catch (lookupError) {
+        console.warn('[Admin Order] Failed to fetch Clerk user metadata', lookupError);
+      }
+    }
+
     // Convert dates to strings for JSON serialization
     const serializedOrder = {
       ...order,
+      clerkUserName,
+      clerkUserEmail,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
       inboxes: order.inboxes.map(inbox => ({

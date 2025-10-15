@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, use } from 'react';
 import Link from 'next/link';
 import CSVUpload from '../_components/CSVUpload';
 import { markOrderAsFulfilledAction, type CSVRow } from '../actions';
+import { revealSecret } from '@/lib/encryption';
 
 type Persona = { firstName: string; lastName: string; profileImage?: string | null };
 
@@ -36,7 +37,9 @@ type OnboardingPayload = {
 
 type OrderData = {
   id: string;
-  clerkUserId: string;
+  clerkUserId: string | null;
+  clerkUserName?: string | null;
+  clerkUserEmail?: string | null;
   productType: string;
   quantity: number;
   status: string;
@@ -249,9 +252,13 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
       if (candidateCredentials && typeof candidateCredentials === 'object') {
         const credObj = candidateCredentials as Record<string, unknown>;
         const accountId = typeof credObj.accountId === 'string' ? credObj.accountId : credObj.accountId == null ? null : String(credObj.accountId);
-        const password = typeof credObj.password === 'string' ? credObj.password : credObj.password == null ? null : String(credObj.password);
-        const apiKey = typeof credObj.apiKey === 'string' ? credObj.apiKey : credObj.apiKey == null ? null : String(credObj.apiKey);
-        espCredentials = { accountId, password, apiKey };
+        const passwordRaw = typeof credObj.password === 'string' ? credObj.password : credObj.password == null ? null : String(credObj.password);
+        const apiKeyRaw = typeof credObj.apiKey === 'string' ? credObj.apiKey : credObj.apiKey == null ? null : String(credObj.apiKey);
+        espCredentials = {
+          accountId,
+          password: revealSecret(passwordRaw),
+          apiKey: revealSecret(apiKeyRaw),
+        };
       }
       const candidateInternal = prefsObject.internalTags;
       if (candidateInternal !== undefined) {
@@ -270,6 +277,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
       internalTags,
       espTags,
       espCredentials,
+      registrarPassword: revealSecret((raw as { registrarPassword?: string | null }).registrarPassword),
     };
   }, [order?.onboardingData]);
 
@@ -387,6 +395,9 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
       ['Product', order.productType],
       ['Quantity', String(order.quantity)],
       ['Total Amount (cents)', String(order.totalAmount ?? order.quantity * 300)],
+      ['Customer Name', order.clerkUserName ?? ''],
+      ['Customer Email', order.clerkUserEmail ?? ''],
+      ['Clerk User ID', order.clerkUserId ?? ''],
       ['Business Name', onboarding?.businessType ?? ''],
       ['Website', onboarding?.website ?? ''],
       ['Domain Source', toTitle(onboarding?.domainSource ?? (isOwn ? 'OWN' : 'BUY_FOR_ME'))],
@@ -529,7 +540,18 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <div className="grid gap-4 md:grid-cols-2">
-            <InfoRow label="Clerk User" value={order.clerkUserId} />
+            <InfoRow label="Customer name" value={order.clerkUserName || '—'} />
+            <InfoRow
+              label="Customer email"
+              value={
+                order.clerkUserEmail ? (
+                  <a href={`mailto:${order.clerkUserEmail}`} className="text-indigo-200 hover:text-indigo-100">
+                    {order.clerkUserEmail}
+                  </a>
+                ) : '—'
+              }
+            />
+            <InfoRow label="Customer ID (Clerk)" value={order.clerkUserId || '—'} />
             <InfoRow label="Domain Source" value={toTitle(onboarding?.domainSource ?? (isOwn ? 'OWN' : 'BUY_FOR_ME'))} />
             <InfoRow label="Primary Forwarding URL" value={onboarding?.website ?? '—'} />
             <InfoRow

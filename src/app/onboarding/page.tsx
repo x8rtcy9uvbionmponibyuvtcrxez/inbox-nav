@@ -10,6 +10,31 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 
 type Persona = { firstName: string; lastName: string; profileImage?: string | null };
 
+const STEP_META = [
+  {
+    id: 1,
+    title: 'Workspace Basics',
+    caption: 'Context about your brand and access so we can configure your fleet confidently.',
+  },
+  {
+    id: 2,
+    title: 'Personas & Tone',
+    caption: 'Define the humans behind the inboxes so signatures and copy feel authentic.',
+  },
+  {
+    id: 3,
+    title: 'Warmup & Tools',
+    caption: 'Securely hand off ESP credentials so we can plug into your existing stack.',
+  },
+  {
+    id: 4,
+    title: 'Review & Confirm',
+    caption: 'Tag your fleet, leave notes, and confirm launch details before we provision.',
+  },
+] as const;
+
+const STORAGE_NAMESPACE = 'inbox-nav:onboarding';
+
 function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -59,6 +84,110 @@ function OnboardingPage() {
   const [internalTags, setInternalTags] = useState<string[]>([]);
   const [espTags, setEspTags] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
+
+  const storageKey = useMemo(() => {
+    const sessionKey = sessionData?.sessionId ?? 'manual';
+    return `${STORAGE_NAMESPACE}:${sessionKey}`;
+  }, [sessionData?.sessionId]);
+
+  useEffect(() => {
+    setHasLoadedDraft(false);
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (hasLoadedDraft || typeof window === 'undefined') return;
+    try {
+      const rawDraft = window.localStorage.getItem(storageKey);
+      if (!rawDraft) {
+        setHasLoadedDraft(true);
+        return;
+      }
+      const draft = JSON.parse(rawDraft) as Record<string, unknown>;
+      if (typeof draft.step === 'number') setStep(Math.min(4, Math.max(1, draft.step)));
+      if (typeof draft.inboxCount === 'number' && !isQuantityLocked) setInboxCount(draft.inboxCount);
+      if (typeof draft.businessName === 'string') setBusinessName(draft.businessName);
+      if (typeof draft.primaryForwardUrl === 'string') setPrimaryForwardUrl(draft.primaryForwardUrl);
+      if (typeof draft.domainSource === 'string') setDomainSource(draft.domainSource);
+      if (typeof draft.ownDomainsRaw === 'string') setOwnDomainsRaw(draft.ownDomainsRaw);
+      if (typeof draft.domainRegistrar === 'string') setDomainRegistrar(draft.domainRegistrar);
+      if (typeof draft.registrarOtherName === 'string') setRegistrarOtherName(draft.registrarOtherName);
+      if (typeof draft.registrarUsername === 'string') setRegistrarUsername(draft.registrarUsername);
+      if (typeof draft.registrarPassword === 'string') setRegistrarPassword(draft.registrarPassword);
+      if (typeof draft.numPersonas === 'number') setNumPersonas(Math.min(20, Math.max(1, draft.numPersonas)));
+      if (Array.isArray(draft.personas)) setPersonas(draft.personas as Persona[]);
+      if (typeof draft.warmupTool === 'string' && ['Smartlead', 'Instantly', 'Plusvibe', 'EmailBison', 'Other'].includes(draft.warmupTool)) {
+        setWarmupTool(draft.warmupTool as typeof warmupTool);
+      }
+      if (typeof draft.warmupToolOther === 'string') setWarmupToolOther(draft.warmupToolOther);
+      if (typeof draft.accountId === 'string') setAccountId(draft.accountId);
+      if (typeof draft.password === 'string') setPassword(draft.password);
+      if (typeof draft.apiKey === 'string') setApiKey(draft.apiKey);
+      if (typeof draft.notes === 'string') setNotes(draft.notes);
+      if (typeof draft.specialRequirements === 'string') setSpecialRequirements(draft.specialRequirements);
+      if (Array.isArray(draft.internalTags)) setInternalTags(draft.internalTags as string[]);
+      if (Array.isArray(draft.espTags)) setEspTags(draft.espTags as string[]);
+    } catch (draftError) {
+      console.warn('[ONBOARDING] Failed to restore draft', draftError);
+    } finally {
+      setHasLoadedDraft(true);
+    }
+  }, [hasLoadedDraft, storageKey, isQuantityLocked]);
+
+  const draftState = useMemo(
+    () =>
+      JSON.stringify({
+        step,
+        inboxCount,
+        businessName,
+        primaryForwardUrl,
+        domainSource,
+        ownDomainsRaw,
+        domainRegistrar,
+        registrarOtherName,
+        registrarUsername,
+        registrarPassword,
+        numPersonas,
+        personas,
+        warmupTool,
+        warmupToolOther,
+        accountId,
+        password,
+        apiKey,
+        notes,
+        specialRequirements,
+        internalTags,
+        espTags,
+      }),
+    [
+      step,
+      inboxCount,
+      businessName,
+      primaryForwardUrl,
+      domainSource,
+      ownDomainsRaw,
+      domainRegistrar,
+      registrarOtherName,
+      registrarUsername,
+      registrarPassword,
+      numPersonas,
+      personas,
+      warmupTool,
+      warmupToolOther,
+      accountId,
+      password,
+      apiKey,
+      notes,
+      specialRequirements,
+      internalTags,
+      espTags,
+    ]
+  );
+
+  useEffect(() => {
+    if (!hasLoadedDraft || typeof window === 'undefined') return;
+    window.localStorage.setItem(storageKey, draftState);
+  }, [hasLoadedDraft, storageKey, draftState]);
 
   // Read URL parameters on component mount
   useEffect(() => {
@@ -145,8 +274,8 @@ function OnboardingPage() {
     }
   };
 
-  const canNext = useMemo(() => {
-    if (step === 1) {
+const canNext = useMemo(() => {
+  if (step === 1) {
       if (inboxCount < 10 || inboxCount > 2000) return false;
       if (!businessName.trim()) return false;
       
@@ -183,10 +312,10 @@ function OnboardingPage() {
       if (!password.trim()) return false;
       if (!apiKey.trim()) return false;
     }
-    return true;
-  }, [step, inboxCount, businessName, primaryForwardUrl, domainSource, ownDomainsRaw, domainRegistrar, registrarOtherName, registrarUsername, registrarPassword, numPersonas, personas, warmupTool, warmupToolOther, accountId, password, apiKey, productType]);
+  return true;
+}, [step, inboxCount, businessName, primaryForwardUrl, domainSource, ownDomainsRaw, domainRegistrar, registrarOtherName, registrarUsername, registrarPassword, numPersonas, personas, warmupTool, warmupToolOther, accountId, password, apiKey, productType]);
 
-  const handlePersonaCountChange = (value: number) => {
+const handlePersonaCountChange = (value: number) => {
     const next = Math.max(1, Math.min(20, value || 1));
     setNumPersonas(next);
     setPersonas((prev) => {
@@ -211,10 +340,28 @@ function OnboardingPage() {
       next[index] = { ...next[index], profileImage: base64 };
       return next;
     });
-  };
+};
 
-  const goNext = () => setStep((s) => Math.min(4, s + 1));
-  const goPrev = () => setStep((s) => Math.max(1, s - 1));
+const goNext = () => setStep((s) => Math.min(4, s + 1));
+const goPrev = () => setStep((s) => Math.max(1, s - 1));
+
+const nextButtonLabels: Record<number, string> = {
+  1: 'Continue to personas',
+  2: 'Continue to warmup setup',
+  3: 'Review & confirm',
+};
+const nextLabel = nextButtonLabels[step] ?? 'Next';
+const hasProductSelection = Boolean(productType || sessionData?.productType);
+const productDisplayName = getProductDisplayName(productType ?? sessionData?.productType ?? null);
+const domainPlanSummary =
+  !domainSource
+    ? 'Domain plan was captured during checkout.'
+    : domainSource === 'BUY_FOR_ME'
+      ? 'Our team will purchase and configure the domains you selected during checkout.'
+      : 'You will connect your existing domains so we can manage DNS and routing.';
+const isOwnDomainFlow = domainSource === 'OWN' && (productType === 'GOOGLE' || productType === 'MICROSOFT');
+const isBuyForMeFlow = domainSource === 'BUY_FOR_ME' && (productType === 'GOOGLE' || productType === 'MICROSOFT');
+const currentStepTitle = STEP_META[step - 1]?.title ?? '';
 
   const handleSubmit = async () => {
     console.log('[ONBOARDING] Handle submit start');
@@ -269,6 +416,9 @@ function OnboardingPage() {
       
       if (result?.success) {
         console.log("✅ Submission successful, redirecting to dashboard");
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(storageKey);
+        }
         router.push("/dashboard");
       } else {
         console.error("❌ Submission failed with error:", result?.error);
@@ -289,83 +439,129 @@ function OnboardingPage() {
 
   return (
     <ErrorBoundary>
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-3xl">
-        <div className="mb-6 text-sm text-gray-300">Step {step} of 4</div>
-        <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden mb-8">
-          <div
-            className="h-full bg-indigo-500 transition-all"
-            style={{ width: `${(step / 4) * 100}%` }}
-          />
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-[#06040f] via-[#0b0d1f] to-[#050509] px-4 py-10 text-slate-100">
+      <div className="mx-auto w-full max-w-4xl">
+        <header className="mb-8 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/50">
+            Step {step} of {STEP_META.length}
+          </p>
+          <h1 className="text-3xl font-semibold text-white sm:text-4xl">Launch your inbox fleet</h1>
+          <p className="max-w-3xl text-sm text-white/60">
+            We’ll use these details to provision inboxes, align forwarding, and plug into your warmup tooling. Everything auto-saves in this browser so you can come back any time.
+          </p>
+          <p className="text-xs uppercase tracking-[0.25em] text-white/45">Current focus: <span className="text-white">{currentStepTitle}</span></p>
+        </header>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-lg p-6">
-          {step === 1 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold">Business Info</h2>
-              
-              {productType && isQuantityLocked && (
-                <div className={`p-4 rounded-lg border ${
-                  sessionData 
-                    ? 'bg-green-500/20 border-green-500/30' 
-                    : 'bg-blue-500/20 border-blue-500/30'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      sessionData ? 'bg-green-400' : 'bg-blue-400'
-                    }`}></div>
-                    <span className={`font-medium ${
-                      sessionData ? 'text-green-300' : 'text-blue-300'
-                    }`}>
-                      {sessionData ? '✅ Payment Complete - ' : 'Selected: '}
-                      {getProductDisplayName(productType)} ({inboxCount} inboxes)
-                    </span>
+        <ol className="mb-8 grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+          {STEP_META.map((meta) => {
+            const isActive = meta.id === step;
+            const isCompleted = meta.id < step;
+            return (
+              <li
+                key={meta.id}
+                className={`rounded-2xl border p-4 transition ${
+                  isActive ? 'border-white/50 bg-white/[0.08]' : isCompleted ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-white/10 bg-white/[0.02]'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                      isCompleted ? 'bg-emerald-400 text-emerald-950' : isActive ? 'bg-white text-black' : 'bg-white/10 text-white/60'
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                          fillRule="evenodd"
+                          d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.25 7.334a1 1 0 0 1-1.438 0L3.29 9.225a1 1 0 1 1 1.418-1.41l3.13 3.147 6.53-6.598a1 1 0 0 1 1.336-.074z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    ) : (
+                      meta.id
+                    )}
+                  </span>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Step {meta.id}</p>
+                    <p className="mt-1 text-sm font-semibold text-white">{meta.title}</p>
                   </div>
-                  <p className={`text-sm mt-1 ${
-                    sessionData ? 'text-green-200' : 'text-blue-200'
-                  }`}>
-                    {sessionData 
-                      ? 'Your payment was successful! Complete the setup below.'
-                      : 'Quantity is locked based on your product selection'
-                    }
+                </div>
+                <p className="mt-3 text-xs text-white/55">{meta.caption}</p>
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 shadow-[0_40px_90px_-60px_rgba(10,10,15,0.8)]">
+          {step === 1 && (
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <h2 className="text-2xl font-semibold text-white">Workspace basics</h2>
+                <p className="text-sm text-white/60">
+                  We’ll use this to configure forwarding, signatures, and DNS access. Nothing is shared outside the Inbox Navigator onboarding team.
+                </p>
+              </div>
+
+              {hasProductSelection && (
+                <div
+                  className={`rounded-2xl border ${
+                    sessionData ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-100' : 'border-indigo-400/30 bg-indigo-500/10 text-indigo-100'
+                  } p-5`}
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] opacity-70">{sessionData ? 'Checkout locked' : 'Selected plan'}</p>
+                      <p className="mt-1 text-lg font-semibold">{productDisplayName}</p>
+                      <p className="text-sm opacity-80">{inboxCount} inboxes / month</p>
+                    </div>
+                    {sessionData && (
+                      <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-emerald-100">
+                        Payment captured
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-3 text-xs text-white/75">
+                    Need to change quantity or product? Visit <span className="font-medium">Dashboard → Products</span> to start a new checkout.
                   </p>
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm mb-2">Number of inboxes</label>
-                <input
-                  type="number"
-                  min={10}
-                  max={2000}
-                  value={inboxCount}
-                  onChange={(e) => !isQuantityLocked && setInboxCount(parseInt(e.target.value, 10) || 10)}
-                  disabled={isQuantityLocked || isLoadingSession}
-                  className={`w-full rounded-md border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    isQuantityLocked 
-                      ? 'bg-gray-800 cursor-not-allowed opacity-70' 
-                      : 'bg-gray-800'
-                  }`}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-2">Business name</label>
-                <input
-                  className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="e.g., Acme Corp"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  required
-                />
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">Monthly inbox volume</label>
+                  <p className="text-xs text-white/50">We recommend at least 10 inboxes per product to keep warmup smooth.</p>
+                  <input
+                    type="number"
+                    min={10}
+                    max={2000}
+                    value={inboxCount}
+                    onChange={(e) => !isQuantityLocked && setInboxCount(parseInt(e.target.value, 10) || 10)}
+                    disabled={isQuantityLocked || isLoadingSession}
+                    className={`mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white shadow-inner focus:border-white/40 focus:outline-none focus:ring-0 ${
+                      isQuantityLocked ? 'cursor-not-allowed opacity-60' : ''
+                    }`}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">Business or sender name</label>
+                  <p className="text-xs text-white/50">Appears in signatures and ownership records.</p>
+                  <input
+                    className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                    placeholder="e.g. Acme Growth Studio"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
 
-              {/* For PREWARMED only, show forwarding URL on Step 1 */}
               {productType === 'PREWARMED' && (
-                <div>
-                  <label className="block text-sm mb-2">Primary forwarding URL</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">Primary forwarding URL</label>
+                  <p className="text-xs text-white/50">Tell us where replies should land once this fleet is warmed and live.</p>
                   <input
-                    className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
                     placeholder="https://yourbusiness.com"
                     value={primaryForwardUrl}
                     onChange={(e) => setPrimaryForwardUrl(e.target.value)}
@@ -374,196 +570,226 @@ function OnboardingPage() {
                 </div>
               )}
 
-              {/* For OWN domains (Google/Microsoft), collect domain list and registrar credentials */}
-              {domainSource === 'OWN' && (productType === 'GOOGLE' || productType === 'MICROSOFT') && (
-                <>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-5">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <label className="block text-sm mb-2">Your Domains</label>
-                    <textarea
-                      className="w-full h-28 rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Enter your domains, one per line&#10;example1.com&#10;example2.com&#10;example3.com"
-                      value={ownDomainsRaw}
-                      onChange={(e) => setOwnDomainsRaw(e.target.value)}
-                      required
-                    />
-                    <div className="text-xs text-gray-400 mt-1">
-                      {ownDomainsRaw.split('\n').filter(d => d.trim()).length} domains provided
+                    <h3 className="text-lg font-semibold text-white">Domain plan</h3>
+                    <p className="text-sm text-white/60">{domainPlanSummary}</p>
+                  </div>
+                  {domainSource && (
+                    <span className="inline-flex items-center rounded-full border border-white/15 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.25em] text-white/70">
+                      {domainSource === 'BUY_FOR_ME' ? 'We buy for you' : 'Using your domains'}
+                    </span>
+                  )}
+                </div>
+
+                {isOwnDomainFlow ? (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="text-sm font-medium text-white">Domains we should use</label>
+                      <p className="text-xs text-white/50">One per line. We’ll confirm DNS access before provisioning.</p>
+                      <textarea
+                        className="mt-2 h-28 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                        placeholder="example1.com&#10;example2.io&#10;example3.net"
+                        value={ownDomainsRaw}
+                        onChange={(e) => setOwnDomainsRaw(e.target.value)}
+                        required
+                      />
+                      <p className="mt-2 text-xs text-white/40">
+                        {ownDomainsRaw.split('\n').filter((d) => d.trim()).length} domain(s) listed
+                      </p>
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white">Primary forwarding URL</label>
+                        <p className="text-xs text-white/50">Where should warm inboxes forward once live?</p>
+                        <input
+                          className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                          placeholder="https://yourbusiness.com"
+                          value={primaryForwardUrl}
+                          onChange={(e) => setPrimaryForwardUrl(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white">Registrar</label>
+                        <select
+                          className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                          value={domainRegistrar}
+                          onChange={(e) => setDomainRegistrar(e.target.value)}
+                          required
+                        >
+                          <option value="">Select registrar…</option>
+                          <option value="Cloudflare">Cloudflare</option>
+                          <option value="Godaddy">GoDaddy</option>
+                          <option value="Porkbun">Porkbun</option>
+                          <option value="Namecheap">Namecheap</option>
+                          <option value="Hostinger">Hostinger</option>
+                          <option value="Bluehost">Bluehost</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {domainRegistrar === 'Other' && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white">Registrar name</label>
+                        <input
+                          className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                          placeholder="Who hosts these domains?"
+                          value={registrarOtherName}
+                          onChange={(e) => setRegistrarOtherName(e.target.value)}
+                          required
+                        />
+                      </div>
+                    )}
+
+                    <div className="rounded-xl border border-blue-400/30 bg-blue-500/10 p-4 text-sm text-blue-100">
+                      Please invite <span className="font-mono">team@inboxnavigator.com</span> as an admin to this registrar so we can configure DNS records.
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white">Registrar username</label>
+                        <input
+                          className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                          placeholder="Login email or username"
+                          value={registrarUsername}
+                          onChange={(e) => setRegistrarUsername(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white">Registrar password</label>
+                        <div className="relative">
+                          <input
+                            type={showRegistrarPassword ? "text" : "password"}
+                            className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 pr-12 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                            placeholder="Stored securely & purged after setup"
+                            value={registrarPassword}
+                            onChange={(e) => setRegistrarPassword(e.target.value)}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowRegistrarPassword(!showRegistrarPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
+                          >
+                            {showRegistrarPassword ? (
+                              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10L21 2m-5.5 11.5L21 19M10.5 6.5L3 14" />
+                              </svg>
+                            ) : (
+                              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.808 9.818C4.773 6.744 7.985 4.75 12 4.75c4.016 0 7.228 1.994 9.193 5.068.282.443.282.971 0 1.414C19.228 14.306 16.016 16.3 12 16.3c-4.015 0-7.227-1.994-9.192-5.068a1.1 1.1 0 0 1 0-1.414z" />
+                                <circle cx="12" cy="11" r="3.5" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                        <p className="text-xs text-white/45">Only the onboarding team can view this and we remove it after DNS is configured.</p>
+                      </div>
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-sm mb-2">Primary forwarding URL</label>
+                ) : isBuyForMeFlow ? (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white">Primary forwarding URL</label>
+                    <p className="text-xs text-white/50">Where should inboxes route once live? This can be a website, landing page, or shared mailbox.</p>
                     <input
-                      className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="yourbusiness.com or https://yourbusiness.com"
+                      className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                      placeholder="https://yourbusiness.com"
                       value={primaryForwardUrl}
                       onChange={(e) => setPrimaryForwardUrl(e.target.value)}
                       required
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-sm mb-2">Domain Registrar</label>
-                    <select
-                      className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      value={domainRegistrar}
-                      onChange={(e) => setDomainRegistrar(e.target.value)}
-                      required
-                    >
-                      <option value="">Select your registrar...</option>
-                      <option value="Cloudflare">Cloudflare</option>
-                      <option value="Godaddy">Godaddy</option>
-                      <option value="Porkbun">Porkbun</option>
-                      <option value="Namecheap">Namecheap</option>
-                      <option value="Hostinger">Hostinger</option>
-                      <option value="Bluehost">Bluehost</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-
-                  {domainRegistrar === 'Other' && (
-                    <div>
-                      <label className="block text-sm mb-2">Registrar Name</label>
-                      <input
-                        className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Enter the name of your registrar"
-                        value={registrarOtherName}
-                        onChange={(e) => setRegistrarOtherName(e.target.value)}
-                        required
-                      />
-                </div>
-              )}
-
-                  <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
-                    <div className="flex items-start gap-2">
-                      <svg className="w-5 h-5 text-blue-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-blue-300 mb-1">Important: Admin Access Required</p>
-                        <p className="text-sm text-blue-200">
-                          Please invite <span className="font-mono font-semibold">team@inboxnavigator.com</span> as an admin to your {domainRegistrar || 'domain registrar'} account. This enables us to configure DNS records and manage your domains for optimal email delivery.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm mb-2">Registrar Login Username</label>
-                    <input
-                      className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Your registrar account username"
-                      value={registrarUsername}
-                      onChange={(e) => setRegistrarUsername(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                <div>
-                    <label className="block text-sm mb-2">Registrar Login Password</label>
-                    <div className="relative">
-                      <input
-                        type={showRegistrarPassword ? "text" : "password"}
-                        className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Your registrar account password"
-                        value={registrarPassword}
-                        onChange={(e) => setRegistrarPassword(e.target.value)}
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowRegistrarPassword(!showRegistrarPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
-                      >
-                        {showRegistrarPassword ? (
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                          </svg>
-                        ) : (
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      This information is encrypted and securely stored
-                    </div>
-                </div>
-                </>
-              )}
-
-              {/* For BUY_FOR_ME, collect forwarding URL */}
-              {domainSource === 'BUY_FOR_ME' && (productType === 'GOOGLE' || productType === 'MICROSOFT') && (
-              <div>
-                <label className="block text-sm mb-2">Primary forwarding URL</label>
-                <input
-                  className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="yourbusiness.com or https://yourbusiness.com"
-                  value={primaryForwardUrl}
-                  onChange={(e) => setPrimaryForwardUrl(e.target.value)}
-                  required
-                />
+                ) : (
+                  <p className="text-sm text-white/55">
+                    Domain configuration is locked from checkout. Reach out to <a className="text-white underline" href="mailto:contact@inboxnavigator.com">contact@inboxnavigator.com</a> if you need to adjust it.
+                  </p>
+                )}
               </div>
-              )}
             </div>
           )}
 
           {step === 2 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold">Persona Setup</h2>
-              <div>
-                <label className="block text-sm mb-2">Number of personas</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={20}
-                  value={numPersonas}
-                  onChange={(e) => handlePersonaCountChange(parseInt(e.target.value, 10))}
-                  className="w-28 rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <h2 className="text-2xl font-semibold text-white">Personas & tone</h2>
+                <p className="text-sm text-white/60">
+                  Share who is sending email so we can align signatures, avatar images, and copy. We can manage up to 20 personas per fleet.
+                </p>
               </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">How many personas do you need?</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={numPersonas}
+                    onChange={(e) => handlePersonaCountChange(parseInt(e.target.value, 10))}
+                    className="mt-1 w-28 rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                  />
+                </div>
+                <p className="text-xs text-white/45">
+                  Tip: we see the best performance with 3–6 personas rotating across the fleet.
+                </p>
+              </div>
+
               <div className="space-y-4">
                 {Array.from({ length: numPersonas }).map((_, idx) => (
-                  <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-                    <div>
-                      <label className="block text-sm mb-2">First name</label>
-                      <input
-                        className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="e.g., John"
-                        value={personas[idx]?.firstName ?? ""}
-                        onChange={(e) =>
-                          setPersonas((prev) => {
-                            const next = [...prev];
-                            next[idx] = { ...next[idx], firstName: e.target.value };
-                            return next;
-                          })
-                        }
-                      />
+                  <div key={idx} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-white">Persona {idx + 1}</span>
+                      <span className="text-xs uppercase tracking-[0.25em] text-white/50">
+                        Sender identity
+                      </span>
                     </div>
-                    <div>
-                      <label className="block text-sm mb-2">Last name</label>
-                      <input
-                        className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="e.g., Smith"
-                        value={personas[idx]?.lastName ?? ""}
-                        onChange={(e) =>
-                          setPersonas((prev) => {
-                            const next = [...prev];
-                            next[idx] = { ...next[idx], lastName: e.target.value };
-                            return next;
-                          })
-                        }
-                      />
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white">First name</label>
+                        <input
+                          className="w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                          placeholder="e.g. Jordan"
+                          value={personas[idx]?.firstName ?? ""}
+                          onChange={(e) =>
+                            setPersonas((prev) => {
+                              const next = [...prev];
+                              next[idx] = { ...next[idx], firstName: e.target.value };
+                              return next;
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white">Last name</label>
+                        <input
+                          className="w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                          placeholder="e.g. Winters"
+                          value={personas[idx]?.lastName ?? ""}
+                          onChange={(e) =>
+                            setPersonas((prev) => {
+                              const next = [...prev];
+                              next[idx] = { ...next[idx], lastName: e.target.value };
+                              return next;
+                            })
+                          }
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm mb-2">Profile image</label>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-white">Profile image (optional)</label>
+                      <p className="text-xs text-white/50">
+                        Square images (200×200) work best. We’ll resize automatically.
+                      </p>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => handleImageChange(idx, e.target.files?.[0] ?? null)}
-                        className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+                        className="block w-full text-sm text-white/80 file:mr-4 file:rounded-lg file:border-0 file:bg-white/80 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black hover:file:bg-white"
                       />
                     </div>
                   </div>
@@ -573,139 +799,185 @@ function OnboardingPage() {
           )}
 
           {step === 3 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold">Warmup Tool Integration</h2>
-              <div>
-                <label className="block text-sm mb-2">Warmup tool</label>
-                <select
-                  value={warmupTool}
-                  onChange={(e) => setWarmupTool(e.target.value as "Smartlead" | "Instantly" | "Plusvibe" | "EmailBison" | "Other")}
-                  className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option>Select warmup tool...</option>
-                  <option>Smartlead</option>
-                  <option>Instantly</option>
-                  <option>Plusvibe</option>
-                  <option>EmailBison</option>
-                  <option>Other</option>
-                </select>
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <h2 className="text-2xl font-semibold text-white">Connect your warmup tool</h2>
+                <p className="text-sm text-white/60">
+                  We’ll plug directly into your sending or warmup provider to import settings and monitor reputation. Credentials are stored securely and audited.
+                </p>
               </div>
 
-              {warmupTool === 'Other' && (
-                <div>
-                  <label className="block text-sm mb-2">Warmup Tool Name</label>
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">Warmup tool</label>
+                  <select
+                    value={warmupTool}
+                    onChange={(e) => setWarmupTool(e.target.value as "Smartlead" | "Instantly" | "Plusvibe" | "EmailBison" | "Other")}
+                    className="mt-1 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                  >
+                    <option value="">Select warmup tool…</option>
+                    <option>Smartlead</option>
+                    <option>Instantly</option>
+                    <option>Plusvibe</option>
+                    <option>EmailBison</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                {warmupTool === 'Other' && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white">Tool name</label>
+                    <input
+                      type="text"
+                      className="mt-1 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                      placeholder="Let us know what you’re using"
+                      value={warmupToolOther}
+                      onChange={(e) => setWarmupToolOther(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">Account ID</label>
                   <input
                     type="text"
-                    className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Enter the name of your warmup tool"
-                    value={warmupToolOther}
-                    onChange={(e) => setWarmupToolOther(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                    placeholder="Account email or ID"
+                    value={accountId}
+                    onChange={(e) => setAccountId(e.target.value)}
                     required
                   />
                 </div>
-              )}
-              <div>
-                <label className="block text-sm mb-2">Account ID</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">Password</label>
+                  <input
+                    type="password"
+                    className="mt-1 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                    placeholder="Used only for warmup configuration"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">API key</label>
                 <input
                   type="text"
-                  className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Your warmup tool account ID"
-                  value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-2">Password</label>
-                <input
-                  type="password"
-                  className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Your account password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-2">API Key</label>
-                <input
-                  type="text"
-                  className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Your API key"
+                  className="mt-1 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                  placeholder="Paste the key with warmup permissions"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm mb-2">Additional notes (optional)</label>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Additional notes (optional)</label>
                 <textarea
-                  className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 h-24 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="mt-1 h-28 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                  placeholder="Share any quirks about your warmup workflow, cadence, or integrations we should know about."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-xs text-white/60">
+                We store credentials with restricted access, rotate them after setup, and can delete them any time—just email <a className="text-white underline" href="mailto:contact@inboxnavigator.com">contact@inboxnavigator.com</a>.
               </div>
             </div>
           )}
 
           {step === 4 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold">Final Review & Submit</h2>
-              <div>
-                <label className="block text-sm mb-2">Internal tags</label>
-                <TagInput
-                  tags={internalTags}
-                  onChange={setInternalTags}
-                  placeholder="marketing, outbound, team-alpha (comma separated)"
-                />
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <h2 className="text-2xl font-semibold text-white">Review & confirm</h2>
+                <p className="text-sm text-white/60">
+                  Tag your fleet, leave any special instructions, and confirm the launch package. We’ll start provisioning as soon as you submit.
+                </p>
               </div>
-              <div>
-                <label className="block text-sm mb-2">ESP tags</label>
-                <TagInput
-                  tags={espTags}
-                  onChange={setEspTags}
-                  placeholder="warmup, primary, high-priority (comma separated)"
-                />
+
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">Internal tags</label>
+                  <p className="text-xs text-white/50">For your internal reporting and account routing (comma separated).</p>
+                  <TagInput
+                    tags={internalTags}
+                    onChange={setInternalTags}
+                    placeholder="marketing, outbound, team-alpha"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">ESP tags</label>
+                  <p className="text-xs text-white/50">Visible to us when configuring your ESP or warmup tool.</p>
+                  <TagInput
+                    tags={espTags}
+                    onChange={setEspTags}
+                    placeholder="warmup, primary, high-priority"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm mb-2">Special requirements</label>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white">Special requirements (optional)</label>
                 <textarea
-                  className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 h-28 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="mt-1 h-28 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
                   value={specialRequirements}
-                  placeholder="Any special instructions or requirements..."
+                  placeholder="Example: “Use our existing SPF record”, “Launch after 10/15”, “Share updates in #deliverability.”"
                   onChange={(e) => setSpecialRequirements(e.target.value)}
                 />
               </div>
 
-              <div className="bg-gray-800 border border-gray-700 rounded-md p-4 text-sm space-y-2">
-                <div className="font-medium text-gray-200">Summary</div>
-                <div>Inboxes: {inboxCount}</div>
-                <div>Business: {businessName}</div>
-                <div>Primary URL: {primaryForwardUrl}</div>
-                {/* Domain configuration was completed during checkout configuration */}
-                <div>Personas: {numPersonas}</div>
-                <div>Warmup tool: {warmupTool === 'Other' ? warmupToolOther : warmupTool}</div>
-                <div>Account ID: {accountId}</div>
-                {internalTags.length > 0 && <div>Internal tags: {internalTags.join(", ")}</div>}
-                {espTags.length > 0 && <div>ESP tags: {espTags.join(", ")}</div>}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-white">Launch summary</h3>
+                  <span className="text-xs uppercase tracking-[0.3em] text-white/50">Review</span>
+                </div>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  {[
+                    { label: 'Product', value: productDisplayName },
+                    { label: 'Inboxes', value: `${inboxCount}` },
+                    { label: 'Forwarding URL', value: primaryForwardUrl || '—' },
+                    { label: 'Personas', value: `${numPersonas}` },
+                    { label: 'Warmup tool', value: warmupTool === 'Other' ? warmupToolOther || 'Other' : warmupTool },
+                    { label: 'Account ID', value: accountId || '—' },
+                    { label: 'Internal tags', value: internalTags.length ? internalTags.join(', ') : '—' },
+                    { label: 'ESP tags', value: espTags.length ? espTags.join(', ') : '—' },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-xl border border-white/10 bg-black/20 p-4 text-sm">
+                      <p className="text-xs uppercase tracking-[0.25em] text-white/50">{item.label}</p>
+                      <p className="mt-2 font-medium text-white">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+                {specialRequirements && (
+                  <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+                    <span className="font-semibold">Special instructions: </span>
+                    {specialRequirements}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {error && (
-            <div className="mt-6 p-4 rounded-lg border border-red-500/20 bg-red-500/10">
-              <div className="text-sm text-red-400 mb-3">{error}</div>
+            <div className="mt-8 rounded-2xl border border-red-500/30 bg-red-600/10 p-5 text-sm text-red-100">
+              <p className="font-semibold">We couldn’t complete this step.</p>
+              <p className="mt-1 text-red-200">{error}</p>
               {(error.includes('expired') || error.includes('not found') || error.includes('does not belong')) && (
-                <div className="flex gap-3">
+                <div className="mt-4 flex flex-wrap gap-3">
                   <button
                     onClick={() => window.location.href = '/dashboard/products'}
-                    className="px-4 py-2 rounded-md bg-white text-black text-sm font-medium hover:bg-white/90 transition-colors"
+                    className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-white/90"
                   >
-                    Start New Order
+                    Start a new checkout
                   </button>
                   <button
                     onClick={() => setError(null)}
-                    className="px-4 py-2 rounded-md border border-gray-600 text-gray-300 text-sm hover:bg-gray-800 transition-colors"
+                    className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/80 transition hover:border-white/40 hover:text-white"
                   >
                     Dismiss
                   </button>
@@ -714,34 +986,37 @@ function OnboardingPage() {
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-between">
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <button
-              className="px-4 py-2 rounded-md bg-gray-800 border border-gray-700 text-gray-300 disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-full border border-white/15 px-5 py-2 text-sm font-medium text-white/80 transition hover:border-white/35 hover:text-white disabled:cursor-not-allowed disabled:border-white/10 disabled:opacity-40"
               onClick={goPrev}
               disabled={step === 1 || loading}
             >
-              Previous
+              Back
             </button>
-            {step < 4 ? (
-              <button
-                className="px-4 py-2 rounded-md bg-indigo-600 text-white disabled:opacity-50"
-                onClick={goNext}
-                disabled={!canNext || loading}
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                className="px-4 py-2 rounded-md bg-green-600 text-white disabled:opacity-50 flex items-center gap-2"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading && (
-                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent" />
-                )}
-                Submit
-              </button>
-            )}
+            <div className="flex flex-col items-start gap-2 text-xs text-white/45 sm:items-end">
+              <span>{hasLoadedDraft ? 'Progress auto-saves to this browser.' : 'Restoring previous progress…'}</span>
+              {step < 4 ? (
+                <button
+                  className="inline-flex items-center justify-center rounded-full bg-white px-6 py-2 text-sm font-semibold text-black shadow hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-black/60"
+                  onClick={goNext}
+                  disabled={!canNext || loading}
+                >
+                  {loading ? 'Saving…' : nextLabel}
+                </button>
+              ) : (
+                <button
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-emerald-950 shadow shadow-emerald-500/30 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-500/40 disabled:text-emerald-900"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                >
+                  {loading && (
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-emerald-950 border-r-transparent" />
+                  )}
+                  Launch onboarding
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

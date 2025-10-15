@@ -64,8 +64,8 @@ export function decryptPassword(encrypted: string): string {
     
     return decryptedBuffer.toString('utf8');
   } catch (error) {
-    console.error('Password decryption failed:', error);
-    return ''; // Return empty string on decryption failure
+    console.warn('Password decryption failed, returning original value:', error);
+    return encrypted; // Fallback to original content on failure
   }
 }
 
@@ -74,4 +74,38 @@ export function decryptPassword(encrypted: string): string {
  */
 export function generateEncryptionKey(): string {
   return crypto.randomBytes(KEY_LENGTH).toString('hex');
+}
+
+export function shouldEncryptSecrets(): boolean {
+  return process.env.ENCRYPT_ONBOARDING_SECRETS === 'true';
+}
+
+export function protectSecret(value: string | null | undefined): string | null {
+  if (value == null || value === '') {
+    return null;
+  }
+  if (!shouldEncryptSecrets()) {
+    return value;
+  }
+  try {
+    return encryptPassword(value);
+  } catch (error) {
+    console.error('Failed to encrypt secret, storing raw value instead:', error);
+    return value;
+  }
+}
+
+export function revealSecret(value: string | null | undefined): string | null {
+  if (value == null || value === '') {
+    return null;
+  }
+  if (!shouldEncryptSecrets()) {
+    return value;
+  }
+  try {
+    return decryptPassword(value);
+  } catch (error) {
+    console.error('Failed to decrypt secret, returning stored value:', error);
+    return value;
+  }
 }

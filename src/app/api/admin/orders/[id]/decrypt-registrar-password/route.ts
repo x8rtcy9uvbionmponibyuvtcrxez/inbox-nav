@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { decryptPassword } from '@/lib/encryption';
+import { revealSecret } from '@/lib/encryption';
 import { requireAdmin } from '@/lib/admin-auth';
 
 export async function GET(
@@ -26,16 +26,16 @@ export async function GET(
       return NextResponse.json({ error: 'Order or onboarding data not found' }, { status: 404 });
     }
 
-    const encryptedPassword = order.onboardingData[0].registrarPassword;
+    const storedPassword = order.onboardingData[0].registrarPassword;
     
-    if (!encryptedPassword) {
+    if (!storedPassword) {
       return NextResponse.json({ error: 'No registrar password found' }, { status: 404 });
     }
 
-    // Decrypt the password
-    const decrypted = decryptPassword(encryptedPassword);
+    // Reveal the password (handles encrypted/plaintext automatically)
+    const revealed = revealSecret(storedPassword);
 
-    return NextResponse.json({ password: decrypted });
+    return NextResponse.json({ password: revealed });
   } catch (error) {
     console.error('Error decrypting registrar password:', error);
     return NextResponse.json(
@@ -44,4 +44,3 @@ export async function GET(
     );
   }
 }
-
