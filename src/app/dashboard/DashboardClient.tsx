@@ -114,6 +114,20 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const [selectedOrder, setSelectedOrder] = useState<OrderWithRelations | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasVisited, setHasVisited] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('inbox-nav:visited');
+      if (stored === 'true') {
+        setHasVisited(true);
+      } else {
+        window.localStorage.setItem('inbox-nav:visited', 'true');
+      }
+    } catch {
+      // noop – localStorage unavailable
+    }
+  }, []);
 
   const handleOpenOrderDetails = (order: OrderWithRelations) => {
     setSelectedOrder(order);
@@ -183,9 +197,11 @@ export default function DashboardClient({
     <div className="space-y-10 text-white">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm text-white/50">Welcome back, {displayName}.</p>
+          <p className="text-sm text-white/50">
+            {hasVisited ? `Welcome back, ${displayName}.` : "Welcome to Inbox Nav — we're excited to have you here!"}
+          </p>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">
-            Your mission control for every inbox.
+            {hasVisited ? 'Your mission control for every inbox.' : 'Let’s launch your inbox fleet.'}
           </h1>
           <p className="mt-3 text-sm text-white/50">
             Track fulfillment in real time, review order history, and spin up new inboxes whenever you&rsquo;re ready.
@@ -232,7 +248,7 @@ export default function DashboardClient({
           <table className="min-w-full divide-y divide-white/5 text-sm">
             <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/60">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left">Order</th>
+                <th scope="col" className="px-6 py-3 text-left">Forwarding URL</th>
                 <th scope="col" className="px-6 py-3 text-left">Business</th>
                 <th scope="col" className="px-6 py-3 text-left">Product</th>
                 <th scope="col" className="px-6 py-3 text-left">Inboxes</th>
@@ -255,8 +271,8 @@ export default function DashboardClient({
                 return (
                   <tr key={record.id} className={`transition hover:bg-white/5 ${isCancelled ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4">
-                      <div className="font-mono text-xs text-white/80">
-                        {order?.id ? `${order.id.slice(0, 8)}…` : "—"}
+                      <div className="text-xs text-white/60 max-w-[240px] truncate" title={record.website ?? order?.inboxes?.[0]?.forwardingDomain ?? order?.domains?.[0]?.forwardingUrl ?? '—'}>
+                        {record.website ?? order?.inboxes?.find((inbox) => inbox.forwardingDomain && inbox.forwardingDomain !== '-')?.forwardingDomain ?? order?.domains?.[0]?.forwardingUrl ?? '—'}
                       </div>
                     </td>
                     <td className="px-6 py-4">

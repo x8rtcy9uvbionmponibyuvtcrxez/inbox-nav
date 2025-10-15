@@ -307,6 +307,10 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                 <StatusBadge status={orderData?.status || "Unknown"} />
               </div>
               <div className="flex justify-between">
+                <span className="text-white/60">Order ID:</span>
+                <span className="font-mono text-xs text-white/80">{orderData?.id ?? '—'}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-white/60">Product:</span>
                 <span className="text-white">{orderData?.productType ? toTitle(orderData.productType) : "—"}</span>
               </div>
@@ -351,8 +355,8 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
               {orderData?.stripeSubscriptionId && (
                 <div className="flex justify-between">
                   <span className="text-white/60">Stripe Subscription:</span>
-                  <span className="font-mono text-xs text-white/80">
-                    {orderData.stripeSubscriptionId.slice(0, 12)}…
+                  <span className="font-mono text-xs text-white/80 break-all">
+                    {orderData.stripeSubscriptionId}
                   </span>
                 </div>
               )}
