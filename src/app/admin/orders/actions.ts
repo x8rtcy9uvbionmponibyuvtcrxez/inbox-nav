@@ -101,7 +101,7 @@ export async function markOrderAsFulfilledAction(
           ? onboardingData.providedDomains as string[]
           : [];
         const personas = Array.isArray(onboardingData.personas) 
-          ? onboardingData.personas as any[]
+          ? onboardingData.personas as Array<{ firstName?: string; first_name?: string; lastName?: string; last_name?: string }>
           : [];
         const inboxesPerDomain = typeof onboardingData.inboxesPerDomain === 'number' 
           ? onboardingData.inboxesPerDomain 
@@ -118,7 +118,7 @@ export async function markOrderAsFulfilledAction(
             productType: order.productType as 'GOOGLE' | 'PREWARMED' | 'MICROSOFT',
             domainSource: 'OWN',
             totalInboxes: order.quantity,
-            personas: personas.map((p: any) => ({
+            personas: personas.map((p) => ({
               firstName: p.firstName || p.first_name || '',
               lastName: p.lastName || p.last_name || ''
             })),
