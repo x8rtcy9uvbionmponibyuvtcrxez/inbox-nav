@@ -27,16 +27,7 @@ const PRODUCT_LABELS: Record<string, string> = {
 
 type InboxRecord = Prisma.InboxGetPayload<{
   include: {
-    order: {
-      select: {
-        id: true;
-        productType: true;
-        quantity: true;
-        status: true;
-        subscriptionStatus: true;
-        cancelledAt: true;
-      };
-    };
+    order: true;
   };
 }>;
 

@@ -86,15 +86,104 @@ export async function markOrderAsFulfilledAction(
       }
     }
 
-    // For OWN domains, support a single uniform password (no CSV needed)
-    if (isOwn && uniformPassword && (!csvData || csvData.length === 0)) {
-      console.log("[FULFILLMENT] Applying uniform password to all inboxes for order", orderId);
-      const trimmed = uniformPassword.trim();
-      if (trimmed) {
-        await prisma.inbox.updateMany({
-          where: { orderId },
-          data: { password: trimmed, updatedAt: new Date() }
-        });
+    // For OWN domains, create inboxes if they don't exist
+    if (isOwn) {
+      console.log("[FULFILLMENT] Creating inboxes for OWN domains order", orderId);
+      
+      // Get the onboarding data to extract domain info
+      const onboardingData = await prisma.onboardingData.findFirst({
+        where: { orderId }
+      });
+      
+      if (onboardingData) {
+        // Safely extract arrays from JSON fields
+        const providedDomains = Array.isArray(onboardingData.providedDomains) 
+          ? onboardingData.providedDomains as string[]
+          : [];
+        const personas = Array.isArray(onboardingData.personas) 
+          ? onboardingData.personas as any[]
+          : [];
+        const inboxesPerDomain = typeof onboardingData.inboxesPerDomain === 'number' 
+          ? onboardingData.inboxesPerDomain 
+          : 3;
+        const businessName = typeof onboardingData.businessType === 'string' 
+          ? onboardingData.businessType 
+          : '';
+        
+        if (providedDomains.length > 0 && personas.length > 0) {
+          // Import the distribution logic
+          const { distributeInboxes } = await import('@/lib/inbox-distribution');
+          
+          const distribution = distributeInboxes({
+            productType: order.productType as 'GOOGLE' | 'PREWARMED' | 'MICROSOFT',
+            domainSource: 'OWN',
+            totalInboxes: order.quantity,
+            personas: personas.map((p: any) => ({
+              firstName: p.firstName || p.first_name || '',
+              lastName: p.lastName || p.last_name || ''
+            })),
+            providedDomains,
+            inboxesPerDomain,
+            businessName
+          });
+          
+          if (distribution.shouldCreateInboxes && distribution.allocations.length > 0) {
+            console.log(`[FULFILLMENT] Creating ${distribution.allocations.length} inboxes for OWN domains`);
+            
+            // Create domains first
+            const domainInserts = distribution.domainsUsed.map(domain => ({
+              orderId,
+              domain,
+              status: 'LIVE' as const,
+              inboxCount: 0, // Will be updated after inbox creation
+              forwardingUrl: onboardingData.website || '',
+              tags: [],
+              businessName,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }));
+            
+            await prisma.domain.createMany({
+              data: domainInserts,
+              skipDuplicates: true
+            });
+            
+            // Create inboxes
+            const inboxInserts = distribution.allocations.map(allocation => ({
+              orderId,
+              email: allocation.email,
+              personaName: allocation.personaName,
+              password: uniformPassword?.trim() || 'temp_password_123',
+              espPlatform: onboardingData.espProvider || 'Smartlead',
+              status: 'LIVE' as const,
+              tags: [],
+              businessName,
+              forwardingDomain: allocation.domain,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }));
+            
+            await prisma.inbox.createMany({
+              data: inboxInserts,
+              skipDuplicates: true
+            });
+            
+            // Update domain inbox counts
+            for (const domain of distribution.domainsUsed) {
+              const count = distribution.allocations.filter(a => a.domain === domain).length;
+              await prisma.domain.updateMany({
+                where: { orderId, domain },
+                data: { inboxCount: count }
+              });
+            }
+            
+            console.log(`[FULFILLMENT] ✅ Created ${inboxInserts.length} inboxes across ${distribution.domainsUsed.length} domains`);
+          }
+        } else {
+          console.warn("[FULFILLMENT] Missing domain or persona data for OWN order", orderId);
+        }
+      } else {
+        console.warn("[FULFILLMENT] No onboarding data found for OWN order", orderId);
       }
     }
 
@@ -158,31 +247,69 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
   console.log("[FULFILLMENT] Processing OWN domains CSV");
   
   const updates = [];
+  const creates = [];
   
   for (const row of csvData) {
-    const { email, password } = row;
+    const { email, password, domain, personaName } = row;
     
     if (!email || !password) {
       console.warn("[FULFILLMENT] Skipping row with missing email or password:", row);
       continue;
     }
 
-    updates.push(
-      db.inbox.updateMany({
-        where: { 
-          orderId,
-          email: email.trim()
-        },
-        data: { 
-          password: password.trim(),
-          updatedAt: new Date()
-        }
-      })
-    );
+    // Check if inbox already exists
+    const existingInbox = await db.inbox.findFirst({
+      where: { 
+        orderId,
+        email: email.trim()
+      }
+    });
+
+    if (existingInbox) {
+      // Update existing inbox
+      updates.push(
+        db.inbox.updateMany({
+          where: { 
+            orderId,
+            email: email.trim()
+          },
+          data: { 
+            password: password.trim(),
+            updatedAt: new Date()
+          }
+        })
+      );
+    } else {
+      // Create new inbox if it doesn't exist
+      creates.push({
+        orderId,
+        email: email.trim(),
+        personaName: personaName || 'Unknown',
+        password: password.trim(),
+        espPlatform: 'Smartlead',
+        status: 'LIVE' as const,
+        tags: [],
+        businessName: '',
+        forwardingDomain: domain || null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    }
   }
 
-  await Promise.all(updates);
-  console.log(`[FULFILLMENT] ✅ Updated ${updates.length} inbox passwords`);
+  // Execute updates and creates
+  if (updates.length > 0) {
+    await Promise.all(updates);
+    console.log(`[FULFILLMENT] ✅ Updated ${updates.length} inbox passwords`);
+  }
+  
+  if (creates.length > 0) {
+    await db.inbox.createMany({
+      data: creates,
+      skipDuplicates: true
+    });
+    console.log(`[FULFILLMENT] ✅ Created ${creates.length} new inboxes`);
+  }
 }
 
 async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, csvData: CSVRow[]) {
