@@ -47,7 +47,7 @@ export async function GET() {
       ],
       ...inboxes.map((inbox) => [
         inbox.email,
-        inbox.personaName,
+        [inbox.firstName, inbox.lastName].filter(Boolean).join(' '),
         inbox.status,
         inbox.tags.join(";"),
         inbox.businessName ?? "",

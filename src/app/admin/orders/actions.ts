@@ -152,7 +152,8 @@ export async function markOrderAsFulfilledAction(
             const inboxInserts = distribution.allocations.map(allocation => ({
               orderId,
               email: allocation.email,
-              personaName: allocation.personaName,
+              firstName: allocation.firstName,
+              lastName: allocation.lastName,
               password: uniformPassword?.trim() || 'temp_password_123',
               espPlatform: onboardingData.espProvider || 'Smartlead',
               status: 'LIVE' as const,
@@ -259,7 +260,7 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
   const domainsToCreate = new Set<string>();
   
   for (const row of csvData) {
-    const { email, password, domain, personaName } = row;
+    const { email, password, domain, first_name, last_name } = row;
     
     if (!email || !password) {
       console.warn("[FULFILLMENT] Skipping row with missing email or password:", row);
@@ -298,7 +299,8 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
       creates.push({
         orderId,
         email: email.trim(),
-        personaName: personaName || 'Unknown',
+        firstName: first_name || null,
+        lastName: last_name || null,
         password: password.trim(),
         espPlatform: 'Smartlead',
         status: 'LIVE' as const,
@@ -397,7 +399,8 @@ async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, 
   const inboxData: Array<{
     orderId: string;
     email: string;
-    personaName: string;
+    firstName: string | null;
+    lastName: string | null;
     password: string;
     espPlatform: string;
     status: string;
@@ -412,9 +415,9 @@ async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, 
       row.Domain ??
       row.DOMAIN ??
       (row.forwardingDomain ?? row.forwarding_url ?? row.forwardingUrl ?? '');
-    const { email, personaName, password } = row;
+    const { email, first_name, last_name, password } = row;
 
-    if (!rawDomain || !email || !personaName || !password) {
+    if (!rawDomain || !email || !password) {
       console.warn("[FULFILLMENT] Skipping row with missing data:", row);
       continue;
     }
@@ -441,7 +444,8 @@ async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, 
     inboxData.push({
       orderId: order.id,
       email: email.trim(),
-      personaName: personaName.trim(),
+      firstName: first_name?.trim() || null,
+      lastName: last_name?.trim() || null,
       password: password.trim(),
       espPlatform: espProvider,
       status: 'PENDING',

@@ -267,12 +267,17 @@ export default function DashboardClient({
                   : (order?.quantity ?? 0);
                 const totalCost = order?.totalAmount ?? inboxCount * 300;
                 const isCancelled = order?.status === 'CANCELLED' || order?.subscriptionStatus === 'cancel_at_period_end';
+                const forwardingLabel =
+                  record.website ||
+                  order?.inboxes?.find((inbox) => inbox.forwardingDomain && inbox.forwardingDomain !== "-")?.forwardingDomain ||
+                  order?.domains?.find((domain) => domain.forwardingUrl)?.forwardingUrl ||
+                  "—";
                 
                 return (
                   <tr key={record.id} className={`transition hover:bg-white/5 ${isCancelled ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4">
-                      <div className="text-xs text-white/60 max-w-[240px] truncate" title={record.website ?? order?.inboxes?.[0]?.forwardingDomain ?? order?.domains?.[0]?.forwardingUrl ?? '—'}>
-                        {record.website ?? order?.inboxes?.find((inbox) => inbox.forwardingDomain && inbox.forwardingDomain !== '-')?.forwardingDomain ?? order?.domains?.[0]?.forwardingUrl ?? '—'}
+                      <div className="text-xs text-white/60 max-w-[240px] truncate" title={forwardingLabel}>
+                        {forwardingLabel}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -297,11 +302,6 @@ export default function DashboardClient({
                           <StatusBadge status={order.status} />
                         ) : (
                           <span className="text-xs text-white/40">Unknown</span>
-                        )}
-                        {isCancelled && order?.cancelledAt && (
-                          <div className="text-xs text-red-300">
-                            Cancelled on {formatDate(order.cancelledAt)}
-                          </div>
                         )}
                       </div>
                     </td>

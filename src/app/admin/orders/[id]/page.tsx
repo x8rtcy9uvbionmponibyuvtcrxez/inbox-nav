@@ -65,7 +65,8 @@ type OrderData = {
   inboxes: Array<{
     id: string;
     email: string;
-    personaName: string;
+    firstName: string | null;
+    lastName: string | null;
     status: string;
     password?: string | null;
     espPlatform: string;
@@ -768,7 +769,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                     {order.inboxes.map((inbox) => (
                       <tr key={inbox.id} className="hover:bg-gray-800/50">
                         <td className="px-4 py-2 font-mono text-xs text-indigo-200">{inbox.email}</td>
-                        <td className="px-4 py-2 text-gray-200">{inbox.personaName}</td>
+                        <td className="px-4 py-2 text-gray-200">{[inbox.firstName, inbox.lastName].filter(Boolean).join(' ') || '—'}</td>
                         <td className="px-4 py-2 text-gray-300">{toTitle(inbox.status)}</td>
                         <td className="px-4 py-2 text-gray-400">{inbox.password ? 'Set' : '—'}</td>
                       </tr>
@@ -852,15 +853,15 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                   <div className="space-y-2">
                     <label className="block text-xs uppercase tracking-wide text-gray-500">Provisioning CSV</label>
                     <CSVUpload
-                      expectedHeaders={['domain', 'email', 'personaName', 'password']}
+                      expectedHeaders={['domain', 'email', 'first_name', 'last_name', 'password']}
                       optionalHeaders={['forwardingUrl']}
                       onParsed={handleCsvParsed}
-                      cta="Upload CSV with domain,email,personaName,password (+forwardingUrl optional)"
+                      cta="Upload CSV with domain,email,first_name,last_name,password (+forwardingUrl optional)"
                     />
                     {csvData && csvData.length > 0 ? (
                       <p className="text-xs text-emerald-400">{csvData.length} rows ready to process.</p>
                     ) : (
-                      <p className="text-xs text-gray-500">Columns: domain,email,personaName,password,forwardingUrl(optional)</p>
+                      <p className="text-xs text-gray-500">Columns: domain,email,first_name,last_name,password,forwardingUrl(optional)</p>
                     )}
                   </div>
                 )}

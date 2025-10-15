@@ -156,21 +156,6 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
 
   const safeDomains = useMemo(() => domains ?? [], [domains]);
 
-  const statusOptions = useMemo(() => {
-    const set = new Set<string>(STATUS_DISPLAY_ORDER);
-    safeDomains.forEach((domain) => {
-      if (domain.status) set.add(domain.status);
-    });
-    return Array.from(set).sort((a, b) => {
-      const aIndex = STATUS_DISPLAY_ORDER.indexOf(a);
-      const bIndex = STATUS_DISPLAY_ORDER.indexOf(b);
-      if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
-      if (aIndex === -1) return 1;
-      if (bIndex === -1) return -1;
-      return aIndex - bIndex;
-    });
-  }, [safeDomains]);
-
   const productOptions = useMemo(() => {
     const set = new Set<string>();
     safeDomains.forEach((domain) => {
@@ -186,6 +171,8 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
     });
   }, [safeDomains]);
 
+  const productFilterOptions = productOptions.length ? productOptions : PRODUCT_DISPLAY_ORDER;
+
   const uniqueTags = useMemo(() => {
     const set = new Set<string>();
     safeDomains.forEach((domain) => domain.tags.forEach((tag) => set.add(tag)));
@@ -198,26 +185,6 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
       if (domain.businessName) set.add(domain.businessName);
     });
     return Array.from(set).sort();
-  }, [safeDomains]);
-
-  const topBusinessSuggestions = useMemo(() => {
-    const counts = new Map<string, number>();
-    safeDomains.forEach((domain) => {
-      if (!domain.businessName) return;
-      counts.set(domain.businessName, (counts.get(domain.businessName) ?? 0) + 1);
-    });
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([business]) => business);
-  }, [safeDomains]);
-
-  const uniqueOrders = useMemo(() => {
-    const set = new Set<string>();
-    safeDomains.forEach((domain) => {
-      if (domain.order?.id) set.add(domain.order.id);
-    });
-    return Array.from(set);
   }, [safeDomains]);
 
   const totalInboxSlots = useMemo(() => safeDomains.reduce((sum, domain) => sum + domain.inboxCount, 0), [safeDomains]);
@@ -544,248 +511,177 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
 
       <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-[0_30px_60px_-45px_rgba(0,0,0,0.8)]">
         <div className="space-y-4 border-b border-white/5 px-6 py-5">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="flex flex-1 flex-col gap-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <input
-                  type="search"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Search domain, business, order…"
-                  className="w-full min-w-[220px] flex-1 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/40 focus:outline-none focus:ring-0 sm:w-60"
-                />
-                <div className="flex flex-wrap items-center gap-2">
-                  {statusOptions.map((status) => {
-                    const active = filters.statuses.includes(status);
-                    return (
-                      <button
-                        key={status}
-                        type="button"
-                        onClick={() => toggleStatus(status)}
-                        className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide transition ${
-                          active
-                            ? "border-white/60 bg-white/15 text-white shadow-inner"
-                            : "border-white/10 bg-black/30 text-white/50 hover:border-white/30 hover:text-white"
-                        }`}
-                      >
-                        {getStatusLabel(status)}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <select
-                  value={filters.product}
-                  onChange={(event) => setFilterValue("product", event.target.value)}
-                  className="w-full max-w-[160px] rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0 sm:w-auto"
-                >
-                  <option value="">All products</option>
-                  {productOptions.map((product) => (
-                    <option key={product} value={product}>
-                      {getProductLabel(product)}
-                    </option>
-                  ))}
-                </select>
-                <label className="ml-2 inline-flex items-center gap-2 text-xs text-white/60">
-                  <input type="checkbox" checked={showDeleted} onChange={(e) => setShowDeleted(e.target.checked)} />
-                  Show deleted domains
-                </label>
-              </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-white">Domains under management</h2>
+              <p className="text-xs text-white/50">Forwarding configuration, inbox allocation, and status at a glance.</p>
             </div>
-
-            <div className="flex flex-wrap items-center justify-end gap-3">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
+              <button
+                onClick={handleExportView}
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/30 hover:text-white"
+              >
+                Export view
+              </button>
               <button
                 onClick={handleExportSelected}
                 disabled={!selectedIds.size}
-                className="rounded-full border border-white/20 px-4 py-2 text-xs font-medium text-white/80 transition hover:border-white/40 hover:text-white disabled:cursor-not-allowed disabled:border-white/10 disabled:text-white/30"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/60 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:border-white/5 disabled:text-white/30"
               >
                 Export selected
               </button>
-              <Popover.Root open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
-                <Popover.Trigger asChild>
-                  <button className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-xs font-medium text-white/80 transition hover:border-white/40 hover:text-white">
-                    <FunnelIcon className="h-4 w-4" />
-                    More filters
-                  </button>
-                </Popover.Trigger>
-                <Popover.Portal>
-                  <Popover.Content
-                    className="z-50 mt-2 w-[360px] rounded-2xl border border-white/10 bg-black/90 p-5 text-white shadow-xl backdrop-blur"
-                    sideOffset={8}
-                    align="end"
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-1 flex-wrap items-center gap-3">
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search domain, business, order…"
+                className="flex-1 min-w-[220px] rounded-full border border-white/15 bg-black/25 px-4 py-2 text-sm text-white focus:border-white/35 focus:outline-none focus:ring-0"
+              />
+              <select
+                value={filters.product}
+                onChange={(event) => setFilterValue("product", event.target.value)}
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-xs text-white focus:border-white/35 focus:outline-none focus:ring-0"
+              >
+                <option value="">All products</option>
+                {productFilterOptions.map((product) => (
+                  <option key={product} value={product}>
+                    {getProductLabel(product)}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={filters.business}
+                onChange={(event) => setFilterValue("business", event.target.value)}
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-xs text-white focus:border-white/35 focus:outline-none focus:ring-0"
+              >
+                <option value="">All businesses</option>
+                {uniqueBusinesses.map((business) => (
+                  <option key={business} value={business}>
+                    {business}
+                  </option>
+                ))}
+              </select>
+              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-white">
+                {STATUS_DISPLAY_ORDER.map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => toggleStatus(status)}
+                    className={`rounded-full px-3 py-1 font-medium uppercase tracking-wide ${
+                      filters.statuses.includes(status)
+                        ? STATUS_COLORS[status] ?? STATUS_COLORS.DEFAULT
+                        : 'bg-transparent text-white/50 border border-white/15'
+                    }`}
                   >
-                  <div className="space-y-5 text-sm">
-                    <div>
-                      <div className="flex items-baseline justify-between">
-                        <label className="text-xs uppercase tracking-[0.2em] text-white/40">Tags</label>
-                        {filters.tags.length ? (
-                          <button
-                            onClick={() => setFilterValue("tags", [])}
-                            className="text-[11px] text-white/40 underline hover:text-white"
-                          >
-                            Clear
-                          </button>
-                        ) : null}
-                      </div>
-                      <div className="mt-3 flex max-h-24 flex-wrap gap-2 overflow-y-auto pr-1">
+                    {getStatusLabel(status)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Popover.Root open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+              <Popover.Trigger asChild>
+                <button className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/30 hover:text-white">
+                  <FunnelIcon className="h-4 w-4" /> More filters
+                </button>
+              </Popover.Trigger>
+              <Popover.Portal>
+                <Popover.Content sideOffset={8} align="end" className="z-50 w-72 rounded-2xl border border-white/15 bg-black/90 p-4 text-white shadow-xl backdrop-blur">
+                  <div className="space-y-4 text-xs text-white/70">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] uppercase tracking-[0.3em] text-white/40">Show deleted domains</span>
+                      <label className="inline-flex items-center gap-2 text-white/70">
+                        <input type="checkbox" checked={showDeleted} onChange={(e) => setShowDeleted(e.target.checked)} />
+                        <span>Show</span>
+                      </label>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Forwarding contains</label>
+                      <input
+                        value={filters.forwarding}
+                        onChange={(event) => setFilterValue("forwarding", event.target.value)}
+                        placeholder="domain.com"
+                        className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Tags</label>
+                      <div className="flex flex-wrap gap-2">
                         {uniqueTags.length ? (
                           uniqueTags.map((tag) => {
                             const active = filters.tags.includes(tag);
                             return (
                               <button
                                 key={tag}
-                                type="button"
                                 onClick={() => toggleTag(tag)}
-                                className={`rounded-full px-3 py-1 text-xs transition ${
-                                  active
-                                    ? "bg-white text-black"
-                                    : "border border-white/20 bg-black/40 text-white/60 hover:border-white/40 hover:text-white"
-                                }`}
+                                className={`rounded-full px-3 py-1 ${active ? 'bg-white text-black' : 'border border-white/20 text-white/60'}`}
                               >
                                 {tag}
                               </button>
                             );
                           })
                         ) : (
-                          <p className="text-xs text-white/40">No tags yet.</p>
+                          <span className="text-white/40">No tags yet.</span>
                         )}
                       </div>
                     </div>
-
-                    <div>
-                      <div className="flex items-baseline justify-between">
-                        <label className="text-xs uppercase tracking-[0.2em] text-white/40">Business</label>
-                        {filters.business ? (
-                          <button
-                            onClick={() => setFilterValue("business", "")}
-                            className="text-[11px] text-white/40 underline hover:text-white"
-                          >
-                            Clear
-                          </button>
-                        ) : null}
-                      </div>
+                    <div className="space-y-2">
+                      <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Order ID</label>
                       <input
-                        type="search"
-                        list="domain-business-suggestions"
-                        value={filters.business}
-                        onChange={(event) => setFilterValue("business", event.target.value)}
-                        placeholder="Search or pick a customer"
-                        className="mt-2 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/40 focus:outline-none focus:ring-0"
-                      />
-                      <datalist id="domain-business-suggestions">
-                        {uniqueBusinesses.map((business) => (
-                          <option key={business} value={business} />
-                        ))}
-                      </datalist>
-                      {topBusinessSuggestions.length ? (
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          {topBusinessSuggestions.map((business) => (
-                            <button
-                              key={business}
-                              type="button"
-                              onClick={() => setFilterValue("business", business)}
-                              className="rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[11px] text-white/60 transition hover:border-white/40 hover:text-white"
-                            >
-                              {business}
-                            </button>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div>
-                      <div className="flex items-baseline justify-between">
-                        <label className="text-xs uppercase tracking-[0.2em] text-white/40">Forwarding URL</label>
-                        {filters.forwarding ? (
-                          <button
-                            onClick={() => setFilterValue("forwarding", "")}
-                            className="text-[11px] text-white/40 underline hover:text-white"
-                          >
-                            Clear
-                          </button>
-                        ) : null}
-                      </div>
-                      <input
-                        type="search"
-                        value={filters.forwarding}
-                        onChange={(event) => setFilterValue("forwarding", event.target.value)}
-                        placeholder="Contains…"
-                        className="mt-2 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/40 focus:outline-none focus:ring-0"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs uppercase tracking-[0.2em] text-white/40">Order</label>
-                      <select
                         value={filters.orderId}
                         onChange={(event) => setFilterValue("orderId", event.target.value)}
-                        className="mt-2 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                      >
-                        <option value="">All orders</option>
-                        {uniqueOrders.map((orderId) => (
-                          <option key={orderId} value={orderId}>
-                            {orderId?.slice(0, 12)}
-                          </option>
-                        ))}
-                      </select>
+                        placeholder="Lookup by order"
+                        className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                      />
                     </div>
-
-                    <div>
-                      <label className="block text-xs uppercase tracking-[0.2em] text-white/40">Created</label>
-                      <div className="mt-2 flex items-center gap-2">
-                        <select
-                          value={filters.datePreset}
+                    <div className="space-y-2">
+                      <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Created</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="date"
+                          value={filters.dateRange.from ? format(filters.dateRange.from, 'yyyy-MM-dd') : ''}
                           onChange={(event) => {
-                            const preset = event.target.value as DatePreset;
-                            const range = applyDatePreset(preset);
-                            setFilters((prev) => ({ ...prev, datePreset: preset, dateRange: range }));
+                            const value = event.target.value ? startOfDay(new Date(event.target.value)) : null;
+                            setFilters((prev) => ({
+                              ...prev,
+                              datePreset: 'ALL',
+                              dateRange: { ...prev.dateRange, from: value },
+                            }));
                           }}
-                          className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                        >
-                          <option value="ALL">All time</option>
-                          <option value="7">Last 7 days</option>
-                          <option value="30">Last 30 days</option>
-                          <option value="90">Last 90 days</option>
-                        </select>
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                        />
+                        <input
+                          type="date"
+                          value={filters.dateRange.to ? format(filters.dateRange.to, 'yyyy-MM-dd') : ''}
+                          onChange={(event) => {
+                            const value = event.target.value ? endOfDay(new Date(event.target.value)) : null;
+                            setFilters((prev) => ({
+                              ...prev,
+                              datePreset: 'ALL',
+                              dateRange: { ...prev.dateRange, to: value },
+                            }));
+                          }}
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                        />
                       </div>
-                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/50">
-                        <div>
-                          <label className="block text-[10px] uppercase tracking-[0.2em] text-white/40">From</label>
-                          <input
-                            type="date"
-                            value={filters.dateRange.from ? format(filters.dateRange.from, "yyyy-MM-dd") : ""}
-                            onChange={(event) => {
-                              const value = event.target.value ? startOfDay(new Date(event.target.value)) : null;
-                              setFilters((prev) => ({
-                                ...prev,
-                                datePreset: "ALL",
-                                dateRange: { ...prev.dateRange, from: value },
-                              }));
+                      <div className="flex items-center gap-2 text-white/50">
+                        {(['ALL', '7', '30', '90'] as DatePreset[]).map((preset) => (
+                          <button
+                            key={preset}
+                            onClick={() => {
+                              const range = applyDatePreset(preset);
+                              setFilters((prev) => ({ ...prev, datePreset: preset, dateRange: range }));
                             }}
-                            className="mt-1 w-full rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-xs text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] uppercase tracking-[0.2em] text-white/40">To</label>
-                          <input
-                            type="date"
-                            value={filters.dateRange.to ? format(filters.dateRange.to, "yyyy-MM-dd") : ""}
-                            onChange={(event) => {
-                              const value = event.target.value ? endOfDay(new Date(event.target.value)) : null;
-                              setFilters((prev) => ({
-                                ...prev,
-                                datePreset: "ALL",
-                                dateRange: { ...prev.dateRange, to: value },
-                              }));
-                            }}
-                            className="mt-1 w-full rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-xs text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                          />
-                        </div>
+                            className={`rounded-full px-3 py-1 ${filters.datePreset === preset ? 'bg-white/90 text-black' : 'border border-white/15'}`}
+                          >
+                          {preset === 'ALL' ? 'All' : `Last ${preset}d`}
+                          </button>
+                        ))}
                       </div>
                     </div>
-
                     <div className="flex items-center justify-between pt-1">
                       <button onClick={resetFilters} className="text-xs font-medium text-white/40 hover:text-white">
                         Clear all
@@ -802,7 +698,6 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
                 </Popover.Content>
               </Popover.Portal>
             </Popover.Root>
-            </div>
           </div>
 
           {activeFilterChips.length ? (
@@ -822,19 +717,6 @@ export default function DomainsClient({ domains, error, isLoading = false }: Pro
               </button>
             </div>
           ) : null}
-        </div>
-
-        <div className="flex flex-col gap-2 border-b border-white/5 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-white">Domains under management</h2>
-            <p className="text-xs text-white/50">Forwarding configuration, inbox allocation, and status at a glance.</p>
-          </div>
-          <button
-            onClick={handleExportView}
-            className="self-start text-xs font-medium text-white/60 transition hover:text-white"
-          >
-            Export view
-          </button>
         </div>
         {filteredDomains.length ? (
           <div className="overflow-x-auto">

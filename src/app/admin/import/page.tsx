@@ -343,7 +343,8 @@ export default function ImportPage() {
               <ul className="space-y-1 text-sm text-gray-300">
                 <li>• <code className="bg-gray-800 px-2 py-1 rounded">domain</code> - Email domain</li>
                 <li>• <code className="bg-gray-800 px-2 py-1 rounded">email</code> - Specific email address</li>
-                <li>• <code className="bg-gray-800 px-2 py-1 rounded">persona_name</code> - Persona name</li>
+                <li>• <code className="bg-gray-800 px-2 py-1 rounded">first_name</code> - First name (optional)</li>
+                <li>• <code className="bg-gray-800 px-2 py-1 rounded">last_name</code> - Last name (optional)</li>
                 <li>• <code className="bg-gray-800 px-2 py-1 rounded">password</code> - Email password (will be encrypted)</li>
                 <li>• <code className="bg-gray-800 px-2 py-1 rounded">esp_platform</code> - ESP platform (default: Smartlead)</li>
                 <li>• <code className="bg-gray-800 px-2 py-1 rounded">tags</code> - Comma-separated tags</li>

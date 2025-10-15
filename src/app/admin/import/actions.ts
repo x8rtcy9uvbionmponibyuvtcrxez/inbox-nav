@@ -213,7 +213,8 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
           inboxData.push({
             orderId: order.id,
             email: row.email.trim(),
-            personaName: row.persona_name?.trim() || 'Imported User',
+            firstName: row.first_name?.trim() || null,
+            lastName: row.last_name?.trim() || null,
             espPlatform: row.esp_platform?.trim() || 'Smartlead',
             status: 'LIVE',
             tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()) : [],

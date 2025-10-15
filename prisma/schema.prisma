@@ -92,7 +92,8 @@ model Inbox {
   
   // Core Fields
   email             String    @unique
-  personaName       String    @map("persona_name")
+  firstName         String?   @map("first_name")
+  lastName          String?   @map("last_name")
   espPlatform       String    @map("esp_platform") // Smartlead, Instantly, etc
   status            String    @default("PENDING") // LIVE, DELETED, PENDING
   tags              String[]  @default([])

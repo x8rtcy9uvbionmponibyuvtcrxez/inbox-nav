@@ -17,7 +17,8 @@ interface DistributionInput {
 
 interface InboxAllocation {
   email: string;
-  personaName: string;
+  firstName: string;
+  lastName: string;
   domain: string;
 }
 
@@ -112,7 +113,8 @@ function distributeMicrosoft(
     variations.forEach(email => {
       allocations.push({
         email,
-        personaName: `${persona.firstName} ${persona.lastName}`,
+        firstName: persona.firstName,
+        lastName: persona.lastName,
         domain
       });
     });
@@ -169,7 +171,8 @@ function distributeMultipleDomains(
         const email = variations[(variationOffset + i) % variations.length];
         allocations.push({
           email,
-          personaName: `${persona.firstName} ${persona.lastName}`,
+          firstName: persona.firstName,
+        lastName: persona.lastName,
           domain
         });
       }

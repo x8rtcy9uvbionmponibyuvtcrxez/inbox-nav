@@ -150,21 +150,6 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
 
   const safeInboxes = useMemo(() => inboxes ?? [], [inboxes]);
 
-  const statusOptions = useMemo(() => {
-    const unique = new Set<string>(STATUS_DISPLAY_ORDER);
-    safeInboxes.forEach((inbox) => {
-      if (inbox.status) unique.add(inbox.status);
-    });
-    return Array.from(unique).sort((a, b) => {
-      const aIndex = STATUS_DISPLAY_ORDER.indexOf(a);
-      const bIndex = STATUS_DISPLAY_ORDER.indexOf(b);
-      if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
-      if (aIndex === -1) return 1;
-      if (bIndex === -1) return -1;
-      return aIndex - bIndex;
-    });
-  }, [safeInboxes]);
-
   const productOptions = useMemo(() => {
     const set = new Set<string>();
     safeInboxes.forEach((inbox) => {
@@ -180,17 +165,14 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
     });
   }, [safeInboxes]);
 
+  const productFilterOptions = productOptions.length ? productOptions : PRODUCT_DISPLAY_ORDER;
+
   const uniquePersonas = useMemo(() => {
     const set = new Set<string>();
     safeInboxes.forEach((inbox) => {
-      if (inbox.personaName) set.add(inbox.personaName);
+      const fullName = [inbox.firstName, inbox.lastName].filter(Boolean).join(' ');
+      if (fullName) set.add(fullName);
     });
-    return Array.from(set).sort();
-  }, [safeInboxes]);
-
-  const uniqueTags = useMemo(() => {
-    const set = new Set<string>();
-    safeInboxes.forEach((inbox) => inbox.tags.forEach((tag) => set.add(tag)));
     return Array.from(set).sort();
   }, [safeInboxes]);
 
@@ -202,34 +184,6 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
     return Array.from(set).sort();
   }, [safeInboxes]);
 
-  const uniqueBusinesses = useMemo(() => {
-    const set = new Set<string>();
-    safeInboxes.forEach((inbox) => {
-      if (inbox.businessName) set.add(inbox.businessName);
-    });
-    return Array.from(set).sort();
-  }, [safeInboxes]);
-
-  const topBusinessSuggestions = useMemo(() => {
-    const counts = new Map<string, number>();
-    safeInboxes.forEach((inbox) => {
-      if (!inbox.businessName) return;
-      counts.set(inbox.businessName, (counts.get(inbox.businessName) ?? 0) + 1);
-    });
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([business]) => business);
-  }, [safeInboxes]);
-
-  const uniqueOrders = useMemo(() => {
-    const set = new Set<string>();
-    safeInboxes.forEach((inbox) => {
-      if (inbox.order?.id) set.add(inbox.order.id);
-    });
-    return Array.from(set);
-  }, [safeInboxes]);
-
   const filteredInboxes = useMemo(() => {
     const searchLower = searchTerm.trim().toLowerCase();
     const dateFrom = filters.dateRange.from ? startOfDay(filters.dateRange.from) : null;
@@ -239,7 +193,7 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
       if (!showDeleted && inbox.status === 'DELETED') return false;
       const haystack = [
         inbox.email,
-        inbox.personaName,
+        [inbox.firstName, inbox.lastName].filter(Boolean).join(' '),
         inbox.businessName ?? "",
         inbox.order?.id ?? "",
         inbox.order?.productType ?? "",
@@ -254,7 +208,7 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
       const matchesStatus = filters.statuses.length ? filters.statuses.includes(inbox.status) : true;
       const matchesProduct = filters.product ? inbox.order?.productType === filters.product : true;
       const matchesPersona = filters.persona
-        ? inbox.personaName.toLowerCase() === filters.persona.toLowerCase()
+        ? [inbox.firstName, inbox.lastName].filter(Boolean).join(' ').toLowerCase() === filters.persona.toLowerCase()
         : true;
       const matchesTags = filters.tags.length ? inbox.tags.some((tag) => filters.tags.includes(tag)) : true;
       const matchesBusiness = filters.business
@@ -345,7 +299,7 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
     ],
     ...inboxList.map((inbox) => [
       inbox.email,
-      inbox.personaName,
+      [inbox.firstName, inbox.lastName].filter(Boolean).join(' '),
       inbox.status,
       inbox.tags.join(";"),
       inbox.businessName ?? "",
@@ -590,280 +544,178 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
 
       <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-[0_30px_60px_-45px_rgba(0,0,0,0.8)]">
         <div className="space-y-4 border-b border-white/5 px-6 py-5">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-1 flex-col gap-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <input
-                  type="search"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Search email, persona, business, order…"
-                  className="w-full min-w-[220px] flex-1 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/40 focus:outline-none focus:ring-0 sm:w-64"
-                />
-                <div className="flex flex-wrap items-center gap-2">
-                  {statusOptions.map((status) => {
-                    const active = filters.statuses.includes(status);
-                    return (
-                      <button
-                        key={status}
-                        type="button"
-                        onClick={() => toggleStatus(status)}
-                        className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide transition ${
-                          active
-                            ? "border-white/60 bg-white/15 text-white shadow-inner"
-                            : "border-white/10 bg-black/30 text-white/50 hover:border-white/30 hover:text-white"
-                        }`}
-                      >
-                        {status.toLowerCase()}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <select
-                  value={filters.product}
-                  onChange={(event) => setFilterValue("product", event.target.value)}
-                  className="w-full max-w-[180px] rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0 sm:w-auto"
-                >
-                  <option value="">All products</option>
-                  {productOptions.map((product) => (
-                    <option key={product} value={product}>
-                      {getProductLabel(product)}
-                    </option>
-                  ))}
-                </select>
-                <label className="ml-2 inline-flex items-center gap-2 text-xs text-white/60">
-                  <input type="checkbox" checked={showDeleted} onChange={(e) => setShowDeleted(e.target.checked)} />
-                  Show deleted inboxes
-                </label>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-1 flex-wrap items-center gap-3">
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search email, persona, business, order…"
+                className="flex-1 min-w-[220px] rounded-full border border-white/15 bg-black/25 px-4 py-2 text-sm text-white focus:border-white/35 focus:outline-none focus:ring-0"
+              />
+              <select
+                value={filters.product}
+                onChange={(event) => setFilterValue("product", event.target.value)}
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-xs text-white focus:border-white/35 focus:outline-none focus:ring-0"
+              >
+                <option value="">All products</option>
+                {productFilterOptions.map((product) => (
+                  <option key={product} value={product}>
+                    {PRODUCT_LABELS[product] ?? product}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={filters.persona}
+                onChange={(event) => setFilterValue("persona", event.target.value)}
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-xs text-white focus:border-white/35 focus:outline-none focus:ring-0"
+              >
+                <option value="">All personas</option>
+                {uniquePersonas.map((persona) => (
+                  <option key={persona} value={persona}>
+                    {persona}
+                  </option>
+                ))}
+              </select>
+              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-xs text-white">
+                {STATUS_DISPLAY_ORDER.map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => toggleStatus(status)}
+                    className={`rounded-full px-3 py-1 font-medium uppercase tracking-wide ${
+                      filters.statuses.includes(status)
+                        ? STATUS_COLORS[status] ?? STATUS_COLORS.DEFAULT
+                        : 'bg-transparent text-white/50 border border-white/15'
+                    }`}
+                  >
+                    {status.toLowerCase()}
+                  </button>
+                ))}
               </div>
             </div>
-
-            <div className="flex flex-wrap items-center justify-end gap-3">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-white/60">
+              <button
+                onClick={handleExportView}
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/30 hover:text-white"
+              >
+                Export view
+              </button>
               <button
                 onClick={handleExportSelected}
                 disabled={!selectedIds.size}
-                className="rounded-full border border-white/20 px-4 py-2 text-xs font-medium text-white/80 transition hover:border-white/40 hover:text-white disabled:cursor-not-allowed disabled:border-white/10 disabled:text-white/30"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/60 transition hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:border-white/5 disabled:text-white/30"
               >
                 Export selected
               </button>
               <Popover.Root open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
                 <Popover.Trigger asChild>
-                  <button className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-xs font-medium text-white/80 transition hover:border-white/40 hover:text-white">
-                    <FunnelIcon className="h-4 w-4" />
-                    More filters
+                  <button className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/30 hover:text-white">
+                    <FunnelIcon className="h-4 w-4" /> More filters
                   </button>
                 </Popover.Trigger>
                 <Popover.Portal>
-                  <Popover.Content
-                    className="z-50 mt-2 w-[360px] rounded-2xl border border-white/10 bg-black/90 p-5 text-white shadow-xl backdrop-blur"
-                    sideOffset={8}
-                    align="end"
-                  >
-                    <div className="space-y-5 text-sm">
-                      <div>
-                        <div className="flex items-baseline justify-between">
-                          <label className="text-xs uppercase tracking-[0.2em] text-white/40">Persona</label>
-                          {filters.persona ? (
-                            <button
-                              onClick={() => setFilterValue("persona", "")}
-                              className="text-[11px] text-white/40 underline hover:text-white"
-                            >
-                              Clear
-                            </button>
-                          ) : null}
-                        </div>
-                        <select
-                          value={filters.persona}
-                          onChange={(event) => setFilterValue("persona", event.target.value)}
-                          className="mt-2 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                        >
-                          <option value="">All personas</option>
-                          {uniquePersonas.map((persona) => (
-                            <option key={persona} value={persona}>
-                              {persona}
-                            </option>
-                          ))}
-                        </select>
+                  <Popover.Content sideOffset={8} align="end" className="z-50 w-72 rounded-2xl border border-white/15 bg-black/90 p-4 text-white shadow-xl backdrop-blur">
+                    <div className="space-y-4 text-xs text-white/70">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] uppercase tracking-[0.3em] text-white/40">Show deleted inboxes</span>
+                        <label className="inline-flex items-center gap-2 text-white/70">
+                          <input type="checkbox" checked={showDeleted} onChange={(e) => setShowDeleted(e.target.checked)} />
+                          <span>Show</span>
+                        </label>
                       </div>
-
-                      <div>
-                        <label className="block text-xs uppercase tracking-[0.2em] text-white/40">Tags</label>
-                        <div className="mt-3 flex max-h-24 flex-wrap gap-2 overflow-y-auto pr-1">
-                          {uniqueTags.length ? (
-                            uniqueTags.map((tag) => {
-                              const active = filters.tags.includes(tag);
-                              return (
-                                <button
-                                  key={tag}
-                                  type="button"
-                                  onClick={() => toggleTag(tag)}
-                                  className={`rounded-full px-3 py-1 text-xs transition ${
-                                    active
-                                      ? "bg-white text-black"
-                                      : "border border-white/20 bg-black/40 text-white/60 hover:border-white/40 hover:text-white"
-                                  }`}
-                                >
-                                  {tag}
-                                </button>
-                              );
-                            })
-                          ) : (
-                            <p className="text-xs text-white/40">No tags yet.</p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-baseline justify-between">
-                          <label className="text-xs uppercase tracking-[0.2em] text-white/40">Business</label>
-                          {filters.business ? (
-                            <button
-                              onClick={() => setFilterValue("business", "")}
-                              className="text-[11px] text-white/40 underline hover:text-white"
-                            >
-                              Clear
-                            </button>
-                          ) : null}
-                        </div>
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Business</label>
                         <input
-                          type="search"
-                          list="business-suggestions"
                           value={filters.business}
                           onChange={(event) => setFilterValue("business", event.target.value)}
-                          placeholder="Search or pick a customer"
-                          className="mt-2 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-white/40 focus:outline-none focus:ring-0"
+                          placeholder="e.g. Acme"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
                         />
-                        <datalist id="business-suggestions">
-                          {uniqueBusinesses.map((business) => (
-                            <option key={business} value={business} />
-                          ))}
-                        </datalist>
-                        {topBusinessSuggestions.length ? (
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            {topBusinessSuggestions.map((business) => (
-                              <button
-                                key={business}
-                                type="button"
-                                onClick={() => setFilterValue("business", business)}
-                                className="rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[11px] text-white/60 transition hover:border-white/40 hover:text-white"
-                              >
-                                {business}
-                              </button>
-                            ))}
-                          </div>
-                        ) : null}
                       </div>
-
-                      <div>
-                        <label className="block text-xs uppercase tracking-[0.2em] text-white/40">Order</label>
-                        <select
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Order ID</label>
+                        <input
                           value={filters.orderId}
                           onChange={(event) => setFilterValue("orderId", event.target.value)}
-                          className="mt-2 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                        >
-                          <option value="">All orders</option>
-                          {uniqueOrders.map((orderId) => (
-                            <option key={orderId} value={orderId}>
-                              {orderId?.slice(0, 12)}
-                            </option>
-                          ))}
-                        </select>
+                          placeholder="Search by order ID"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                        />
                       </div>
-
-                      <div>
-                        <div className="flex items-baseline justify-between">
-                          <label className="text-xs uppercase tracking-[0.2em] text-white/40">ESP / Platform</label>
-                          {filters.platforms.length ? (
-                            <button
-                              onClick={() => setFilterValue("platforms", [])}
-                              className="text-[11px] text-white/40 underline hover:text-white"
-                            >
-                              Clear
-                            </button>
-                          ) : null}
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">ESP platforms</label>
+                        <div className="flex flex-wrap gap-2">
                           {uniquePlatforms.length ? (
-                            uniquePlatforms.map((platform) => {
-                              const active = filters.platforms.includes(platform);
-                              return (
-                                <button
-                                  key={platform}
-                                  type="button"
-                                  onClick={() => togglePlatform(platform)}
-                                  className={`rounded-full px-3 py-1 text-xs transition ${
-                                    active
-                                      ? "bg-white text-black"
-                                      : "border border-white/20 bg-black/40 text-white/60 hover:border-white/40 hover:text-white"
-                                  }`}
-                                >
-                                  {platform}
-                                </button>
-                              );
-                            })
+                            uniquePlatforms.map((platform) => (
+                              <button
+                                key={platform}
+                                onClick={() => togglePlatform(platform)}
+                                className={`rounded-full px-3 py-1 ${
+                                  filters.platforms.includes(platform)
+                                    ? 'bg-white/90 text-black'
+                                    : 'border border-white/15 text-white/60'
+                                }`}
+                              >
+                                {platform}
+                              </button>
+                            ))
                           ) : (
-                            <p className="text-xs text-white/40">No ESP data present.</p>
+                            <span className="text-white/40">No ESP data yet.</span>
                           )}
                         </div>
                       </div>
-
-                      <div>
-                        <label className="block text-xs uppercase tracking-[0.2em] text-white/40">Created</label>
-                        <div className="mt-2 flex items-center gap-2">
-                          <select
-                            value={filters.datePreset}
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Tags</label>
+                        <input
+                          value={filters.tags.join(', ')}
+                          onChange={(event) => setFilterValue("tags", event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean))}
+                          placeholder="primary, warmup"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Created</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="date"
+                            value={filters.dateRange.from ? format(filters.dateRange.from, 'yyyy-MM-dd') : ''}
                             onChange={(event) => {
-                              const preset = event.target.value as DatePreset;
-                              const range = applyDatePreset(preset);
-                              setFilters((prev) => ({ ...prev, datePreset: preset, dateRange: range }));
+                              const value = event.target.value ? startOfDay(new Date(event.target.value)) : null;
+                              setFilters((prev) => ({
+                                ...prev,
+                                datePreset: 'ALL',
+                                dateRange: { ...prev.dateRange, from: value },
+                              }));
                             }}
-                            className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                          >
-                            <option value="ALL">All time</option>
-                            <option value="7">Last 7 days</option>
-                            <option value="30">Last 30 days</option>
-                            <option value="90">Last 90 days</option>
-                          </select>
+                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                          />
+                          <input
+                            type="date"
+                            value={filters.dateRange.to ? format(filters.dateRange.to, 'yyyy-MM-dd') : ''}
+                            onChange={(event) => {
+                              const value = event.target.value ? endOfDay(new Date(event.target.value)) : null;
+                              setFilters((prev) => ({
+                                ...prev,
+                                datePreset: 'ALL',
+                                dateRange: { ...prev.dateRange, to: value },
+                              }));
+                            }}
+                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                          />
                         </div>
-                        <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/50">
-                          <div>
-                            <label className="block text-[10px] uppercase tracking-[0.2em] text-white/40">From</label>
-                            <input
-                              type="date"
-                              value={filters.dateRange.from ? format(filters.dateRange.from, "yyyy-MM-dd") : ""}
-                              onChange={(event) => {
-                                const value = event.target.value ? startOfDay(new Date(event.target.value)) : null;
-                                setFilters((prev) => ({
-                                  ...prev,
-                                  datePreset: "ALL",
-                                  dateRange: { ...prev.dateRange, from: value },
-                                }));
+                        <div className="flex items-center gap-2 text-white/50">
+                          {(['ALL', '7', '30', '90'] as DatePreset[]).map((preset) => (
+                            <button
+                              key={preset}
+                              onClick={() => {
+                                const range = applyDatePreset(preset);
+                                setFilters((prev) => ({ ...prev, datePreset: preset, dateRange: range }));
                               }}
-                              className="mt-1 w-full rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-xs text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] uppercase tracking-[0.2em] text-white/40">To</label>
-                            <input
-                              type="date"
-                              value={filters.dateRange.to ? format(filters.dateRange.to, "yyyy-MM-dd") : ""}
-                              onChange={(event) => {
-                                const value = event.target.value ? endOfDay(new Date(event.target.value)) : null;
-                                setFilters((prev) => ({
-                                  ...prev,
-                                  datePreset: "ALL",
-                                  dateRange: { ...prev.dateRange, to: value },
-                                }));
-                              }}
-                              className="mt-1 w-full rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-xs text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                            />
-                          </div>
+                              className={`rounded-full px-3 py-1 ${filters.datePreset === preset ? 'bg-white/90 text-black' : 'border border-white/15'}`}
+                            >
+                              {preset === 'ALL' ? 'All' : `Last ${preset}d`}
+                            </button>
+                          ))}
                         </div>
                       </div>
-
                       <div className="flex items-center justify-between pt-1">
                         <button onClick={resetFilters} className="text-xs font-medium text-white/40 hover:text-white">
                           Clear all
@@ -901,7 +753,6 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
             </div>
           ) : null}
         </div>
-
         {filteredInboxes.length > 0 ? (
           <div className="overflow-hidden rounded-xl border border-white/10">
             <table className="min-w-full divide-y divide-white/5">
@@ -944,7 +795,7 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
                       <td className="px-6 py-4">
                         <StatusPill status={inbox.status} order={inbox.order} />
                       </td>
-                      <td className="px-6 py-4 text-white/70">{inbox.personaName}</td>
+                      <td className="px-6 py-4 text-white/70">{[inbox.firstName, inbox.lastName].filter(Boolean).join(' ') || '—'}</td>
                       <td className="px-6 py-4 text-white/60">
                         {inbox.tags.length ? inbox.tags.slice(0, 3).join(", ") : <span className="text-white/30">—</span>}
                       </td>

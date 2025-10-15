@@ -412,7 +412,8 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         const inboxData = distribution.allocations.map(allocation => ({
           orderId: order.id,
           email: allocation.email,
-          personaName: allocation.personaName,
+          firstName: allocation.firstName,
+          lastName: allocation.lastName,
           espPlatform: input.warmupTool,
           status: 'PENDING' as const,
           tags: input.internalTags || [],
