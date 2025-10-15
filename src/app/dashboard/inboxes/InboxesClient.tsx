@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback, memo } from "react";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
 import type { Prisma } from "@prisma/client";
 import { InboxIcon, SparklesIcon, FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { TableSkeleton } from "@/components/skeletons";
 import { endOfDay, format, startOfDay, subDays } from "date-fns";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const STATUS_COLORS: Record<string, string> = {
   LIVE: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
@@ -141,12 +142,15 @@ function getProductLabel(value?: string | null) {
   return PRODUCT_LABELS[value] ?? value;
 }
 
-export default function InboxesClient({ inboxes, error, isLoading = false }: Props) {
+function InboxesClient({ inboxes, error, isLoading = false }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [showDeleted, setShowDeleted] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  
+  // Debounce search term to avoid excessive filtering
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const safeInboxes = useMemo(() => inboxes ?? [], [inboxes]);
 
@@ -185,26 +189,30 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
   }, [safeInboxes]);
 
   const filteredInboxes = useMemo(() => {
-    const searchLower = searchTerm.trim().toLowerCase();
+    const searchLower = debouncedSearchTerm.trim().toLowerCase();
     const dateFrom = filters.dateRange.from ? startOfDay(filters.dateRange.from) : null;
     const dateTo = filters.dateRange.to ? endOfDay(filters.dateRange.to) : null;
 
     return safeInboxes.filter((inbox) => {
       if (!showDeleted && inbox.status === 'DELETED') return false;
-      const haystack = [
-        inbox.email,
-        [inbox.firstName, inbox.lastName].filter(Boolean).join(' '),
-        inbox.businessName ?? "",
-        inbox.order?.id ?? "",
-        inbox.order?.productType ?? "",
-        inbox.espPlatform ?? "",
-        parseInboxDomain(inbox),
-        ...inbox.tags,
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      const matchesSearch = searchLower ? haystack.includes(searchLower) : true;
+      
+      // Only compute haystack if we have a search term
+      let matchesSearch = true;
+      if (searchLower) {
+        const haystack = [
+          inbox.email,
+          [inbox.firstName, inbox.lastName].filter(Boolean).join(' '),
+          inbox.businessName ?? "",
+          inbox.order?.id ?? "",
+          inbox.order?.productType ?? "",
+          inbox.espPlatform ?? "",
+          parseInboxDomain(inbox),
+          ...inbox.tags,
+        ]
+          .join(" ")
+          .toLowerCase();
+        matchesSearch = haystack.includes(searchLower);
+      }
       const matchesStatus = filters.statuses.length ? filters.statuses.includes(inbox.status) : true;
       const matchesProduct = filters.product ? inbox.order?.productType === filters.product : true;
       const matchesPersona = filters.persona
@@ -242,7 +250,7 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
         matchesDate
       );
     });
-  }, [safeInboxes, searchTerm, filters, showDeleted]);
+  }, [safeInboxes, debouncedSearchTerm, filters, showDeleted]);
 
   const inboxCount = safeInboxes.length;
   const uniqueDomains = useMemo(() => {
@@ -256,7 +264,7 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
 
   const averageAge = useMemo(() => calculateAverageAge(safeInboxes), [safeInboxes]);
 
-  const handleToggleSelect = (id: string) => {
+  const handleToggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -266,11 +274,11 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
       }
       return next;
     });
-  };
+  }, []);
 
   const allFilteredSelected = filteredInboxes.length > 0 && filteredInboxes.every((inbox) => selectedIds.has(inbox.id));
 
-  const handleToggleSelectAll = () => {
+  const handleToggleSelectAll = useCallback(() => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (allFilteredSelected) {
@@ -280,7 +288,7 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
       }
       return next;
     });
-  };
+  }, [allFilteredSelected, filteredInboxes]);
 
   const buildInboxCsvRows = (inboxList: InboxRecord[]) => [
     [
@@ -828,3 +836,5 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
     </div>
   );
 }
+
+export default memo(InboxesClient);
