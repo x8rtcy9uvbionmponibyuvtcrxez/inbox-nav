@@ -541,31 +541,28 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     <div className="space-y-8 text-white">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-white">Inbox inventory</h1>
-          <p className="mt-2 max-w-xl text-sm text-white/50">
+          <h1 className="text-brand-primary text-3xl font-semibold">Inbox inventory</h1>
+          <p className="mt-2 max-w-xl text-base text-brand-secondary">
             Every sender you’ve provisioned, plus their current delivery status, tags, and linked orders.
           </p>
         </div>
-        <Link
-          href="/dashboard/products"
-          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black shadow-[0_10px_30px_-20px_rgba(255,255,255,0.6)] transition hover:bg-white/90"
-        >
-          Add more inboxes
-        </Link>
+        <Button asChild variant="primary" size="md" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)]">
+          <Link href="/dashboard/products">Add more inboxes</Link>
+        </Button>
       </div>
 
       <div className="grid gap-5 md:grid-cols-3">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.6)]">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/40">Total inboxes</p>
-          <p className="mt-3 text-3xl font-semibold text-white">{inboxCount}</p>
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Total inboxes</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{inboxCount}</p>
         </div>
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.6)]">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/40">Domains represented</p>
-          <p className="mt-3 text-3xl font-semibold text-white">{uniqueDomains.size}</p>
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Domains represented</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{uniqueDomains.size}</p>
         </div>
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.6)]">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/40">Average inbox age</p>
-          <p className="mt-3 text-3xl font-semibold text-white">{averageAge.toFixed(1)} days</p>
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Average inbox age</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{averageAge.toFixed(1)} days</p>
         </div>
       </div>
 
@@ -577,12 +574,12 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search email, persona, business, order…"
-                className="flex-1 min-w-[220px] rounded-full border border-white/15 bg-black/25 px-4 py-2 text-sm text-white focus:border-white/35 focus:outline-none focus:ring-0"
+                className="flex-1 min-w-[220px] rounded-full border border-white/15 bg-black/25 px-4 py-2 text-sm text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
               />
               <select
                 value={filters.product}
                 onChange={(event) => setFilterValue("product", event.target.value)}
-                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-sm text-white/90 focus:border-white/35 focus:outline-none focus:ring-0"
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-sm text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
               >
                 <option value="">All products</option>
                 {productFilterOptions.map((product) => (
@@ -594,7 +591,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
               <select
                 value={filters.persona}
                 onChange={(event) => setFilterValue("persona", event.target.value)}
-                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-sm text-white/90 focus:border-white/35 focus:outline-none focus:ring-0"
+                className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-sm text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
               >
                 <option value="">All personas</option>
                 {uniquePersonas.map((persona) => (
@@ -603,7 +600,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                   </option>
                 ))}
               </select>
-              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-sm text-white/80">
+              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-sm text-brand-secondary">
                 {STATUS_DISPLAY_ORDER.map((status) => (
                   <button
                     key={status}
@@ -611,7 +608,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                     className={`rounded-full px-3 py-1.5 font-medium uppercase tracking-wide ${
                       filters.statuses.includes(status)
                         ? STATUS_COLORS[status] ?? STATUS_COLORS.DEFAULT
-                        : 'bg-transparent text-white/75 border border-white/20'
+                        : 'bg-transparent text-brand-muted border border-white/20'
                     }`}
                   >
                     {status.toLowerCase()}
@@ -619,7 +616,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                 ))}
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-white/70">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-brand-secondary">
               <Popover.Root open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
                 <Popover.Trigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
@@ -628,34 +625,34 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                 </Popover.Trigger>
                 <Popover.Portal>
                   <Popover.Content sideOffset={8} align="end" className="z-50 w-72 rounded-2xl border border-white/15 bg-black/90 p-4 text-white shadow-xl backdrop-blur">
-                    <div className="space-y-4 text-xs text-white/70">
+                    <div className="space-y-4 text-xs text-brand-secondary">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] uppercase tracking-[0.3em] text-white/40">Show deleted inboxes</span>
-                        <label className="inline-flex items-center gap-2 text-white/70">
+                        <span className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Show deleted inboxes</span>
+                        <label className="inline-flex items-center gap-2 text-brand-secondary">
                           <input type="checkbox" checked={showDeleted} onChange={(e) => setShowDeleted(e.target.checked)} />
                           <span>Show</span>
                         </label>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Business</label>
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Business</label>
                         <input
                           value={filters.business}
                           onChange={(event) => setFilterValue("business", event.target.value)}
                           placeholder="e.g. Acme"
-                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Order ID</label>
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Order ID</label>
                         <input
                           value={filters.orderId}
                           onChange={(event) => setFilterValue("orderId", event.target.value)}
                           placeholder="Search by order ID"
-                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">ESP platforms</label>
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">ESP platforms</label>
                         <div className="flex flex-wrap gap-2">
                           {uniquePlatforms.length ? (
                             uniquePlatforms.map((platform) => (
@@ -665,28 +662,28 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                                 className={`rounded-full px-3 py-1 ${
                                   filters.platforms.includes(platform)
                                     ? 'bg-white/90 text-black'
-                                    : 'border border-white/15 text-white/60'
+                                    : 'border border-white/15 text-brand-muted'
                                 }`}
                               >
                                 {platform}
                               </button>
                             ))
                           ) : (
-                            <span className="text-white/40">No ESP data yet.</span>
+                            <span className="text-brand-muted">No ESP data yet.</span>
                           )}
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Tags</label>
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Tags</label>
                         <input
                           value={filters.tags.join(', ')}
                           onChange={(event) => setFilterValue("tags", event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean))}
                           placeholder="primary, warmup"
-                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-white/40">Created</label>
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Created</label>
                         <div className="flex items-center gap-2">
                           <input
                             type="date"
@@ -699,7 +696,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                                 dateRange: { ...prev.dateRange, from: value },
                               }));
                             }}
-                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
                           />
                           <input
                             type="date"
@@ -712,10 +709,10 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                                 dateRange: { ...prev.dateRange, to: value },
                               }));
                             }}
-                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs focus:border-white/35 focus:outline-none focus:ring-0"
+                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
                           />
                         </div>
-                        <div className="flex items-center gap-2 text-white/50">
+                        <div className="flex items-center gap-2 text-brand-muted">
                           {(['ALL', '7', '30', '90'] as DatePreset[]).map((preset) => (
                             <button
                               key={preset}
@@ -731,7 +728,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                         </div>
                       </div>
                     <div className="flex items-center justify-between pt-1">
-                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-white/60 hover:text-white">
+                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-brand-secondary hover:text-brand-primary">
                         Clear all
                       </Button>
                       <Button variant="primary" size="sm" onClick={() => setIsFilterSheetOpen(false)}>

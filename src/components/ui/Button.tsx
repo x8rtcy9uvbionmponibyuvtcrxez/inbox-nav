@@ -5,20 +5,25 @@ type Variant = "primary" | "secondary" | "ghost" | "outline" | "danger";
 type Size = "sm" | "md" | "lg";
 
 const baseClasses =
-  "inline-flex items-center justify-center rounded-full font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-full font-semibold tracking-[0.01em] transition-all duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent-gradient-to)] focus-visible:ring-offset-[var(--surface-0)] disabled:cursor-not-allowed disabled:opacity-60 border border-transparent";
 
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-white text-black shadow hover:bg-white/90 focus-visible:ring-white/70",
-  secondary: "border border-white/20 bg-white/10 text-white/80 hover:border-white/40 hover:text-white focus-visible:ring-white/50",
-  ghost: "border border-transparent text-white/70 hover:text-white focus-visible:ring-white/40",
-  outline: "border border-white/20 text-white/80 hover:border-white/40 hover:text-white focus-visible:ring-white/50",
-  danger: "bg-red-500 text-white hover:bg-red-400 focus-visible:ring-red-200",
+  primary:
+    "bg-[var(--accent-primary)] text-[var(--accent-primary-contrast)] shadow-[0_18px_38px_-24px_rgba(255,255,255,0.7)] hover:bg-white/95 hover:shadow-[0_22px_44px_-26px_rgba(255,255,255,0.8)] active:translate-y-[1px]",
+  secondary:
+    "border-[var(--border-subtle)] bg-white/[0.08] text-brand-primary hover:border-[var(--border-strong)] hover:bg-white/[0.12]",
+  ghost:
+    "border-transparent bg-transparent text-brand-secondary hover:text-brand-primary hover:bg-white/[0.08]",
+  outline:
+    "border-[var(--border-strong)] bg-transparent text-brand-secondary hover:text-brand-primary hover:border-white/50",
+  danger:
+    "bg-[var(--danger)] text-white shadow-[0_18px_34px_-24px_rgba(251,113,133,0.7)] hover:bg-[#ff8598]",
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: "px-3 py-1.5 text-xs",
-  md: "px-5 py-2 text-sm",
-  lg: "px-6 py-3 text-base",
+  sm: "h-9 px-4 text-sm",
+  md: "h-11 px-5 text-base",
+  lg: "h-[52px] px-6 text-lg",
 };
 
 type ButtonProps = PropsWithChildren<

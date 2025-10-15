@@ -190,6 +190,34 @@ function OnboardingPage() {
     window.localStorage.setItem(storageKey, draftState);
   }, [hasLoadedDraft, storageKey, draftState]);
 
+  // Block back navigation after onboarding completion
+  useEffect(() => {
+    // Check if onboarding was already completed and redirect
+    const hasCompletedOnboarding = typeof window !== 'undefined' && 
+      window.localStorage.getItem('onboarding-completed');
+    if (hasCompletedOnboarding) {
+      router.push('/dashboard');
+      return;
+    }
+
+    const handlePopState = (e: PopStateEvent) => {
+      // Check if user is trying to go back to onboarding after completion
+      const hasCompletedOnboarding = typeof window !== 'undefined' && 
+        window.localStorage.getItem('onboarding-completed');
+      if (hasCompletedOnboarding) {
+        e.preventDefault();
+        router.push('/dashboard');
+        return;
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [router]);
+
   // Read URL parameters on component mount
   useEffect(() => {
     const product = searchParams.get('product');
@@ -427,6 +455,8 @@ const personaSummaryNames = personas
         console.log("✅ Submission successful, redirecting to dashboard");
         if (typeof window !== 'undefined') {
           window.localStorage.removeItem(storageKey);
+          // Mark onboarding as completed to prevent back navigation
+          window.localStorage.setItem('onboarding-completed', 'true');
         }
         router.push("/dashboard");
       } else {

@@ -195,7 +195,7 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="space-y-6 text-white pt-4">
+    <div className="space-y-6 text-white -mt-4">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-sm text-white/50">
