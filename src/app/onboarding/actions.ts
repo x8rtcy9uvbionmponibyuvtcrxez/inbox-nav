@@ -253,10 +253,10 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       const orderProductType = coerceProductType(order.productType);
       
       const domainPreferenceList =
-        sessionDomainSource === 'OWN'
-          ? sessionOwnDomains ?? []
-          : input.domainSource === 'OWN' || input.domainStatus === 'own'
-            ? input.providedDomains ?? input.domainList ?? []
+        (input.domainSource === 'OWN' || input.domainStatus === 'own')
+          ? input.ownDomains ?? input.providedDomains ?? input.domainList ?? []
+          : sessionDomainSource === 'OWN'
+            ? sessionOwnDomains ?? []
             : [];
 
       const onboardingData = {
@@ -282,10 +282,10 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         isCompleted: true,
         domainSource: sessionDomainSource ?? (input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME')),
         inboxesPerDomain: sessionInboxesPerDomain ?? (input.inboxesPerDomain ?? (orderProductType === 'GOOGLE' ? 3 : orderProductType === 'PREWARMED' ? 3 : 50)),
-        providedDomains: sessionDomainSource === 'OWN'
-          ? sessionOwnDomains ?? []
-          : input.domainSource === 'OWN' || input.domainStatus === 'own'
-            ? input.ownDomains ?? input.providedDomains ?? input.domainList ?? []
+        providedDomains: (input.domainSource === 'OWN' || input.domainStatus === 'own')
+          ? input.ownDomains ?? input.providedDomains ?? input.domainList ?? []
+          : sessionDomainSource === 'OWN'
+            ? sessionOwnDomains ?? []
             : [],
         calculatedDomainCount: sessionDomainsNeeded ?? null,
         // Registrar credentials for OWN domains (password is encrypted)
