@@ -154,10 +154,12 @@ export default function ProductsPage() {
             <p className="text-xs uppercase tracking-[0.25em] text-white/40">Need a custom fleet?</p>
             <p className="mt-2 text-sm text-white/70">Talk to us about tiered enterprise pricing and dedicated deliverability ops.</p>
             <a
-              href="mailto:contact@inboxnavigator.com"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-white transition hover:text-white/70"
+              href="https://calendly.com/inboxnavigator/demo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-white transition hover:text-white/70"
             >
-              Contact sales
+              Book a Call
               <ArrowRightIcon className="h-4 w-4" />
             </a>
           </div>
@@ -253,15 +255,26 @@ export default function ProductsPage() {
                     </span>
                   </div>
 
-                  <a
-                    href="https://calendly.com/inboxnavigator/demo"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black transition hover:bg-white/90"
+                  <button
+                    onClick={() => handleSelectPlan(product.id)}
+                    disabled={loading[product.id] || quantities[product.id] < getMoq(product.id)}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/30 disabled:text-black/50"
                   >
-                    Book a Call
-                    <ArrowRightIcon className="h-4 w-4" />
-                  </a>
+                    {loading[product.id] ? (
+                      <>
+                        <svg className="h-4 w-4 animate-spin text-black/70" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
+                        </svg>
+                        Processing
+                      </>
+                    ) : (
+                      <>
+                        Launch this fleet
+                        <ArrowRightIcon className="h-4 w-4" />
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             );

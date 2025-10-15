@@ -253,6 +253,39 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
     });
   }, [safeDomains, debouncedSearchTerm, filters, showDeleted]);
 
+  const hasSelection = selectedIds.size > 0;
+
+  const hasFiltersApplied = useMemo(() => {
+    if (searchTerm.trim()) return true;
+    if (showDeleted) return true;
+    if (filters.statuses.length) return true;
+    if (filters.product) return true;
+    if (filters.tags.length) return true;
+    if (filters.business) return true;
+    if (filters.orderId) return true;
+    if (filters.forwarding) return true;
+    if (filters.datePreset !== "ALL") return true;
+    if (filters.dateRange.from) return true;
+    if (filters.dateRange.to) return true;
+    return false;
+  }, [filters, searchTerm, showDeleted]);
+
+  const canExport = hasSelection || filteredDomains.length > 0;
+  const exportButtonLabel = hasSelection ? "Export selected as CSV" : "Export as CSV";
+
+  const handleExportCsv = () => {
+    const source = hasSelection
+      ? safeDomains.filter((domain) => selectedIds.has(domain.id))
+      : filteredDomains;
+    if (!source.length) return;
+    const filename = hasSelection
+      ? "domains-selected.csv"
+      : hasFiltersApplied
+        ? "domains-filtered.csv"
+        : "domains.csv";
+    downloadCsv(buildDomainCsvRows(source), filename);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-8 text-brand-primary">
@@ -336,39 +369,6 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
       domain.createdAt.toISOString(),
     ]),
   ];
-
-  const hasSelection = selectedIds.size > 0;
-
-  const hasFiltersApplied = useMemo(() => {
-    if (searchTerm.trim()) return true;
-    if (showDeleted) return true;
-    if (filters.statuses.length) return true;
-    if (filters.product) return true;
-    if (filters.tags.length) return true;
-    if (filters.business) return true;
-    if (filters.orderId) return true;
-    if (filters.forwarding) return true;
-    if (filters.datePreset !== "ALL") return true;
-    if (filters.dateRange.from) return true;
-    if (filters.dateRange.to) return true;
-    return false;
-  }, [filters, searchTerm, showDeleted]);
-
-  const canExport = hasSelection || filteredDomains.length > 0;
-  const exportButtonLabel = hasSelection ? "Export selected as CSV" : "Export as CSV";
-
-  const handleExportCsv = () => {
-    const source = hasSelection
-      ? safeDomains.filter((domain) => selectedIds.has(domain.id))
-      : filteredDomains;
-    if (!source.length) return;
-    const filename = hasSelection
-      ? "domains-selected.csv"
-      : hasFiltersApplied
-        ? "domains-filtered.csv"
-        : "domains.csv";
-    downloadCsv(buildDomainCsvRows(source), filename);
-  };
 
   const setFilterValue = <Key extends keyof FilterState>(key: Key, value: FilterState[Key]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
