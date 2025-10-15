@@ -902,7 +902,9 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
           ) : null}
         </div>
 
-        <table className="min-w-full divide-y divide-white/5">
+        {filteredInboxes.length > 0 ? (
+          <div className="overflow-hidden rounded-xl border border-white/10">
+            <table className="min-w-full divide-y divide-white/5">
           <thead>
             <tr>
               <th className="px-6 py-3 text-left">
