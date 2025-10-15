@@ -902,27 +902,29 @@ export default function InboxesClient({ inboxes, error, isLoading = false }: Pro
           ) : null}
         </div>
 
-
-                  <th className="px-6 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={allFilteredSelected}
-                      onChange={handleToggleSelectAll}
-                      className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
-                    />
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left">Email</th>
-                  <th scope="col" className="px-6 py-3 text-left">Status</th>
-                  <th scope="col" className="px-6 py-3 text-left">Persona</th>
-                  <th scope="col" className="px-6 py-3 text-left">Tags</th>
-                  <th scope="col" className="px-6 py-3 text-left">Business</th>
-                  <th scope="col" className="px-6 py-3 text-left">Domain</th>
-                  <th scope="col" className="px-6 py-3 text-left">Product</th>
-                  <th scope="col" className="px-6 py-3 text-left">ESP</th>
-                  <th scope="col" className="px-6 py-3 text-left">Order</th>
-                  <th scope="col" className="px-6 py-3 text-left">Created</th>
-                </tr>
-              </thead>
+        <table className="min-w-full divide-y divide-white/5">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 text-left">
+                <input
+                  type="checkbox"
+                  checked={allFilteredSelected}
+                  onChange={handleToggleSelectAll}
+                  className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
+                />
+              </th>
+              <th scope="col" className="px-6 py-3 text-left">Email</th>
+              <th scope="col" className="px-6 py-3 text-left">Status</th>
+              <th scope="col" className="px-6 py-3 text-left">Persona</th>
+              <th scope="col" className="px-6 py-3 text-left">Tags</th>
+              <th scope="col" className="px-6 py-3 text-left">Business</th>
+              <th scope="col" className="px-6 py-3 text-left">Domain</th>
+              <th scope="col" className="px-6 py-3 text-left">Product</th>
+              <th scope="col" className="px-6 py-3 text-left">ESP</th>
+              <th scope="col" className="px-6 py-3 text-left">Order</th>
+              <th scope="col" className="px-6 py-3 text-left">Created</th>
+            </tr>
+          </thead>
               <tbody className="divide-y divide-white/5">
                 {filteredInboxes.map((inbox) => {
                   const domain = parseInboxDomain(inbox);
