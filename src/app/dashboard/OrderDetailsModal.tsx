@@ -156,6 +156,19 @@ function formatDate(input: Date | string | null | undefined) {
   }).format(date);
 }
 
+function formatDateWithTimezone(input: Date | string | null | undefined) {
+  if (!input) return "—";
+  const date = typeof input === "string" ? new Date(input) : input;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(date);
+}
+
 function toTitle(value: string | null | undefined) {
   if (!value) return "Unknown";
   return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -275,7 +288,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
           <div>
             <h2 className="text-2xl font-semibold text-white">Order Details</h2>
             <p className="text-sm text-white/60 mt-1">
-              Order {orderData?.id ? `${orderData.id.slice(0, 8)}…` : "—"} • {formatDate(order.createdAt)}
+              {formatDateWithTimezone(order.createdAt)}
             </p>
           </div>
           <div className="flex items-center gap-3">
