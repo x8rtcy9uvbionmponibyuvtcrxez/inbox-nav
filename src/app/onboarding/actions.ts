@@ -1,11 +1,10 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { stripe } from '@/lib/stripe';
+import { assertStripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
 import type { ProductType, OrderStatus } from '@prisma/client';
-import { encryptPassword } from '@/lib/encryption';
 import crypto from "node:crypto";
 
 export type SaveOnboardingInput = {
@@ -130,6 +129,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           console.log("[ACTION] Order not found, fetching from Stripe...");
 
           try {
+            const stripe = assertStripe();
             const session = await stripe.checkout.sessions.retrieve(input.sessionId, { expand: ['subscription'] });
             console.log("[ACTION] ✅ Stripe session retrieved:", {
               id: session.id,
@@ -292,7 +292,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         domainRegistrar: input.domainRegistrar ?? null,
         registrarAdminEmail: input.domainRegistrar ? 'team@inboxnavigator.com' : null,
         registrarUsername: input.registrarUsername ?? null,
-        registrarPassword: input.registrarPassword ? encryptPassword(input.registrarPassword) : null,
+        registrarPassword: input.registrarPassword ?? null,
       };
 
       console.log("[ACTION] 📝 OnboardingData payload:", {

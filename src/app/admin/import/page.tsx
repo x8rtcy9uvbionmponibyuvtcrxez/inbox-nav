@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { validateCSVAction, importCSVAction, type CSVRow, type ValidationResult, type ImportResult } from './actions';
 import { CloudArrowUpIcon, CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { parseCsv } from '@/lib/csv';
 
 export default function ImportPage() {
   const [csvData, setCsvData] = useState<CSVRow[]>([]);
@@ -12,24 +13,28 @@ export default function ImportPage() {
   const [dragActive, setDragActive] = useState(false);
 
   const parseCSV = useCallback((text: string): CSVRow[] => {
-    const lines = text.split('\n').filter(line => line.trim());
-    if (lines.length === 0) return [];
-    
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
-    const rows: CSVRow[] = [];
-    
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim());
+    const rows = parseCsv(text);
+    if (rows.length === 0) return [];
+
+    const headers = rows[0].map((h) =>
+      h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_')
+    );
+
+    const parsed: CSVRow[] = [];
+
+    for (let i = 1; i < rows.length; i++) {
+      const values = rows[i];
+      if (!values || values.every((value) => value.trim() === '')) {
+        continue;
+      }
       const row: CSVRow = {};
-      
       headers.forEach((header, index) => {
-        row[header] = values[index] || '';
+        row[header] = (values[index] ?? '').trim();
       });
-      
-      rows.push(row);
+      parsed.push(row);
     }
-    
-    return rows;
+
+    return parsed;
   }, []);
 
   const handleFileUpload = useCallback(async (file: File) => {

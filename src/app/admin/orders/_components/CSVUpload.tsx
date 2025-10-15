@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { parseCsv } from '@/lib/csv';
 
 export type CSVRow = Record<string, string>;
 
@@ -81,10 +82,11 @@ export default function CSVUpload({
     setIsValidating(true);
     try {
       const text = await file.text();
-      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-      if (lines.length === 0) throw new Error("Empty CSV");
+      const parsedRows = parseCsv(text);
+
+      if (parsedRows.length === 0) throw new Error("Empty CSV");
       
-      const headers = lines[0].split(',').map(h => h.trim());
+      const headers = parsedRows[0].map(h => h.trim());
       const missing = expectedHeaders.filter(h => !headers.includes(h));
       if (missing.length) throw new Error(`Missing headers: ${missing.join(', ')}`);
       
@@ -97,10 +99,15 @@ export default function CSVUpload({
       const rows: CSVRow[] = [];
       const allErrors: ValidationError[] = [];
       
-      for (let i = 1; i < lines.length; i++) {
-        const cols = lines[i].split(',');
+      for (let i = 1; i < parsedRows.length; i++) {
+        const cols = parsedRows[i];
+        if (!cols || cols.every((value) => value.trim() === '')) {
+          continue;
+        }
         const row: CSVRow = {};
-        headers.forEach((h, idx) => row[h] = (cols[idx] || '').trim());
+        headers.forEach((h, idx) => {
+          row[h] = (cols[idx] ?? '').trim();
+        });
         rows.push(row);
         
             // Validate each row

@@ -1,11 +1,24 @@
 import Stripe from 'stripe'
 
-// Only initialize Stripe if we have the required environment variable
-// This prevents build-time errors when env vars are missing
 const secretKey = process.env.STRIPE_SECRET_KEY
+// Use the SDK's latest compatible API version type
+const apiVersion: Stripe.LatestApiVersion = '2025-09-30.clover'
 
-export const stripe = secretKey 
-  ? new Stripe(secretKey, {
-      apiVersion: '2025-09-30.clover',
-    })
-  : ({} as Stripe)
+let stripeClient: Stripe | null = null
+
+if (secretKey) {
+  stripeClient = new Stripe(secretKey, { apiVersion })
+}
+
+export const stripe = stripeClient
+
+export function getStripe(): Stripe | null {
+  return stripeClient
+}
+
+export function assertStripe(): Stripe {
+  if (!stripeClient) {
+    throw new Error('Stripe secret key is not configured')
+  }
+  return stripeClient
+}

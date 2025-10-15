@@ -1,6 +1,5 @@
 import { type Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
-import { validateEnv } from '@/lib/validateEnv'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Header from '@/components/Header'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -26,10 +25,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // Fail fast in production if critical envs are missing
-  if (process.env.NODE_ENV === 'production') {
-    validateEnv(true)
-  }
   return (
     <ClerkProvider
       afterSignInUrl="/dashboard"

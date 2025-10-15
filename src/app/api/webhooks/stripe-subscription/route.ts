@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import type Stripe from 'stripe'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
@@ -12,6 +12,12 @@ export async function POST(request: NextRequest) {
   if (!sig || !webhookSecret) {
     console.error('[Stripe Webhook] Missing webhook signature or secret')
     return NextResponse.json({ error: 'Missing webhook configuration' }, { status: 400 })
+  }
+
+  const stripe = getStripe()
+  if (!stripe) {
+    console.error('[Stripe Webhook] Stripe secret key missing')
+    return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 })
   }
 
   let event: Stripe.Event

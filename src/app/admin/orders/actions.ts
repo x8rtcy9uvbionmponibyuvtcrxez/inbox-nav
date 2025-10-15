@@ -89,10 +89,13 @@ export async function markOrderAsFulfilledAction(
     // For OWN domains, support a single uniform password (no CSV needed)
     if (isOwn && uniformPassword && (!csvData || csvData.length === 0)) {
       console.log("[FULFILLMENT] Applying uniform password to all inboxes for order", orderId);
-      await prisma.inbox.updateMany({
-        where: { orderId },
-        data: { password: uniformPassword.trim(), updatedAt: new Date() }
-      });
+      const trimmed = uniformPassword.trim();
+      if (trimmed) {
+        await prisma.inbox.updateMany({
+          where: { orderId },
+          data: { password: trimmed, updatedAt: new Date() }
+        });
+      }
     }
 
     // Step 4: Update order status and fulfillment timestamps

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,6 +31,15 @@ export async function POST(request: NextRequest) {
 
     // Resolve base URL dynamically (env first, then fallback to current PORT or 3000)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`
+
+    const stripe = getStripe()
+    if (!stripe) {
+      console.error('Stripe secret key missing for checkout')
+      return NextResponse.json(
+        { error: 'Payment processing is temporarily unavailable' },
+        { status: 503 }
+      )
+    }
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({

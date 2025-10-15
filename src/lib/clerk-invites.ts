@@ -8,21 +8,22 @@ export async function sendClerkInvitation(email: string): Promise<{ success: boo
   try {
     // Check if user already exists
     const client = await clerkClient();
+    const targetEmail = email.trim().toLowerCase();
     const existingUsers = await client.users.getUserList({
-      emailAddress: [email],
+      emailAddress: [targetEmail],
       limit: 1
     });
 
     if (existingUsers.data.length > 0) {
       // User already exists, link their orders
       const user = existingUsers.data[0];
-      await linkOrdersToUserAction(email, user.id);
+      await linkOrdersToUserAction(targetEmail, user.id);
       return { success: true };
     }
 
     // Create invitation
     const invitation = await client.invitations.createInvitation({
-      emailAddress: email,
+      emailAddress: targetEmail,
       redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
       publicMetadata: {
         source: 'csv_import',
@@ -30,7 +31,7 @@ export async function sendClerkInvitation(email: string): Promise<{ success: boo
       }
     });
 
-    console.log(`[CLERK_INVITE] Sent invitation to ${email}:`, invitation.id);
+    console.log(`[CLERK_INVITE] Sent invitation to ${targetEmail}:`, invitation.id);
     return { success: true };
 
   } catch (error) {
@@ -48,7 +49,9 @@ export async function sendClerkInvitation(email: string): Promise<{ success: boo
 export async function handleUserSignup(userId: string, emailAddresses: string[]): Promise<void> {
   try {
     // Link orders for each email address
-    for (const email of emailAddresses) {
+    for (const rawEmail of emailAddresses) {
+      const email = rawEmail.trim().toLowerCase();
+      if (!email) continue;
       await linkOrdersToUserAction(email, userId);
     }
     

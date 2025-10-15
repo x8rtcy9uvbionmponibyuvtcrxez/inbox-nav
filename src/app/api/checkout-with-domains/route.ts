@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
 
 type ProductType = 'GOOGLE' | 'PREWARMED' | 'MICROSOFT'
@@ -123,6 +123,12 @@ export async function POST(request: NextRequest) {
       success_url: `${baseUrl}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout/configure?product=${productType}&qty=${quantity}`,
     };
+
+    const stripe = getStripe()
+    if (!stripe) {
+      console.error('Stripe secret key missing for checkout-with-domains')
+      return NextResponse.json({ error: 'Payment processing is temporarily unavailable' }, { status: 503 })
+    }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
 

@@ -17,7 +17,16 @@ export default async function InboxesPage() {
         },
       },
       include: {
-        order: true,
+        order: {
+          select: {
+            id: true,
+            productType: true,
+            quantity: true,
+            status: true,
+            subscriptionStatus: true,
+            cancelledAt: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",

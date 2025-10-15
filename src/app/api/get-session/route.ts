@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,6 +19,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { error: 'Missing session_id parameter' },
         { status: 400 }
+      )
+    }
+
+    const stripe = getStripe()
+    if (!stripe) {
+      console.error('Stripe secret key missing for get-session')
+      return NextResponse.json(
+        { error: 'Payment processing is temporarily unavailable' },
+        { status: 503 }
       )
     }
 

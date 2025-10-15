@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,9 +20,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
+    const stripe = getStripe()
     const subId = order.stripeSubscriptionId ?? undefined
     let stripeError: string | null = null
-    if (subId && stripe && typeof stripe.subscriptions === 'object') {
+    if (subId && stripe) {
       try {
         // End-of-period cancellation per product policy
         await stripe.subscriptions.update(subId, { cancel_at_period_end: true })

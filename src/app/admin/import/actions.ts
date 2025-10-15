@@ -3,7 +3,6 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { encryptPassword } from '@/lib/encryption';
 import { sendClerkInvitation } from '@/lib/clerk-invites';
 
 export type CSVRow = Record<string, string>;
@@ -220,7 +219,7 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
             tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()) : [],
             businessName: order.businessName,
             forwardingDomain: row.forwarding_domain?.trim() || null,
-            password: row.password ? encryptPassword(row.password) : null,
+            password: row.password ? row.password.trim() : null,
             fulfilledAt: new Date(),
             createdAt: new Date(),
             updatedAt: new Date()
@@ -260,6 +259,7 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
         
         // Send Clerk invitation to client
         const clientEmail = firstRow.client_email.trim();
+
         const inviteResult = await sendClerkInvitation(clientEmail);
         
         if (!inviteResult.success) {
@@ -315,43 +315,58 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
  * Links existing orders to users when they sign up
  */
 export async function linkOrdersToUserAction(userEmail: string, clerkUserId: string): Promise<void> {
-  // Using shared Prisma instance
-  await prisma.$connect();
-  
   try {
+    const normalizedEmail = userEmail.trim().toLowerCase();
+    if (!normalizedEmail) {
+      return;
+    }
+
+    // PendingOrderInvite feature disabled: no pending invite lookup
+    const pendingOrderIds: string[] = [];
+
     // Find orders with matching email but no clerkUserId
-    const orders = await prisma.order.findMany({
-      where: {
-        clerkUserId: null,
-        inboxes: {
-          some: {
-            email: userEmail
-          }
-        }
-      }
-    });
-    
-    if (orders.length > 0) {
-      // Update orders with clerkUserId
-      await prisma.order.updateMany({
+    const fallbackOrders = pendingOrderIds.length
+      ? []
+      : await prisma.order.findMany({
+          where: {
+            clerkUserId: null,
+            inboxes: {
+              some: {
+                email: normalizedEmail,
+              },
+            },
+          },
+          select: { id: true },
+        });
+
+    const orderIds = Array.from(new Set([...pendingOrderIds, ...fallbackOrders.map((o) => o.id)]));
+
+    if (orderIds.length === 0) {
+      return;
+    }
+
+    const tx = [
+      prisma.order.updateMany({
         where: {
           id: {
-            in: orders.map(o => o.id)
-          }
+            in: orderIds,
+          },
         },
         data: {
           clerkUserId,
-          updatedAt: new Date()
-        }
-      });
-      
-      console.log(`[LINK] Linked ${orders.length} orders to user ${clerkUserId}`);
-    }
+          updatedAt: new Date(),
+        },
+      }),
+    ];
+
+    // PendingOrderInvite feature disabled: no cleanup needed
+
+    await prisma.$transaction(tx);
     
+    console.log(`[LINK] Linked ${orderIds.length} orders to user ${clerkUserId}`);
+
   } catch (error) {
     console.error('[LINK] Error linking orders to user:', error);
-  } finally {
-    // Prisma connection managed by singleton
   }
 }
 

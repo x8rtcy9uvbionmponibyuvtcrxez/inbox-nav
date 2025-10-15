@@ -44,6 +44,7 @@ model Order {
   onboardingData   OnboardingData[]
   inboxes          Inbox[]
   domains          Domain[]
+  pendingInvites   PendingOrderInvite[]
   
   @@map("orders")
 }
@@ -136,4 +137,17 @@ model AuditLog {
   createdAt     DateTime @default(now()) @map("created_at")
 
   @@map("audit_logs")
+}
+
+model PendingOrderInvite {
+  id        String   @id @default(cuid())
+  email     String
+  orderId   String   @map("order_id")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@unique([email, orderId])
+  @@map("pending_order_invites")
 }
