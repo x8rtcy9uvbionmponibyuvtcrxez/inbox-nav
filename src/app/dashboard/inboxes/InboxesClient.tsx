@@ -646,67 +646,72 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                   </Button>
                 </Popover.Trigger>
                 <Popover.Portal>
-                  <Popover.Content sideOffset={8} align="end" className="surface-pop z-50 w-72 p-4 text-brand-primary backdrop-blur">
-                    <div className="space-y-4 text-xs text-brand-secondary">
+                  <Popover.Content sideOffset={8} align="end" className="z-50 w-80 rounded-2xl border border-white/10 bg-white/[0.08] p-6 text-brand-primary shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+                    <div className="space-y-6 text-sm text-brand-secondary">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Show deleted inboxes</span>
-                        <label className="inline-flex items-center gap-2 text-brand-secondary">
-                          <input type="checkbox" checked={showDeleted} onChange={(e) => setShowDeleted(e.target.checked)} />
-                          <span>Show</span>
+                        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Show deleted inboxes</span>
+                        <label className="inline-flex items-center gap-3 text-brand-secondary">
+                          <input 
+                            type="checkbox" 
+                            checked={showDeleted} 
+                            onChange={(e) => setShowDeleted(e.target.checked)}
+                            className="h-4 w-4 rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
+                          />
+                          <span className="text-sm font-medium">Show</span>
                         </label>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Business</label>
+                      <div className="space-y-3">
+                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Business</label>
                         <input
                           value={filters.business}
                           onChange={(event) => setFilterValue("business", event.target.value)}
                           placeholder="e.g. Acme"
-                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
+                          className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary placeholder:text-brand-muted focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Order ID</label>
+                      <div className="space-y-3">
+                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Order ID</label>
                         <input
                           value={filters.orderId}
                           onChange={(event) => setFilterValue("orderId", event.target.value)}
                           placeholder="Search by order ID"
-                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
+                          className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary placeholder:text-brand-muted focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">ESP platforms</label>
+                      <div className="space-y-3">
+                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">ESP platforms</label>
                         <div className="flex flex-wrap gap-2">
                           {uniquePlatforms.length ? (
                             uniquePlatforms.map((platform) => (
                               <button
                                 key={platform}
                                 onClick={() => togglePlatform(platform)}
-                                className={`rounded-full px-3 py-1 ${
+                                className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                                   filters.platforms.includes(platform)
-                                    ? 'bg-white/90 text-black'
-                                    : 'border border-white/15 text-brand-muted'
+                                    ? 'bg-white text-black shadow-sm'
+                                    : 'border border-white/20 text-brand-muted hover:border-white/40 hover:text-brand-primary'
                                 }`}
                               >
                                 {platform}
                               </button>
                             ))
                           ) : (
-                            <span className="text-brand-muted">No ESP data yet.</span>
+                            <span className="text-sm text-brand-muted">No ESP data yet.</span>
                           )}
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Tags</label>
+                      <div className="space-y-3">
+                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Tags</label>
                         <input
                           value={filters.tags.join(', ')}
                           onChange={(event) => setFilterValue("tags", event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean))}
                           placeholder="primary, warmup"
-                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
+                          className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary placeholder:text-brand-muted focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Created</label>
-                        <div className="flex items-center gap-2">
+                      <div className="space-y-3">
+                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Created</label>
+                        <div className="flex items-center gap-3">
                           <input
                             type="date"
                             value={filters.dateRange.from ? format(filters.dateRange.from, 'yyyy-MM-dd') : ''}
@@ -718,7 +723,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                                 dateRange: { ...prev.dateRange, from: value },
                               }));
                             }}
-                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
+                            className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
                           />
                           <input
                             type="date"
@@ -731,10 +736,10 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                                 dateRange: { ...prev.dateRange, to: value },
                               }));
                             }}
-                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
+                            className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
                           />
                         </div>
-                        <div className="flex items-center gap-2 text-brand-muted">
+                        <div className="flex items-center gap-2">
                           {(['ALL', '7', '30', '90'] as DatePreset[]).map((preset) => (
                             <button
                               key={preset}
@@ -742,18 +747,22 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                                 const range = applyDatePreset(preset);
                                 setFilters((prev) => ({ ...prev, datePreset: preset, dateRange: range }));
                               }}
-                              className={`rounded-full px-3 py-1 ${filters.datePreset === preset ? 'bg-white/90 text-black' : 'border border-white/15'}`}
+                              className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                                filters.datePreset === preset 
+                                  ? 'bg-white text-black shadow-sm' 
+                                  : 'border border-white/20 text-brand-muted hover:border-white/40 hover:text-brand-primary'
+                              }`}
                             >
                               {preset === 'ALL' ? 'All' : `Last ${preset}d`}
                             </button>
                           ))}
                         </div>
                       </div>
-                    <div className="flex items-center justify-between pt-1">
-                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-brand-secondary hover:text-brand-primary">
+                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-brand-secondary hover:text-brand-primary px-6">
                         Clear all
                       </Button>
-                      <Button variant="primary" size="sm" onClick={() => setIsFilterSheetOpen(false)}>
+                      <Button variant="primary" size="sm" onClick={() => setIsFilterSheetOpen(false)} className="px-8">
                         Done
                       </Button>
                     </div>
