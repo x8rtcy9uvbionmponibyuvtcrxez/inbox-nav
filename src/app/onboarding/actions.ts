@@ -440,6 +440,17 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         shouldCreate: distribution.shouldCreateInboxes,
         message: distribution.message,
       });
+      
+      console.log('[ACTION] Domain source check:', {
+        domainSource,
+        sessionDomainSource,
+        inputDomainSource: input.domainSource,
+        inputDomainStatus: input.domainStatus,
+        providedDomains: domainSource === 'OWN' ? (sessionOwnDomains ?? (input.providedDomains ?? input.domainList ?? [])) : [],
+        sessionOwnDomains,
+        inputProvidedDomains: input.providedDomains,
+        inputDomainList: input.domainList,
+      });
 
       if (!distribution.shouldCreateInboxes) {
         // BUY_FOR_ME branch - set order status and return
@@ -508,11 +519,23 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         }));
 
         if (inboxData.length > 0) {
+          console.log('[ACTION] Creating inboxes with data:', {
+            count: inboxData.length,
+            firstInbox: inboxData[0],
+            orderId: order.id,
+          });
           const inboxResult = await tx.inbox.createMany({
             data: inboxData,
             skipDuplicates: true,
           });
           console.log(`[ACTION] ✅ Created inboxes: ${inboxResult.count}`);
+          
+          // Verify inboxes were created
+          const createdInboxes = await tx.inbox.findMany({
+            where: { orderId: order.id },
+            select: { id: true, email: true, status: true }
+          });
+          console.log('[ACTION] Verification - inboxes in DB:', createdInboxes);
         } else {
           console.log('[ACTION] ✅ No inboxes to create');
         }
