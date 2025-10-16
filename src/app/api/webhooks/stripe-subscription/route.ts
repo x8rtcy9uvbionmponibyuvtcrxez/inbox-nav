@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
 
   let event: Stripe.Event
   try {
-    const payload = await request.text()
+    // Get the raw body as a Buffer to preserve the exact format
+    const body = await request.arrayBuffer()
+    const payload = Buffer.from(body).toString('utf8')
+    
     event = stripe.webhooks.constructEvent(payload, sig, webhookSecret)
     console.log(`[Stripe Webhook] Received event: ${event.type}`)
   } catch (err) {

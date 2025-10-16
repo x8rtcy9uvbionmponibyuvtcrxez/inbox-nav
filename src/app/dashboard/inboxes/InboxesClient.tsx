@@ -114,7 +114,9 @@ function calculateAverageAge(inboxList: InboxRecord[]): number {
     return sum + diff / (1000 * 60 * 60 * 24);
   }, 0);
   const average = totalDays / inboxList.length;
-  return Number.isFinite(average) ? average : 0;
+  if (!Number.isFinite(average)) return 0;
+  const rounded = Math.round(average);
+  return Math.max(1, rounded);
 }
 
 function downloadCsv(rows: string[][], filename: string) {
@@ -600,7 +602,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
         </div>
         <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
           <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Average age of Inboxes</p>
-          <p className="mt-4 text-4xl font-bold text-brand-primary">{averageAge.toFixed(1)} days</p>
+          <p className="mt-4 text-4xl font-bold text-brand-primary">{averageAge} days</p>
         </div>
       </div>
 

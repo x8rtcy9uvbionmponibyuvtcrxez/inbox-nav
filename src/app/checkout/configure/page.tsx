@@ -41,12 +41,30 @@ function ConfigurePageContent() {
   const product = normalizeProductType(params.get("product"));
   const quantity = Math.max(1, parseInt(params.get("qty") || "10", 10) || 10);
 
-  // PREWARMED skips configuration entirely per requirements
-  useEffect(() => {
-    if (product === "PREWARMED") {
-      router.replace("/dashboard/products");
-    }
-  }, [product, router]);
+  // Check for missing required parameters
+  const productParam = params.get("product");
+  if (!productParam) {
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+          <div className="app-shell">
+            <div className="flex flex-col items-center justify-center space-y-6 py-20">
+              <h1 className="text-2xl font-bold text-[var(--text-primary)]">Configuration Error</h1>
+              <p className="text-center text-[var(--text-secondary)]">
+                Missing product parameter. Please select a product from the products page.
+              </p>
+              <Button asChild>
+                <Link href="/dashboard/products">← Back to Products</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
+  // PREWARMED products don't need domain configuration
+  // They go directly to checkout, but we still show the form for consistency
 
   const [inboxesPerDomain, setInboxesPerDomain] = useState<number>(getDefaultInboxesPerDomain(product));
   const [domainSource, setDomainSource] = useState<DomainSource>("OWN");
@@ -177,7 +195,7 @@ function ConfigurePageContent() {
                 </p>
               </div>
 
-              {product !== "PREWARMED" && (
+              {product !== "PREWARMED" ? (
                 <div className="space-y-4">
                   <label
                     className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
@@ -224,31 +242,37 @@ function ConfigurePageContent() {
                     </div>
                   )}
                 </div>
+              ) : (
+                <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+                  Prewarmed inboxes are ready to send immediately and don&apos;t require domain configuration.
+                </div>
               )}
 
-              <div className="space-y-4">
-                <label
-                  className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
-                    domainSource === "OWN"
-                      ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.12)] text-[var(--text-primary)]"
-                      : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)] hover:bg-[rgba(254,254,254,0.06)]"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="domainSource"
-                    className="h-4 w-4 accent-[var(--bg-white)]"
-                    checked={domainSource === "OWN"}
-                    onChange={() => setDomainSource("OWN")}
-                  />
-                  <span className="flex-1">I have my own domains (no additional cost)</span>
-                </label>
-                {domainSource === "OWN" && (
-                  <div className="rounded-[12px] border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] p-4 text-xs text-[var(--text-muted)]">
-                    You&apos;ll provide your domain list, forwarding URL, and registrar access during onboarding so we can configure DNS and launch quickly.
-                  </div>
-                )}
-              </div>
+              {product !== "PREWARMED" && (
+                <div className="space-y-4">
+                  <label
+                    className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
+                      domainSource === "OWN"
+                        ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.12)] text-[var(--text-primary)]"
+                        : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)] hover:bg-[rgba(254,254,254,0.06)]"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="domainSource"
+                      className="h-4 w-4 accent-[var(--bg-white)]"
+                      checked={domainSource === "OWN"}
+                      onChange={() => setDomainSource("OWN")}
+                    />
+                    <span className="flex-1">I have my own domains (no additional cost)</span>
+                  </label>
+                  {domainSource === "OWN" && (
+                    <div className="rounded-[12px] border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] p-4 text-xs text-[var(--text-muted)]">
+                      You&apos;ll provide your domain list, forwarding URL, and registrar access during onboarding so we can configure DNS and launch quickly.
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
           </div>
 
