@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { Button } from "@/components/ui/Button";
 
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 type DomainSource = "OWN" | "BUY_FOR_ME";
@@ -102,126 +103,187 @@ function ConfigurePageContent() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-950 text-gray-100 px-6 py-10">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Configure Your {product} Order</h1>
-            <p className="text-sm text-gray-400 mt-1">
-              {quantity} {product} Inboxes @ {formatUsd(getPricePerInbox(product))} = {formatUsd(totalInboxPrice)}
-              {domainSource === "BUY_FOR_ME" && (
-                <>
-                  {" "}+ • Domains: {domainsNeeded} × {formatUsd(tldPrice)} = {formatUsd(totalDomainPrice)}
-                </>
+      <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+        <div className="app-shell">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="space-y-3">
+              <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                Configuration
+              </span>
+              <h1>Configure your {product} order</h1>
+              <p className="text-base text-[var(--text-secondary)]">
+                {quantity} {product} inboxes @ {formatUsd(getPricePerInbox(product))} = {formatUsd(totalInboxPrice)}
+                {domainSource === "BUY_FOR_ME" && (
+                  <>
+                    {" "}• Domains: {domainsNeeded} × {formatUsd(tldPrice)} = {formatUsd(totalDomainPrice)}
+                  </>
+                )}
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/dashboard/products">← Back to products</Link>
+            </Button>
+          </div>
+
+          {error && (
+            <div className="mt-8 rounded-[16px] border border-[#ff8d8d]/40 bg-[#ff8d8d]/10 p-5 text-sm text-[#ffb0b0]">
+              {error}
+            </div>
+          )}
+
+          <div className="mt-16 space-y-12">
+            <section className="surface-card space-y-6">
+              <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">Inboxes per domain</h2>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    Balance ramp speed with inbox reputation by controlling how many senders share a domain.
+                  </p>
+                </div>
+                <span className="text-sm font-medium text-[var(--text-secondary)]">≈ {domainsNeeded} domains needed</span>
+              </div>
+
+              {(product === "RESELLER" || product === "EDU" || product === "LEGACY" || product === "AWS") ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  {[1, 2, 3].map((n) => {
+                    const isActive = inboxesPerDomain === n;
+                    return (
+                      <button
+                        key={n}
+                        onClick={() => setInboxesPerDomain(n)}
+                        className={`rounded-[12px] border px-4 py-2 text-sm font-semibold transition-colors ${
+                          isActive
+                            ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
+                            : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)]"
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+                  {product === "MICROSOFT" ? "50 inboxes per domain (fixed)" : "3 inboxes per domain (fixed)"}
+                </div>
               )}
-            </p>
-          </div>
-          <Link href="/dashboard/products" className="text-sm text-gray-300 hover:text-white">← Back to Products</Link>
-        </div>
+            </section>
 
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</div>
-        )}
+            <section className="surface-card space-y-6">
+              <div>
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Domain options</h2>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Decide if we should procure fresh domains or if you&apos;ll connect existing inventory during onboarding.
+                </p>
+              </div>
 
-        <div className="space-y-8">
-          <div className="rounded-xl border border-white/10 bg-gray-900 p-6">
-            <div className="mb-4 text-sm font-medium text-gray-300">Inboxes per Domain</div>
-            {(product === "RESELLER" || product === "EDU" || product === "LEGACY" || product === "AWS") ? (
-              <div className="flex items-center gap-3">
-                {[1, 2, 3].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setInboxesPerDomain(n)}
-                    className={`rounded-lg px-4 py-2 text-sm ${inboxesPerDomain === n ? "bg-white text-black" : "bg-white/10 text-white hover:bg-white/20"}`}
+              {product !== "PREWARMED" && (
+                <div className="space-y-4">
+                  <label
+                    className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
+                      domainSource === "BUY_FOR_ME"
+                        ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
+                        : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)]"
+                    }`}
                   >
-                    {n}
-                  </button>
-                ))}
-                <div className="ml-auto text-sm text-gray-400">→ Requires ~{domainsNeeded} domains</div>
-              </div>
-            ) : (
-              <div className="text-sm text-gray-300">
-                {product === "MICROSOFT" ? "50 (fixed)" : "3 (fixed)"}
-                <span className="ml-2 text-gray-400">→ Requires ~{domainsNeeded} domains</span>
-              </div>
-            )}
-          </div>
+                    <input
+                      type="radio"
+                      name="domainSource"
+                      className="h-4 w-4 accent-[var(--bg-white)]"
+                      checked={domainSource === "BUY_FOR_ME"}
+                      onChange={() => setDomainSource("BUY_FOR_ME")}
+                    />
+                    <span className="flex-1">Purchase domains for me</span>
+                  </label>
 
-          <div className="rounded-xl border border-white/10 bg-gray-900 p-6">
-            <div className="mb-4 text-sm font-medium text-gray-300">Domain Options</div>
+                  {domainSource === "BUY_FOR_ME" && (
+                    <div className="space-y-4 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-4 text-sm text-[var(--text-secondary)]">
+                      <div className="flex flex-wrap items-center gap-4">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            className="h-4 w-4 accent-[var(--bg-white)]"
+                            checked={domainTLD === ".com"}
+                            onChange={() => setDomainTLD(".com")}
+                          />
+                          .com ({formatUsd(12)} each) = {formatUsd(domainsNeeded * 12)}
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            className="h-4 w-4 accent-[var(--bg-white)]"
+                            checked={domainTLD === ".info"}
+                            onChange={() => setDomainTLD(".info")}
+                          />
+                          .info ({formatUsd(4)} each) = {formatUsd(domainsNeeded * 4)}
+                        </label>
+                      </div>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        We&apos;ll purchase {domainsNeeded} {domainTLD} domains and stage them for DNS configuration. Forwarding destinations are collected during onboarding.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {product !== "PREWARMED" && (
-              <div className="space-y-2">
-                <label className="inline-flex items-center gap-2 text-sm">
+              <div className="space-y-4">
+                <label
+                  className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
+                    domainSource === "OWN"
+                      ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
+                      : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)]"
+                  }`}
+                >
                   <input
                     type="radio"
                     name="domainSource"
-                    checked={domainSource === "BUY_FOR_ME"}
-                    onChange={() => setDomainSource("BUY_FOR_ME")}
+                    className="h-4 w-4 accent-[var(--bg-white)]"
+                    checked={domainSource === "OWN"}
+                    onChange={() => setDomainSource("OWN")}
                   />
-                  Purchase domains for me
+                  <span className="flex-1">I have my own domains (no additional cost)</span>
                 </label>
-                {domainSource === "BUY_FOR_ME" && (
-                  <div className="mt-3 space-y-3">
-                    <div className="flex items-center gap-4 text-sm">
-                      <label className="inline-flex items-center gap-2">
-                        <input type="radio" checked={domainTLD === ".com"} onChange={() => setDomainTLD(".com")} />
-                        .com (${12} each) = {formatUsd(domainsNeeded * 12)}
-                      </label>
-                      <label className="inline-flex items-center gap-2">
-                        <input type="radio" checked={domainTLD === ".info"} onChange={() => setDomainTLD(".info")} />
-                        .info (${4} each) = {formatUsd(domainsNeeded * 4)}
-                      </label>
-                    </div>
-                    <div className="text-xs text-gray-400">We&apos;ll purchase {domainsNeeded} {domainTLD} domains. You&apos;ll provide the forwarding URL during onboarding.</div>
+                {domainSource === "OWN" && (
+                  <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-4 text-xs text-[var(--text-muted)]">
+                    You&apos;ll provide your domain list, forwarding URL, and registrar access during onboarding so we can configure DNS and launch quickly.
                   </div>
                 )}
               </div>
-            )}
-
-            <div className="mt-6 space-y-2">
-              <label className="inline-flex items-center gap-2 text-sm">
-                <input
-                  type="radio"
-                  name="domainSource"
-                  checked={domainSource === "OWN"}
-                  onChange={() => setDomainSource("OWN")}
-                />
-                I have my own domains (free)
-              </label>
-              {domainSource === "OWN" && (
-                <div className="mt-3 space-y-2">
-                  <div className="text-xs text-gray-400">You&apos;ll provide your domain list, forwarding URL, and registrar credentials during onboarding.</div>
-                </div>
-              )}
-            </div>
+            </section>
           </div>
 
-          <div className="flex items-center justify-between">
-            <Link href="/dashboard/products" className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10">← Back to Products</Link>
-            <button onClick={onContinue} disabled={submitting} className="rounded-md bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/40">
-              {submitting ? "Processing..." : "Continue to Checkout →"}
-            </button>
+          <div className="mt-12 flex flex-col gap-4 border-t border-[var(--border-subtle)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <Button variant="ghost" asChild className="justify-center sm:w-auto">
+              <Link href="/dashboard/products">← Back to products</Link>
+            </Button>
+            <Button
+              variant="primary"
+              onClick={onContinue}
+              disabled={submitting}
+              className="justify-center sm:w-auto"
+            >
+              {submitting ? "Processing…" : "Continue to checkout →"}
+            </Button>
           </div>
         </div>
       </div>
-    </div>
     </ErrorBoundary>
   );
 }
 
 export default function ConfigurePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-          <p className="mt-4 text-white/60">Loading configuration...</p>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[var(--bg-primary)] text-[var(--text-secondary)]">
+          <div className="space-y-4 text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[var(--border-medium)] border-t-transparent" />
+            <p className="text-sm">Loading configuration…</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ConfigurePageContent />
     </Suspense>
   );
 }
-

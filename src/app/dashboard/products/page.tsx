@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CheckIcon, StarIcon, ShieldCheckIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/Button";
 
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 
@@ -221,34 +222,38 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#090909] to-black px-6 pb-24 pt-16 text-white">
-      <div className="mx-auto max-w-6xl space-y-20">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <div className="app-shell space-y-16">
+        <div className="flex flex-col gap-12 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl space-y-5">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs font-semibold tracking-[0.3em] text-white/60 uppercase">
+            <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
               Plans
             </span>
-            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+            <h1>
               Pick the inbox runway that matches your outreach ambitions.
             </h1>
-            <p className="text-sm text-white/60 sm:text-base">
+            <p className="text-lg text-[var(--text-secondary)]">
               Every fleet ships with warming, deliverability monitoring, and human support. Scale campaigns with confidence—whether you need a handful of senders or an entire squadron.
             </p>
-            <div className="flex flex-wrap items-center gap-4 text-xs text-white/50">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
               <span>⚡ Instant provisioning</span>
               <span>• Reputation-safe warmup</span>
               <span>• Concierge support included</span>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5/20 px-6 py-4 backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.25em] text-white/40">Need a custom fleet?</p>
-            <p className="mt-2 text-sm text-white/70">Talk to us about tiered enterprise pricing and dedicated deliverability ops.</p>
+          <div className="surface-card max-w-md space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+              Need a custom fleet?
+            </p>
+            <p className="text-base text-[var(--text-secondary)]">
+              Talk to us about tiered enterprise pricing and dedicated deliverability ops.
+            </p>
             <a
               href="https://calendly.com/inboxnavigator/demo"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-white transition hover:text-white/70"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)]"
             >
               Book a Call
               <ArrowRightIcon className="h-4 w-4" />
@@ -257,86 +262,92 @@ export default function ProductsPage() {
         </div>
 
         {error && (
-          <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-sm text-red-200">
-            <div className="flex items-center justify-between">
+          <div className="rounded-[16px] border border-[#ff8d8d]/40 bg-[#ff8d8d]/10 p-6 text-sm text-[#ffb0b0]">
+            <div className="flex items-center justify-between gap-4">
               <p>{error}</p>
-              <button onClick={() => setError(null)} className="text-xs text-red-200 underline hover:text-red-100">
+              <button onClick={() => setError(null)} className="text-xs font-medium uppercase tracking-[0.08em] text-[#ffb0b0] hover:text-[#ffd1d1]">
                 Dismiss
               </button>
             </div>
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'bg-white/10 text-white border border-white/20'
-                  : 'text-white/60 hover:text-white/80 hover:bg-white/5'
-              }`}
-            >
-              <span className="text-lg">{tab.emoji}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+        <nav className="border-b border-[var(--border-subtle)] pb-6">
+          <div className="flex flex-wrap justify-center gap-3">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex h-11 items-center gap-3 rounded-[12px] px-5 text-base font-medium transition-colors ${
+                    isActive
+                      ? 'border border-[var(--border-medium)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]'
+                      : 'border border-transparent text-[var(--text-secondary)] hover:border-[var(--border-subtle)] hover:bg-[rgba(99,99,99,0.18)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <span className="text-lg">{tab.emoji}</span>
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
 
-        <div className={`grid gap-8 ${
-          filteredProducts.length === 1 
-            ? 'grid-cols-1 max-w-md mx-auto' 
-            : filteredProducts.length === 2 
-            ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
-            : filteredProducts.length === 3
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto'
-            : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6'
-        }`}>
+        <div
+          className={`grid gap-6 ${
+            filteredProducts.length === 1
+              ? 'grid-cols-1 max-w-lg mx-auto'
+              : filteredProducts.length === 2
+              ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
+              : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'
+          }`}
+        >
           {filteredProducts.map((product) => {
             const totalPrice = getTotalPrice(product.id);
 
             return (
-              <div
-                key={product.id}
-                className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-8 pb-10 pt-12 shadow-[0_25px_60px_-40px_rgba(0,0,0,0.8)] transition hover:border-white/20 hover:bg-white/[0.06]"
-              >
-                <div className="mb-8 flex items-start justify-between gap-3">
-                  <div className="rounded-2xl bg-white/10 p-3 text-white/80">
+              <div key={product.id} className="surface-card flex h-full flex-col gap-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-primary)]/80">
                     <product.icon className="h-6 w-6" />
                   </div>
-                  <div className="pt-1 text-right">
-                    <p className="text-xs uppercase tracking-[0.3em] text-white/40">Starting at</p>
-                    <p className="text-3xl font-semibold text-white">
+                  <div className="text-right">
+                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
+                    <p className="text-3xl font-semibold text-[var(--text-primary)]">
                       ${product.price}
-                      <span className="text-sm text-white/40"> / inbox</span>
+                      <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ inbox</span>
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <h2 className="text-2xl font-semibold text-white">{product.name}</h2>
-                  <p className="text-sm text-white/55">{product.description}</p>
+                  <h2 className="text-2xl font-semibold text-[var(--text-primary)]">{product.name}</h2>
+                  <p className="text-base text-[var(--text-secondary)]">{product.description}</p>
+                  {product.badge ? (
+                    <span className="inline-flex w-fit items-center rounded-[10px] border border-[var(--border-medium)] bg-[var(--bg-tertiary)] px-3 py-1 text-xs font-medium uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+                      {product.badge}
+                    </span>
+                  ) : null}
                 </div>
 
-                <div className="mt-6 space-y-3 text-sm text-white/70">
+                <div className="space-y-3 text-base text-[var(--text-secondary)]">
                   {product.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-3">
-                      <CheckIcon className="h-4 w-4 text-emerald-400" />
+                      <CheckIcon className="h-4 w-4 text-[var(--text-primary)]/80" />
                       <span>{feature}</span>
                     </div>
                   ))}
                   {product.id === "MICROSOFT" && (
-                    <div className="flex items-center gap-3 text-amber-300">
+                    <div className="flex items-center gap-3 text-[var(--text-primary)]">
                       <StarIcon className="h-4 w-4" />
                       <span>Elite reputation floor & dedicated SPF records</span>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-8 space-y-3">
-                  <label className="text-xs uppercase tracking-[0.25em] text-white/45">
+                <div className="space-y-3">
+                  <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
                     Inbox volume
                   </label>
                   <input
@@ -352,34 +363,39 @@ export default function ProductsPage() {
                         product.id,
                         Number.isFinite(num)
                           ? num
-                          : (product.id === "AWS" ? 20 : product.id === "MICROSOFT" ? 1 : 10)
+                          : product.id === "AWS"
+                          ? 20
+                          : product.id === "MICROSOFT"
+                          ? 1
+                          : 10,
                       );
                     }}
-                    className="w-full rounded-2xl border border-white/15 bg-black/40 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none"
                   />
                   {quantities[product.id] < getMoq(product.id) && (
-                    <p className="mt-2 text-xs text-amber-300">
+                    <p className="text-sm text-[var(--text-muted)]">
                       We have a minimum order of {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
                     </p>
                   )}
                 </div>
 
-                <div className="mt-auto space-y-6 pt-8">
-                  <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.3em] text-white/50">
+                <div className="mt-auto space-y-6">
+                  <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
                     <span>Total monthly</span>
-                    <span className="text-xl font-semibold text-white">
+                    <span className="text-xl font-semibold text-[var(--text-primary)]">
                       {formatCurrency(totalPrice)}
                     </span>
                   </div>
 
-                  <button
-                    onClick={() => handleSelectPlan(product.id)}
+                  <Button
+                    variant="primary"
+                    className="w-full justify-center gap-2"
                     disabled={loading[product.id] || quantities[product.id] < getMoq(product.id)}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/30 disabled:text-black/50"
+                    onClick={() => handleSelectPlan(product.id)}
                   >
                     {loading[product.id] ? (
                       <>
-                        <svg className="h-4 w-4 animate-spin text-black/70" viewBox="0 0 24 24" fill="none">
+                        <svg className="h-4 w-4 animate-spin text-[var(--text-dark)]/70" viewBox="0 0 24 24" fill="none">
                           <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
                         </svg>
@@ -391,7 +407,7 @@ export default function ProductsPage() {
                         <ArrowRightIcon className="h-4 w-4" />
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             );
@@ -399,9 +415,11 @@ export default function ProductsPage() {
         </div>
 
         {hasLargeQuantity ? (
-          <div className="rounded-3xl border border-white/10 bg-white/[0.04] px-8 py-6 text-sm text-white/60 backdrop-blur">
-            Scaling beyond 500 inboxes? We’ll layer in custom deliverability ops, pool management, and dedicated IP reputation monitoring.
-            <a href="mailto:contact@inboxnavigator.com" className="ml-2 text-white underline">
+          <div className="surface-panel text-sm text-[var(--text-secondary)]">
+            <span>
+              Scaling beyond 500 inboxes? We’ll layer in custom deliverability ops, pool management, and dedicated IP reputation monitoring.
+            </span>
+            <a href="mailto:contact@inboxnavigator.com" className="ml-2 inline-flex items-center text-[var(--text-primary)] underline">
               Reach out for enterprise pricing →
             </a>
           </div>

@@ -1,34 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --surface-0: #030616;
-  --surface-1: #0b1024;
-  --surface-2: #131a36;
-  --surface-3: #1f2954;
+  /* Core surfaces */
+  --bg-primary: #020202;
+  --bg-secondary: #2b2b25;
+  --bg-tertiary: #494949;
+  --bg-quaternary: #636363;
+  --bg-light: #7e7f7e;
+  --bg-white: #fefefe;
 
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  /* Typography */
+  --text-primary: #fefefe;
+  --text-secondary: #7e7f7e;
+  --text-muted: #636363;
+  --text-dark: #020202;
 
-  --text-primary: rgba(255, 255, 255, 0.96);
-  --text-secondary: rgba(228, 233, 255, 0.86);
-  --text-muted: rgba(189, 202, 255, 0.68);
-  --text-muted-strong: rgba(189, 202, 255, 0.78);
+  /* Borders */
+  --border-subtle: rgba(254, 254, 254, 0.06);
+  --border-medium: rgba(254, 254, 254, 0.12);
+  --border-strong: rgba(254, 254, 254, 0.24);
 
-  --accent-primary: #ffffff;
-  --accent-primary-contrast: #040714;
+  /* Accent (CTA gradient preserved) */
+  --accent-primary: #fefefe;
+  --accent-primary-contrast: #020202;
   --accent-gradient-from: #7468ff;
   --accent-gradient-to: #7ed0ff;
 
-  --success: #4ade80;
-  --warning: #facc15;
-  --danger: #fb7185;
+  /* Spacing scale (4px base) */
+  --space-xs: 0.5rem; /* 8px */
+  --space-sm: 0.75rem; /* 12px */
+  --space-md: 1rem; /* 16px */
+  --space-lg: 1.5rem; /* 24px */
+  --space-xl: 2rem; /* 32px */
+  --space-2xl: 3rem; /* 48px */
+  --space-3xl: 4rem; /* 64px */
+
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
 }
 
 @theme inline {
-  --color-background: var(--surface-0);
+  --color-background: var(--bg-primary);
   --color-foreground: var(--text-secondary);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 @layer base {
@@ -40,12 +55,11 @@
 
   body {
     min-height: 100vh;
-    background: radial-gradient(circle at top left, rgba(116, 104, 255, 0.18), transparent 55%),
-      radial-gradient(circle at 80% 20%, rgba(126, 208, 255, 0.12), transparent 45%),
-      var(--surface-0);
+    background: var(--bg-primary);
     color: var(--text-secondary);
     font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    letter-spacing: 0.01em;
+    letter-spacing: 0;
+    line-height: 1.6;
   }
 
   h1,
@@ -60,18 +74,21 @@
   }
 
   h1 {
-    font-size: clamp(2.25rem, 5vw, 2.75rem);
-    line-height: 1.16;
+    font-size: clamp(2.625rem, 6vw, 3.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
   }
 
   h2 {
-    font-size: clamp(1.75rem, 4vw, 2.25rem);
-    line-height: 1.18;
+    font-size: clamp(2rem, 5vw, 2.625rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
   }
 
   h3 {
-    font-size: clamp(1.375rem, 3vw, 1.75rem);
-    line-height: 1.22;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
   }
 
   p,
@@ -82,6 +99,11 @@
   }
 
   strong {
+    color: var(--text-primary);
+  }
+
+  ::selection {
+    background: var(--bg-tertiary);
     color: var(--text-primary);
   }
 }
@@ -100,10 +122,10 @@
   }
 
   .text-brand-muted-strong {
-    color: var(--text-muted-strong);
+    color: var(--text-secondary);
   }
 
-  /* Legacy opacity utilities tuned for readability */
+  /* Override legacy opacity utilities to match monochrome palette */
   .text-white\/80 {
     color: var(--text-primary);
   }
@@ -120,31 +142,88 @@
 
   .text-white\/45,
   .text-white\/40 {
-    color: rgba(189, 202, 255, 0.62);
+    color: rgba(126, 127, 126, 0.75);
   }
 
   .text-white\/30 {
-    color: rgba(189, 202, 255, 0.45);
+    color: rgba(126, 127, 126, 0.55);
+  }
+
+  .bg-white\/5 {
+    background-color: rgba(126, 127, 126, 0.08) !important;
+  }
+
+  .bg-white\/10,
+  .bg-white\/\[0\.1\] {
+    background-color: rgba(126, 127, 126, 0.12) !important;
+  }
+
+  .bg-white\/15 {
+    background-color: rgba(126, 127, 126, 0.18) !important;
+  }
+
+  .bg-white\/20 {
+    background-color: rgba(126, 127, 126, 0.22) !important;
+  }
+
+  .bg-white\/\[0\.04\],
+  .bg-white\/\[0\.05\] {
+    background-color: rgba(126, 127, 126, 0.16) !important;
+  }
+
+  .bg-white\/\[0\.03\],
+  .bg-white\/\[0\.035\],
+  .bg-white\/\[0\.02\] {
+    background-color: rgba(126, 127, 126, 0.12) !important;
+  }
+
+  .border-white\/5,
+  .border-white\/10,
+  .border-white\/\[0\.1\] {
+    border-color: var(--border-subtle) !important;
+  }
+
+  .border-white\/15,
+  .border-white\/20 {
+    border-color: var(--border-medium) !important;
+  }
+
+  .border-white\/25,
+  .border-white\/30,
+  .border-white\/40 {
+    border-color: var(--border-strong) !important;
   }
 
   .surface-card {
-    background: var(--surface-1);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
-    border-radius: 1.5rem;
-    box-shadow: 0 28px 48px -32px rgba(4, 7, 20, 0.65);
+    border-radius: 16px;
+    box-shadow: none;
+    padding: var(--space-xl);
   }
 
   .surface-panel {
-    background: var(--surface-2);
+    background: var(--bg-tertiary);
     border: 1px solid var(--border-subtle);
-    border-radius: 1.25rem;
-    box-shadow: 0 24px 60px -34px rgba(4, 7, 20, 0.6);
+    border-radius: 16px;
+    box-shadow: none;
+    padding: var(--space-xl);
   }
 
   .surface-pop {
-    background: var(--surface-3);
-    border: 1px solid var(--border-strong);
-    border-radius: 1rem;
-    box-shadow: 0 40px 70px -40px rgba(4, 7, 20, 0.75);
+    background: var(--bg-quaternary);
+    border: 1px solid var(--border-medium);
+    border-radius: 14px;
+    box-shadow: none;
+    padding: var(--space-lg);
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: 80rem;
+    margin: 0 auto;
+    padding-inline: clamp(1.5rem, 3vw, 3rem);
+    padding-top: var(--space-3xl);
+    padding-bottom: var(--space-3xl);
   }
 }

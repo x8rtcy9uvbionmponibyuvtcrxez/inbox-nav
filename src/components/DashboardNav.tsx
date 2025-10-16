@@ -23,10 +23,10 @@ export default function DashboardNav() {
             <li key={item.name}>
               <Link
                 href={item.href}
-                className={`flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition ${
+                className={`flex items-center gap-3 rounded-[12px] border px-4 py-2 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-white/10 text-white shadow-[0_10px_40px_-20px_rgba(15,118,255,0.6)]"
-                    : "text-white/60 hover:bg-white/5 hover:text-white"
+                    ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
+                    : "border-transparent text-[var(--text-secondary)] hover:border-[var(--border-subtle)] hover:bg-[rgba(99,99,99,0.2)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 <item.icon className="h-5 w-5" />

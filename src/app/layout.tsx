@@ -1,6 +1,6 @@
 import { type Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Inter, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { PerformanceMonitor } from '@/components/PerformanceMonitor'
@@ -8,8 +8,9 @@ import Header from '@/components/Header'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const inter = Inter({
+  variable: '--font-inter',
+  display: 'swap',
   subsets: ['latin'],
 })
 
@@ -45,7 +46,7 @@ export default function RootLayout({
       afterSignUpUrl="/dashboard"
     >
       <html lang="en" suppressHydrationWarning>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
+        <body className={`${inter.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
           <ErrorBoundary>
             <Header />
             {children}

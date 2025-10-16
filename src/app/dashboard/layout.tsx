@@ -18,20 +18,25 @@ export default async function DashboardLayout({
       : user?.fullName || user?.emailAddresses?.[0]?.emailAddress || "User";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#070707] via-[#0a0a0a] to-black text-white flex">
-      <aside className="w-72 border-r border-white/5 bg-black/40 backdrop-blur-xl flex flex-col">
-        <div className="px-6 pt-6 pb-5 border-b border-white/5">
+    <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <aside className="flex w-72 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+        <div className="border-b border-[var(--border-subtle)] px-6 py-6">
           <div className="flex items-center gap-3">
             <UserButton afterSignOutUrl="/" />
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{displayName}</p>
-              <p className="text-xs text-white/50">Inbox Navigator</p>
+              <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{displayName}</p>
+              <p className="text-xs text-[var(--text-muted)]">Inbox Navigator</p>
             </div>
           </div>
         </div>
 
         <div className="px-6 pt-6">
-          <Button asChild variant="secondary" className="w-full gap-2 rounded-xl bg-white/10 px-4 py-3 text-sm text-white hover:bg-white/20">
+          <Button
+            asChild
+            variant="primary"
+            size="sm"
+            className="w-full justify-center gap-2"
+          >
             <Link href="/dashboard/products">
               <ShoppingCartIcon className="h-5 w-5" />
               Create Inboxes
@@ -43,13 +48,13 @@ export default async function DashboardLayout({
           <DashboardNav />
         </div>
 
-        <div className="px-6 py-6 border-t border-white/5 text-xs text-white/40">
+        <div className="border-t border-[var(--border-subtle)] px-6 py-6 text-xs text-[var(--text-muted)]">
           © {new Date().getFullYear()} Inbox Navigator
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
-        <div className="px-8 pt-4 pb-10">{children}</div>
+      <main className="flex-1 overflow-y-auto bg-[var(--bg-primary)]">
+        <div className="px-6 py-8 md:px-10 lg:px-16 lg:py-12">{children}</div>
       </main>
     </div>
   );
