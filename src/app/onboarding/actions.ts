@@ -213,7 +213,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
               data: {
                 id: crypto.randomUUID(),
                 clerkUserId: userId,
-                productType: sessionProductTypeCanonical,
+                productType: sessionProductTypeCanonical as any, // Cast to any for now until DB migration
                 quantity: sessionQuantity,
                 totalAmount: sessionTotalAmountCents,
                 status: OrderStatus.PENDING, // Start as PENDING, admin will mark FULFILLED
@@ -281,7 +281,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           data: {
             id: tempOrderId,
             clerkUserId: userId,
-            productType: normalizedProductType,
+            productType: normalizedProductType as any, // Cast to any for now until DB migration
             quantity: input.inboxCount,
             totalAmount: totalAmountCents,
             status: OrderStatus.PENDING,
@@ -318,7 +318,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       const onboardingData = {
         orderId: order.id, // Use the actual order ID (from existing or newly created)
         clerkUserId: userId,
-        productType: orderProductType, // Normalized product type
+        productType: orderProductType as any, // Cast to any for now until DB migration
         businessType: input.businessName,
         website: sessionForwardingUrl ?? input.primaryForwardUrl,
         domainPreferences: {
