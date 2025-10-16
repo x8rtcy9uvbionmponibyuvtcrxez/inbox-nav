@@ -223,26 +223,27 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      <div className="app-shell space-y-16">
-        <div className="flex flex-col gap-12 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl space-y-5">
+      <div className="app-shell space-y-20">
+        {/* Hero Section */}
+        <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex-1 max-w-4xl space-y-6">
             <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
               Plans
             </span>
-            <h1>
+            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">
               Pick the inbox runway that matches your outreach ambitions.
             </h1>
-            <p className="text-lg text-[var(--text-secondary)]">
+            <p className="text-xl text-[var(--text-secondary)] leading-relaxed">
               Every fleet ships with warming, deliverability monitoring, and human support. Scale campaigns with confidence—whether you need a handful of senders or an entire squadron.
             </p>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
-              <span>⚡ Instant provisioning</span>
-              <span>• Reputation-safe warmup</span>
-              <span>• Concierge support included</span>
+            <div className="flex flex-wrap items-center gap-6 text-sm text-[var(--text-muted)]">
+              <span className="flex items-center gap-2">⚡ Instant provisioning</span>
+              <span className="flex items-center gap-2">🛡️ Reputation-safe warmup</span>
+              <span className="flex items-center gap-2">🎯 Concierge support included</span>
             </div>
           </div>
 
-          <div className="surface-card max-w-md space-y-3">
+          <div className="surface-card max-w-md space-y-4 p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
               Need a custom fleet?
             </p>
@@ -253,7 +254,7 @@ export default function ProductsPage() {
               href="https://calendly.com/inboxnavigator/demo"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)]"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)] transition-colors duration-200"
             >
               Book a Call
               <ArrowRightIcon className="h-4 w-4" />
@@ -272,21 +273,22 @@ export default function ProductsPage() {
           </div>
         )}
 
-        <nav className="border-b border-[var(--border-subtle)] pb-6">
-          <div className="flex flex-wrap justify-center gap-3">
+        {/* Tab Navigation */}
+        <nav className="border-b border-[var(--border-subtle)] pb-8">
+          <div className="flex flex-wrap justify-center gap-4">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex h-11 items-center gap-3 rounded-[12px] px-5 text-base font-medium transition-colors ${
+                  className={`flex h-12 items-center gap-3 rounded-[12px] px-6 text-base font-semibold transition-all duration-200 ${
                     isActive
-                      ? 'border border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)]'
-                      : 'border border-transparent text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:bg-[rgba(254,254,254,0.08)] hover:text-[var(--text-primary)]'
+                      ? 'border border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)] shadow-sm'
+                      : 'border border-transparent text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:bg-[rgba(254,254,254,0.08)] hover:text-[var(--text-primary)] hover:shadow-sm'
                   }`}
                 >
-                  <span className="text-lg">{tab.emoji}</span>
+                  <span className="text-xl">{tab.emoji}</span>
                   <span>{tab.label}</span>
                 </button>
               );
@@ -294,12 +296,13 @@ export default function ProductsPage() {
           </div>
         </nav>
 
+        {/* Product Cards */}
         <div
-          className={`grid gap-6 ${
+          className={`grid gap-8 ${
             filteredProducts.length === 1
               ? 'grid-cols-1 max-w-lg mx-auto'
               : filteredProducts.length === 2
-              ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
+              ? 'grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto'
               : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'
           }`}
         >
@@ -307,47 +310,49 @@ export default function ProductsPage() {
             const totalPrice = getTotalPrice(product.id);
 
             return (
-              <div key={product.id} className="surface-card flex h-full flex-col gap-8">
+              <div key={product.id} className="surface-card group flex h-full flex-col gap-8 p-8 transition-all duration-200 hover:shadow-lg">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-primary)]/80">
+                  <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-4 text-[var(--text-primary)]/80 group-hover:bg-[var(--bg-secondary)] transition-colors duration-200">
                     <product.icon className="h-6 w-6" />
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
-                    <p className="text-3xl font-semibold text-[var(--text-primary)]">
+                    <p className="text-3xl font-bold text-[var(--text-primary)]">
                       ${product.price}
                       <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ inbox</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <h2 className="text-2xl font-semibold text-[var(--text-primary)]">{product.name}</h2>
-                  <p className="text-base text-[var(--text-secondary)]">{product.description}</p>
-                  {product.badge ? (
-                    <span className="inline-flex w-fit items-center rounded-[10px] border border-[var(--border-medium)] bg-[var(--bg-tertiary)] px-3 py-1 text-xs font-medium uppercase tracking-[0.08em] text-[var(--text-secondary)]">
-                      {product.badge}
-                    </span>
-                  ) : null}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)]">{product.name}</h2>
+                    {product.badge ? (
+                      <span className="inline-flex w-fit items-center rounded-[10px] border border-[var(--border-medium)] bg-[var(--bg-tertiary)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+                        {product.badge}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="text-base text-[var(--text-secondary)] leading-relaxed">{product.description}</p>
                 </div>
 
-                <div className="space-y-3 text-base text-[var(--text-secondary)]">
+                <div className="space-y-4 text-base text-[var(--text-secondary)]">
                   {product.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-3">
-                      <CheckIcon className="h-4 w-4 text-[var(--text-primary)]/80" />
-                      <span>{feature}</span>
+                      <CheckIcon className="h-5 w-5 text-[var(--text-primary)]/80 flex-shrink-0" />
+                      <span className="leading-relaxed">{feature}</span>
                     </div>
                   ))}
                   {product.id === "MICROSOFT" && (
                     <div className="flex items-center gap-3 text-[var(--text-primary)]">
-                      <StarIcon className="h-4 w-4" />
-                      <span>Elite reputation floor & dedicated SPF records</span>
+                      <StarIcon className="h-5 w-5 flex-shrink-0" />
+                      <span className="leading-relaxed">Elite reputation floor & dedicated SPF records</span>
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                <div className="space-y-4">
+                  <label className="text-sm font-semibold text-[var(--text-primary)]">
                     Inbox volume
                   </label>
                   <input
@@ -370,32 +375,33 @@ export default function ProductsPage() {
                           : 10,
                       );
                     }}
-                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none"
+                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-4 text-lg font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none focus:ring-2 focus:ring-[var(--border-medium)]/20 transition-all duration-200"
                   />
                   {quantities[product.id] < getMoq(product.id) && (
-                    <p className="text-sm text-[var(--text-muted)]">
+                    <p className="text-sm text-[var(--text-muted)] bg-[var(--bg-tertiary)] rounded-lg px-3 py-2">
                       We have a minimum order of {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
                     </p>
                   )}
                 </div>
 
                 <div className="mt-auto space-y-6">
-                  <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                    <span>Total monthly</span>
-                    <span className="text-xl font-semibold text-[var(--text-primary)]">
+                  <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-6 py-4">
+                    <span className="text-sm font-semibold text-[var(--text-muted)]">Total monthly</span>
+                    <span className="text-2xl font-bold text-[var(--text-primary)]">
                       {formatCurrency(totalPrice)}
                     </span>
                   </div>
 
                   <Button
                     variant="primary"
-                    className="w-full justify-center gap-2"
+                    size="lg"
+                    className="w-full justify-center gap-3 font-semibold"
                     disabled={loading[product.id] || quantities[product.id] < getMoq(product.id)}
                     onClick={() => handleSelectPlan(product.id)}
                   >
                     {loading[product.id] ? (
                       <>
-                        <svg className="h-4 w-4 animate-spin text-[var(--text-dark)]/70" viewBox="0 0 24 24" fill="none">
+                        <svg className="h-5 w-5 animate-spin text-[var(--text-dark)]/70" viewBox="0 0 24 24" fill="none">
                           <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
                         </svg>
@@ -404,7 +410,7 @@ export default function ProductsPage() {
                     ) : (
                       <>
                         Launch this fleet
-                        <ArrowRightIcon className="h-4 w-4" />
+                        <ArrowRightIcon className="h-5 w-5" />
                       </>
                     )}
                   </Button>

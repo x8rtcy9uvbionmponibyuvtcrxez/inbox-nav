@@ -223,7 +223,8 @@ export default function DashboardClient({
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-3">
+      {/* Stats Cards */}
+      <div className="grid gap-6 md:grid-cols-3">
         <SummaryCard label="Total inboxes live" value={totalInboxes.toString()} icon={InboxIcon} accent={cardAccent.inboxes} />
         <SummaryCard label="Domains under management" value={totalDomains.toString()} icon={GlobeAltIcon} accent={cardAccent.domains} />
         <SummaryCard label="Monthly subscription" value={formatCurrency(totalMonthlySpend)} icon={CurrencyDollarIcon} accent={cardAccent.revenue} />
@@ -235,25 +236,31 @@ export default function DashboardClient({
         </div>
       ) : null}
 
+      {/* Order History Section */}
       <div className="rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_80px_-60px_rgba(7,7,7,0.9)] backdrop-blur-xl">
-        <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
-          <div>
-            <h2 className="text-lg font-semibold text-brand-primary">Order history</h2>
-            <p className="text-sm text-brand-secondary">Your most recent onboarding submissions and fulfillment progress.</p>
+        <div className="border-b border-white/5 px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-brand-primary">Order History</h2>
+              <p className="mt-1 text-sm text-brand-secondary">Your most recent onboarding submissions and fulfillment progress.</p>
+            </div>
+            <div className="text-xs text-brand-muted">
+              {orders.length} {orders.length === 1 ? 'order' : 'orders'}
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-white/5 text-sm">
             <thead className="bg-white/5 text-xs uppercase tracking-wider text-brand-muted">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left">Forwarding URL</th>
-                <th scope="col" className="px-6 py-3 text-left">Business</th>
-                <th scope="col" className="px-6 py-3 text-left">Product</th>
-                <th scope="col" className="px-6 py-3 text-left">Inboxes</th>
-                <th scope="col" className="px-6 py-3 text-left">Total</th>
-                <th scope="col" className="px-6 py-3 text-left">Submitted</th>
-                <th scope="col" className="px-6 py-3 text-left">Status</th>
-                <th scope="col" className="px-6 py-3 text-left">Actions</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Forwarding URL</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Business</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Product</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Inboxes</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Total</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Submitted</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Status</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -272,28 +279,32 @@ export default function DashboardClient({
                   "—";
                 
                 return (
-                  <tr key={record.id} className={`transition hover:bg-white/5 ${isCancelled ? 'opacity-60' : ''}`}>
-                    <td className="px-6 py-4">
-                      <div className="max-w-[240px] truncate text-xs text-brand-muted" title={forwardingLabel}>
+                  <tr key={record.id} className={`group transition-all duration-200 hover:bg-white/5 ${isCancelled ? 'opacity-60' : ''}`}>
+                    <td className="px-6 py-5">
+                      <div className="max-w-[240px] truncate text-sm text-brand-primary font-medium" title={forwardingLabel}>
                         {forwardingLabel}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-base text-brand-primary">{businessLabel}</div>
-                      <div className="text-xs text-brand-muted">{record.website ? record.website : "—"}</div>
+                    <td className="px-6 py-5">
+                      <div className="text-base font-semibold text-brand-primary">{businessLabel}</div>
+                      <div className="text-xs text-brand-muted mt-1">{record.website ? record.website : "—"}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-brand-secondary">
+                    <td className="px-6 py-5">
+                      <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-brand-primary">
                         {order?.productType ? toTitle(order.productType) : "—"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-brand-secondary">{inboxCount}</td>
-                    <td className="px-6 py-4 text-brand-secondary">{formatCurrency(totalCost)}</td>
-                    <td className="px-6 py-4 text-brand-muted">{formatDate(record.createdAt)}</td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-2">
+                    <td className="px-6 py-5">
+                      <span className="text-lg font-semibold text-brand-primary">{inboxCount}</span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="text-lg font-semibold text-brand-primary">{formatCurrency(totalCost)}</span>
+                    </td>
+                    <td className="px-6 py-5 text-sm text-brand-muted">{formatDate(record.createdAt)}</td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center">
                         {order?.subscriptionStatus === 'cancel_at_period_end' || order?.status === 'CANCELLED' ? (
-                          <span className="rounded-full px-3 py-1 text-xs font-medium tracking-wide bg-red-500/15 text-red-300 border border-red-500/30">
+                          <span className="rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide bg-red-500/15 text-red-300 border border-red-500/30">
                             Cancelled
                           </span>
                         ) : order?.status ? (
@@ -303,8 +314,8 @@ export default function DashboardClient({
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <Button size="sm" variant="secondary" onClick={() => handleOpenOrderDetails(record)}>
+                    <td className="px-6 py-5">
+                      <Button size="sm" variant="secondary" onClick={() => handleOpenOrderDetails(record)} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         View Details
                       </Button>
                     </td>
