@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckIcon, StarIcon, ShieldCheckIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
 
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
@@ -15,7 +15,6 @@ interface Product {
   description: string;
   features: string[];
   badge?: string;
-  icon: React.ComponentType<{ className?: string }>;
   color: string;
   priceId: string;
   tab: TabId;
@@ -62,7 +61,6 @@ const products: Product[] = [
     price: 1.5,
     description: "Educational institution inboxes with special pricing",
     features: ["Academic pricing", "Educational features", "Student support"],
-    icon: CheckIcon,
     color: "green",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual EDU price ID
     tab: "google",
@@ -73,7 +71,6 @@ const products: Product[] = [
     price: 2.5,
     description: "Legacy inboxes with established reputation",
     features: ["Proven reputation", "Stable delivery", "Legacy support"],
-    icon: CheckIcon,
     color: "orange",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual LEGACY price ID
     tab: "google",
@@ -84,7 +81,6 @@ const products: Product[] = [
     price: 3,
     description: "Standard cold email inboxes with Google Workspace",
     features: ["Basic warmup", "Reliable delivery", "IMAP/SMTP access"],
-    icon: CheckIcon,
     color: "blue",
     priceId: "price_1SCFcnBTWWHTKTJvdwKiINPy",
     tab: "google",
@@ -96,7 +92,6 @@ const products: Product[] = [
     description: "Pre-warmed inboxes ready to send immediately",
     features: ["Already warmed", "Higher reputation", "Instant setup"],
     badge: "Popular",
-    icon: StarIcon,
     color: "green",
     priceId: "price_1SHmyyBTWWHTKTJvK6ohM58w",
     tab: "prewarmed",
@@ -107,7 +102,6 @@ const products: Product[] = [
     price: 1.25,
     description: "AWS-powered inboxes with cloud infrastructure",
     features: ["Cloud infrastructure", "Scalable", "AWS integration"],
-    icon: CheckIcon,
     color: "yellow",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual AWS price ID
     tab: "smtp",
@@ -119,7 +113,6 @@ const products: Product[] = [
     description: "Premium Microsoft 365 enterprise inboxes (per domain)",
     features: ["Enterprise security", "Advanced features", "Priority support"],
     badge: "Premium",
-    icon: ShieldCheckIcon,
     color: "purple",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
     tab: "microsoft",
@@ -311,10 +304,7 @@ export default function ProductsPage() {
 
             return (
               <div key={product.id} className="surface-card group flex h-full flex-col gap-8 p-8 transition-all duration-200 hover:shadow-lg">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-4 text-[var(--text-primary)]/80 group-hover:bg-[var(--bg-secondary)] transition-colors duration-200">
-                    <product.icon className="h-6 w-6" />
-                  </div>
+                <div className="flex items-start justify-end gap-4">
                   <div className="text-right">
                     <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
                     <p className="text-3xl font-bold text-[var(--text-primary)]">
@@ -336,17 +326,15 @@ export default function ProductsPage() {
                   <p className="text-base text-[var(--text-secondary)] leading-relaxed">{product.description}</p>
                 </div>
 
-                <div className="space-y-4 text-base text-[var(--text-secondary)]">
+                <div className="space-y-3 text-base text-[var(--text-secondary)]">
                   {product.features.map((feature) => (
-                    <div key={feature} className="flex items-center gap-3">
-                      <CheckIcon className="h-5 w-5 text-[var(--text-primary)]/80 flex-shrink-0" />
-                      <span className="leading-relaxed">{feature}</span>
+                    <div key={feature} className="flex items-start">
+                      <span className="leading-relaxed">• {feature}</span>
                     </div>
                   ))}
                   {product.id === "MICROSOFT" && (
-                    <div className="flex items-center gap-3 text-[var(--text-primary)]">
-                      <StarIcon className="h-5 w-5 flex-shrink-0" />
-                      <span className="leading-relaxed">Elite reputation floor & dedicated SPF records</span>
+                    <div className="flex items-start text-[var(--text-primary)]">
+                      <span className="leading-relaxed">• Elite reputation floor & dedicated SPF records</span>
                     </div>
                   )}
                 </div>
