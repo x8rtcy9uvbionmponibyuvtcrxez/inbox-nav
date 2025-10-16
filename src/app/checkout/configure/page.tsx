@@ -163,8 +163,8 @@ function ConfigurePageContent() {
                 </p>
               </div>
               
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
+              <div className="flex flex-col items-center gap-8">
+                <div className="w-full max-w-md">
                   <input
                     type="number"
                     min="1"
@@ -179,13 +179,13 @@ function ConfigurePageContent() {
                       // Update state
                       setQuantity(newQuantity);
                     }}
-                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-lg font-semibold text-[var(--text-primary)] focus:border-[var(--border-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--border-strong)]/20"
-                    placeholder="Enter quantity"
+                    className="w-full rounded-[16px] border-2 border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-8 py-6 text-center text-4xl font-bold text-[var(--text-primary)] focus:border-[var(--border-strong)] focus:outline-none focus:ring-4 focus:ring-[var(--border-strong)]/20"
+                    placeholder="10"
                   />
                 </div>
-                <div className="text-right">
-                  <div className="text-sm text-[var(--text-secondary)]">Total cost</div>
-                  <div className="text-2xl font-bold text-[var(--text-primary)]">
+                <div className="text-center">
+                  <div className="text-lg text-[var(--text-secondary)]">Total cost</div>
+                  <div className="text-5xl font-bold text-[var(--text-primary)]">
                     {formatUsd(totalInboxPrice)}
                   </div>
                 </div>
