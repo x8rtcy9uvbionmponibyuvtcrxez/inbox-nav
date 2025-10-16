@@ -5,6 +5,8 @@ import { CheckIcon, StarIcon, ShieldCheckIcon, ArrowRightIcon } from "@heroicons
 
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 
+type TabId = "google" | "microsoft" | "prewarmed" | "smtp";
+
 interface Product {
   id: ProductType;
   name: string;
@@ -15,7 +17,42 @@ interface Product {
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   priceId: string;
+  tab: TabId;
 }
+
+interface Tab {
+  id: TabId;
+  label: string;
+  emoji: string;
+  productIds: ProductType[];
+}
+
+const tabs: Tab[] = [
+  {
+    id: "google",
+    label: "Google",
+    emoji: "📧",
+    productIds: ["RESELLER", "EDU", "LEGACY"]
+  },
+  {
+    id: "microsoft",
+    label: "Microsoft",
+    emoji: "💼",
+    productIds: ["MICROSOFT"]
+  },
+  {
+    id: "prewarmed",
+    label: "Prewarmed",
+    emoji: "🔥",
+    productIds: ["PREWARMED"]
+  },
+  {
+    id: "smtp",
+    label: "SMTP",
+    emoji: "📨",
+    productIds: ["AWS"]
+  }
+];
 
 const products: Product[] = [
   {
@@ -27,6 +64,7 @@ const products: Product[] = [
     icon: CheckIcon,
     color: "blue",
     priceId: "price_1SCFcnBTWWHTKTJvdwKiINPy",
+    tab: "google",
   },
   {
     id: "EDU",
@@ -37,6 +75,7 @@ const products: Product[] = [
     icon: CheckIcon,
     color: "green",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual EDU price ID
+    tab: "google",
   },
   {
     id: "LEGACY",
@@ -47,6 +86,7 @@ const products: Product[] = [
     icon: CheckIcon,
     color: "orange",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual LEGACY price ID
+    tab: "google",
   },
   {
     id: "PREWARMED",
@@ -58,6 +98,7 @@ const products: Product[] = [
     icon: StarIcon,
     color: "green",
     priceId: "price_1SHmyyBTWWHTKTJvK6ohM58w",
+    tab: "prewarmed",
   },
   {
     id: "AWS",
@@ -68,6 +109,7 @@ const products: Product[] = [
     icon: CheckIcon,
     color: "yellow",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual AWS price ID
+    tab: "smtp",
   },
   {
     id: "MICROSOFT",
@@ -79,6 +121,7 @@ const products: Product[] = [
     icon: ShieldCheckIcon,
     color: "purple",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
+    tab: "microsoft",
   },
 ];
 
@@ -90,6 +133,7 @@ const formatCurrency = (amountInDollars: number) =>
   }).format(amountInDollars);
 
 export default function ProductsPage() {
+  const [activeTab, setActiveTab] = useState<TabId>("google");
   const [quantities, setQuantities] = useState<Record<ProductType, number>>({
     RESELLER: 10,
     EDU: 10,
@@ -111,6 +155,13 @@ export default function ProductsPage() {
     () => Math.max(...Object.values(quantities)) > 500,
     [quantities],
   );
+
+  // Filter products based on active tab
+  const filteredProducts = useMemo(() => {
+    const activeTabConfig = tabs.find(tab => tab.id === activeTab);
+    if (!activeTabConfig) return products;
+    return products.filter(product => activeTabConfig.productIds.includes(product.id));
+  }, [activeTab]);
 
   const handleQuantityChange = (productId: ProductType, value: number) => {
     // Allow temporary values below MOQ while typing; enforce hard caps 0..2000
@@ -216,8 +267,34 @@ export default function ProductsPage() {
           </div>
         )}
 
-        <div className="grid gap-8 lg:grid-cols-3 xl:grid-cols-6">
-          {products.map((product) => {
+        {/* Tab Navigation */}
+        <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                activeTab === tab.id
+                  ? 'bg-white/10 text-white border border-white/20'
+                  : 'text-white/60 hover:text-white/80 hover:bg-white/5'
+              }`}
+            >
+              <span className="text-lg">{tab.emoji}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className={`grid gap-8 ${
+          filteredProducts.length === 1 
+            ? 'grid-cols-1 max-w-md mx-auto' 
+            : filteredProducts.length === 2 
+            ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
+            : filteredProducts.length === 3
+            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto'
+            : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6'
+        }`}>
+          {filteredProducts.map((product) => {
             const totalPrice = getTotalPrice(product.id);
 
             return (
