@@ -89,7 +89,7 @@ function StatusPill({ status, order }: { status: InboxStatus; order?: { subscrip
       case InboxStatus.CANCELLED:
         return 'Paused';
       default:
-        return status.toLowerCase();
+        return String(status).toLowerCase();
     }
   };
   

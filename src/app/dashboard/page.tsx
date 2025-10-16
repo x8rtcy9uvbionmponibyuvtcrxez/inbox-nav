@@ -65,9 +65,11 @@ export default async function Dashboard() {
     return sum + amount;
   }, 0);
 
-  const displayName = user.firstName
-    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
-    : user.fullName || user.emailAddresses?.[0]?.emailAddress || "there";
+  const displayName =
+    (user.firstName && user.firstName.trim()) ||
+    (user.fullName ? user.fullName.split(" ")[0] : undefined) ||
+    user.emailAddresses?.[0]?.emailAddress ||
+    "there";
 
   return (
     <DashboardClient
