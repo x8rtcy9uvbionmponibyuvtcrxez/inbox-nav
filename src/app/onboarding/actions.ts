@@ -257,11 +257,16 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
             }
           } catch (stripeError) {
             console.error("[ACTION] ❌ Stripe session fetch failed:", stripeError);
+            console.error("[ACTION] Stripe error type:", typeof stripeError);
+            console.error("[ACTION] Stripe error message:", stripeError instanceof Error ? stripeError.message : 'Not an Error object');
             if (stripeError instanceof Error) console.error("[ACTION] Stripe error stack:", stripeError.stack);
+            
             const code =
               typeof stripeError === 'object' && stripeError !== null && 'code' in stripeError
                 ? String((stripeError as { code?: string }).code ?? '')
                 : '';
+            console.error("[ACTION] Stripe error code:", code);
+            
             const friendlyMessage =
               code === 'resource_missing'
                 ? 'Your checkout session has expired or was already completed. Please start a new checkout.'
