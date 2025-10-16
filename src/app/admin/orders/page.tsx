@@ -168,13 +168,13 @@ export default async function AdminOrdersPage({
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <div className="app-shell space-y-12">
-        <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-3">
-            <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+        <header className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+          <div className="flex-1 max-w-3xl space-y-4">
+            <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.08)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
               Control center
             </span>
-            <h1 className="text-3xl font-semibold text-[var(--text-primary)]">Admin orders dashboard</h1>
-            <p className="max-w-xl text-sm text-[var(--text-secondary)]">
+            <h1 className="text-4xl font-bold text-[var(--text-primary)]">Admin Orders Dashboard</h1>
+            <p className="text-lg text-[var(--text-secondary)] leading-relaxed">
               Monitor incoming orders, fulfillment velocity, and subscription health at a glance. Use the filters or search by customer to dive deeper.
             </p>
           </div>
@@ -201,33 +201,33 @@ export default async function AdminOrdersPage({
           </div>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { label: "Total orders", value: orders.length.toString() },
             { label: "Pending review", value: pending.toString() },
             { label: "Fulfilled orders", value: fulfilled.toString() },
             { label: "Assets under mgmt", value: `${totalInboxes} inboxes · ${totalDomains} domains` },
           ].map((card) => (
-            <div key={card.label} className="surface-card space-y-3">
+            <div key={card.label} className="surface-card group space-y-4 px-8 py-6 hover:bg-white/[0.04] transition-all duration-200">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                 {card.label}
               </p>
-              <p className="text-2xl font-semibold text-[var(--text-primary)]">{card.value}</p>
+              <p className="text-3xl font-bold text-[var(--text-primary)]">{card.value}</p>
             </div>
           ))}
         </section>
 
-        <section className="flex flex-wrap gap-2">
+        <section className="flex flex-wrap gap-3">
           {STATUS_FILTERS.map((status) => {
             const isActive = currentStatus === status;
             return (
               <Link
                 key={status}
                 href={buildUrl(status, q)}
-                className={`inline-flex items-center gap-2 rounded-[10px] border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition-colors ${
+                className={`inline-flex items-center gap-2 rounded-[12px] border px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition-all duration-200 ${
                   isActive
-                    ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)]"
-                    : "border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-[var(--border-medium)] hover:text-[var(--text-primary)]"
+                    ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)] shadow-sm"
+                    : "border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-[var(--border-medium)] hover:text-[var(--text-primary)] hover:shadow-sm"
                 }`}
               >
                 {status.replace(/_/g, " ")}
@@ -241,15 +241,15 @@ export default async function AdminOrdersPage({
             <table className="min-w-full divide-y divide-[var(--border-subtle)] text-sm text-[var(--text-secondary)]">
               <thead className="bg-[rgba(254,254,254,0.05)] text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">
                 <tr>
-                  <th className="px-6 py-4 text-left">Order</th>
-                  <th className="px-6 py-4 text-left">Customer</th>
-                  <th className="px-6 py-4 text-left">Product</th>
-                  <th className="px-6 py-4 text-left">Qty</th>
-                  <th className="px-6 py-4 text-left">Status</th>
-                  <th className="px-6 py-4 text-left">Subscription</th>
-                  <th className="px-6 py-4 text-left">Inboxes</th>
-                  <th className="px-6 py-4 text-left">Domains</th>
-                  <th className="px-6 py-4 text-left">Created</th>
+                  <th className="px-6 py-5 text-left font-semibold text-[var(--text-primary)]">Order</th>
+                  <th className="px-6 py-5 text-left font-semibold text-[var(--text-primary)]">Customer</th>
+                  <th className="px-6 py-5 text-left font-semibold text-[var(--text-primary)]">Product</th>
+                  <th className="px-6 py-5 text-left font-semibold text-[var(--text-primary)]">Qty</th>
+                  <th className="px-6 py-5 text-left font-semibold text-[var(--text-primary)]">Status</th>
+                  <th className="px-6 py-5 text-left font-semibold text-[var(--text-primary)]">Subscription</th>
+                  <th className="px-6 py-5 text-left font-semibold text-[var(--text-primary)]">Inboxes</th>
+                  <th className="px-6 py-5 text-left font-semibold text-[var(--text-primary)]">Domains</th>
+                  <th className="px-6 py-5 text-left font-semibold text-[var(--text-primary)]">Created</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)]">
