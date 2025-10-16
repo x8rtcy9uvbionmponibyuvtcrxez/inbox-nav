@@ -35,12 +35,12 @@ export type SaveOnboardingInput = {
   sessionId?: string; // Stripe session ID for existing orders
 };
 
-const PRODUCT_TYPES: ProductType[] = ['GOOGLE', 'PREWARMED', 'MICROSOFT'];
+const PRODUCT_TYPES: ProductType[] = ['RESELLER', 'EDU', 'LEGACY', 'PREWARMED', 'AWS', 'MICROSOFT'];
 
 function coerceProductType(value?: string | null): ProductType {
-  if (!value) return 'GOOGLE';
+  if (!value) return 'RESELLER';
   const candidate = value.toUpperCase() as ProductType;
-  return PRODUCT_TYPES.includes(candidate) ? candidate : 'GOOGLE';
+  return PRODUCT_TYPES.includes(candidate) ? candidate : 'RESELLER';
 }
 
 export async function saveOnboardingAction(input: SaveOnboardingInput) {
@@ -80,7 +80,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     if (!input.accountId?.trim()) validationErrors.push("Account ID is required");
     if (!input.password?.trim()) validationErrors.push("Password is required");
     if (!input.personas || input.personas.length === 0) validationErrors.push("At least one persona is required");
-    if (input.inboxCount < 10 || input.inboxCount > 2000) validationErrors.push("Inbox count must be between 10 and 2000");
+    // MOQ validation will be done after product type is determined
 
     if (validationErrors.length > 0) {
       console.error("❌ Validation errors:", validationErrors);
@@ -89,8 +89,28 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
     const normalizedProductType = coerceProductType(input.productType);
 
+    // Step 2.5: Validate MOQ based on product type
+    const getMoq = (productType: ProductType) => {
+      if (productType === 'AWS') return 20;
+      if (productType === 'MICROSOFT') return 1;
+      return 10;
+    };
+    const moq = getMoq(normalizedProductType);
+    if (input.inboxCount < moq || input.inboxCount > 2000) {
+      return { success: false, error: `Inbox count must be between ${moq} and 2000 for ${normalizedProductType}` };
+    }
+
     // Step 3: Calculate pricing (in cents)
-    const pricePerInbox = normalizedProductType === 'GOOGLE' ? 3 : normalizedProductType === 'PREWARMED' ? 7 : 50;
+    const getPricePerInbox = (productType: ProductType) => {
+      if (productType === 'RESELLER') return 3;
+      if (productType === 'EDU') return 1.5;
+      if (productType === 'LEGACY') return 2.5;
+      if (productType === 'PREWARMED') return 7;
+      if (productType === 'AWS') return 1.25;
+      if (productType === 'MICROSOFT') return 60; // Per domain, not per inbox
+      return 3;
+    };
+    const pricePerInbox = getPricePerInbox(normalizedProductType);
     const totalAmountCents = input.inboxCount * pricePerInbox * 100; // Convert to cents
     console.log("[ACTION] 💰 Pricing calculation:", {
       productType: input.productType,
@@ -150,12 +170,16 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
             }
 
             const sessionProductTypeCanonical = coerceProductType(sessionProductType);
-            const productPrice =
-              sessionProductTypeCanonical === "GOOGLE"
-                ? 3
-                : sessionProductTypeCanonical === "PREWARMED"
-                  ? 7
-                  : 50;
+            const getPricePerInbox = (productType: ProductType) => {
+              if (productType === 'RESELLER') return 3;
+              if (productType === 'EDU') return 1.5;
+              if (productType === 'LEGACY') return 2.5;
+              if (productType === 'PREWARMED') return 7;
+              if (productType === 'AWS') return 1.25;
+              if (productType === 'MICROSOFT') return 60;
+              return 3;
+            };
+            const productPrice = getPricePerInbox(sessionProductTypeCanonical);
             const sessionTotalAmountCents = sessionQuantity * productPrice * 100;
 
             const subscriptionId = typeof session.subscription === 'string'
@@ -290,7 +314,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         stepCompleted: 4,
         isCompleted: true,
         domainSource: sessionDomainSource ?? (input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME')),
-        inboxesPerDomain: sessionInboxesPerDomain ?? (input.inboxesPerDomain ?? (orderProductType === 'GOOGLE' ? 3 : orderProductType === 'PREWARMED' ? 3 : 50)),
+        inboxesPerDomain: sessionInboxesPerDomain ?? (input.inboxesPerDomain ?? (orderProductType === 'RESELLER' || orderProductType === 'EDU' || orderProductType === 'LEGACY' || orderProductType === 'AWS' ? 3 : orderProductType === 'PREWARMED' ? 3 : 50)),
         providedDomains: (input.domainSource === 'OWN' || input.domainStatus === 'own')
           ? input.ownDomains ?? input.providedDomains ?? input.domainList ?? []
           : sessionDomainSource === 'OWN'
@@ -413,6 +437,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           email: allocation.email,
           firstName: allocation.firstName,
           lastName: allocation.lastName,
+          personaName: `${allocation.firstName} ${allocation.lastName}`.trim(),
           espPlatform: input.warmupTool,
           status: 'PENDING' as const,
           tags: input.internalTags || [],

@@ -332,7 +332,7 @@ export default function ImportPage() {
               <ul className="space-y-1 text-sm text-gray-300">
                 <li>• <code className="bg-gray-800 px-2 py-1 rounded">external_id</code> - Unique identifier for the order</li>
                 <li>• <code className="bg-gray-800 px-2 py-1 rounded">client_email</code> - Client’s email address</li>
-                <li>• <code className="bg-gray-800 px-2 py-1 rounded">product_type</code> - GOOGLE, PREWARMED, or MICROSOFT</li>
+                <li>• <code className="bg-gray-800 px-2 py-1 rounded">product_type</code> - RESELLER, EDU, LEGACY, PREWARMED, AWS, or MICROSOFT</li>
                 <li>• <code className="bg-gray-800 px-2 py-1 rounded">quantity</code> - Number of inboxes (10-2000)</li>
                 <li>• <code className="bg-gray-800 px-2 py-1 rounded">business_name</code> - Client’s business name</li>
               </ul>

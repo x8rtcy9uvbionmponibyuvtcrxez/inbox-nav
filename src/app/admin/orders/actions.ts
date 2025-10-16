@@ -116,7 +116,7 @@ export async function markOrderAsFulfilledAction(
           const { distributeInboxes } = await import('@/lib/inbox-distribution');
           
           const distribution = distributeInboxes({
-            productType: order.productType as 'GOOGLE' | 'PREWARMED' | 'MICROSOFT',
+            productType: order.productType as 'RESELLER' | 'EDU' | 'LEGACY' | 'PREWARMED' | 'AWS' | 'MICROSOFT',
             domainSource: 'OWN',
             totalInboxes: order.quantity,
             personas: personas.map((p) => ({
@@ -155,6 +155,7 @@ export async function markOrderAsFulfilledAction(
               email: allocation.email,
               firstName: allocation.firstName,
               lastName: allocation.lastName,
+              personaName: `${allocation.firstName} ${allocation.lastName}`.trim(),
               password: uniformPassword?.trim() || 'temp_password_123',
               espPlatform: onboardingData.espProvider || 'Smartlead',
               status: 'LIVE' as const,
@@ -308,6 +309,7 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
         email: email.trim(),
         firstName: first_name || null,
         lastName: last_name || null,
+        personaName: first_name && last_name ? `${first_name} ${last_name}`.trim() : null,
         password: password.trim(),
         espPlatform: 'Smartlead',
         status: 'LIVE' as const,
@@ -408,6 +410,7 @@ async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, 
     email: string;
     firstName: string | null;
     lastName: string | null;
+    personaName: string | null;
     password: string;
     espPlatform: string;
     status: string;
@@ -453,6 +456,7 @@ async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, 
       email: email.trim(),
       firstName: first_name?.trim() || null,
       lastName: last_name?.trim() || null,
+      personaName: first_name && last_name ? `${first_name.trim()} ${last_name.trim()}`.trim() : null,
       password: password.trim(),
       espPlatform: espProvider,
       status: 'PENDING',

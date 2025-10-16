@@ -11,28 +11,35 @@ import { Button } from "@/components/ui/Button";
 
 type Persona = { firstName: string; lastName: string; profileImage?: string | null };
 
-const STEP_META = [
+const ALL_STEPS = [
   {
-    id: 1,
+    key: 'workspace',
     title: 'Workspace Basics',
     caption: 'Context about your brand and access so we can configure your fleet confidently.',
   },
   {
-    id: 2,
+    key: 'registrar',
+    title: 'Registrar Access',
+    caption: 'Grant registrar access so we can configure DNS and complete provisioning.',
+  },
+  {
+    key: 'personas',
     title: 'Personas & Tone',
     caption: 'Define the humans behind the inboxes so signatures and copy feel authentic.',
   },
   {
-    id: 3,
+    key: 'warmup',
     title: 'Warmup & Tools',
     caption: 'Securely hand off ESP credentials so we can plug into your existing stack.',
   },
   {
-    id: 4,
+    key: 'review',
     title: 'Review & Confirm',
     caption: 'Tag your fleet, leave notes, and confirm launch details before we provision.',
   },
 ] as const;
+
+type StepKey = (typeof ALL_STEPS)[number]['key'];
 
 const STORAGE_NAMESPACE = 'inbox-nav:onboarding';
 
@@ -105,7 +112,7 @@ function OnboardingPage() {
         return;
       }
       const draft = JSON.parse(rawDraft) as Record<string, unknown>;
-      if (typeof draft.step === 'number') setStep(Math.min(4, Math.max(1, draft.step)));
+      if (typeof draft.step === 'number') setStep(Math.min(ALL_STEPS.length, Math.max(1, draft.step)));
       if (typeof draft.inboxCount === 'number' && !isQuantityLocked) setInboxCount(draft.inboxCount);
       if (typeof draft.businessName === 'string') setBusinessName(draft.businessName);
       if (typeof draft.primaryForwardUrl === 'string') setPrimaryForwardUrl(draft.primaryForwardUrl);
@@ -296,52 +303,96 @@ function OnboardingPage() {
 
   const getProductDisplayName = (productType: string | null) => {
     switch (productType) {
-      case 'GOOGLE': return 'Google Inboxes';
+      case 'RESELLER': return 'Reseller Inboxes';
+      case 'EDU': return 'Edu Inboxes';
+      case 'LEGACY': return 'Legacy Inboxes';
       case 'PREWARMED': return 'Prewarmed Inboxes';
+      case 'AWS': return 'AWS Inboxes';
       case 'MICROSOFT': return 'Microsoft Inboxes';
       default: return 'Unknown Product';
     }
   };
 
+const isOwnDomainFlow = domainSource === 'OWN' && (productType === 'RESELLER' || productType === 'EDU' || productType === 'LEGACY' || productType === 'AWS' || productType === 'MICROSOFT');
+const isBuyForMeFlow = domainSource === 'BUY_FOR_ME' && (productType === 'RESELLER' || productType === 'EDU' || productType === 'LEGACY' || productType === 'AWS' || productType === 'MICROSOFT');
+
+const steps = useMemo(() => {
+  return isOwnDomainFlow ? ALL_STEPS : ALL_STEPS.filter((meta) => meta.key !== 'registrar');
+}, [isOwnDomainFlow]);
+const totalSteps = steps.length;
+
+useEffect(() => {
+  if (!totalSteps) return;
+  if (step > totalSteps) {
+    setStep(totalSteps);
+  }
+}, [step, totalSteps]);
+const currentStepMeta = steps[step - 1];
+const currentStepKey = currentStepMeta?.key as StepKey | undefined;
+
 const canNext = useMemo(() => {
-  if (step === 1) {
+  switch (currentStepKey) {
+    case 'workspace': {
       if (inboxCount < 10 || inboxCount > 2000) return false;
       if (!businessName.trim()) return false;
-      
-      // For PREWARMED, collect forwarding URL here
+
       if (productType === 'PREWARMED' && !primaryForwardUrl.trim()) return false;
-      
-      // For OWN domains (Google/Microsoft), validate domain list, forwarding URL, and registrar credentials
-      if (domainSource === 'OWN' && (productType === 'GOOGLE' || productType === 'MICROSOFT')) {
-        if (!ownDomainsRaw.trim()) return false; // Must have domains
-        if (!primaryForwardUrl.trim()) return false; // Must have forwarding URL
-        if (!domainRegistrar) return false; // Must select registrar
-        if (domainRegistrar === 'Other' && !registrarOtherName.trim()) return false; // Must specify registrar name if "Other"
-        if (!registrarUsername.trim()) return false; // Must have username
-        if (!registrarPassword.trim()) return false; // Must have password
-        
-        // Validate that domain list has actual domains
-        const domains = ownDomainsRaw.split('\n').map(d => d.trim()).filter(Boolean);
-        if (domains.length === 0) return false; // Must have at least one domain
+
+      if (isOwnDomainFlow) {
+        if (!ownDomainsRaw.trim()) return false;
+        if (!primaryForwardUrl.trim()) return false;
+        const domains = ownDomainsRaw.split('\n').map((d) => d.trim()).filter(Boolean);
+        if (domains.length === 0) return false;
       }
-      
-      // For BUY_FOR_ME, collect forwarding URL
-      if (domainSource === 'BUY_FOR_ME' && !primaryForwardUrl.trim()) return false;
+
+      if (isBuyForMeFlow && !primaryForwardUrl.trim()) return false;
+      return true;
     }
-  if (step === 2) {
-    if (numPersonas < 1) return false;
-    for (const p of personas.slice(0, numPersonas)) {
-      if (!p.firstName.trim() || !p.lastName.trim()) return false;
+    case 'registrar': {
+      if (!isOwnDomainFlow) return true;
+      if (!domainRegistrar) return false;
+      if (domainRegistrar === 'Other' && !registrarOtherName.trim()) return false;
+      if (!registrarUsername.trim()) return false;
+      if (!registrarPassword.trim()) return false;
+      return true;
     }
+    case 'personas': {
+      if (numPersonas < 1) return false;
+      for (const p of personas.slice(0, numPersonas)) {
+        if (!p.firstName.trim() || !p.lastName.trim()) return false;
+      }
+      return true;
+    }
+    case 'warmup': {
+      if (!warmupTool) return false;
+      if (warmupTool === 'Other' && !warmupToolOther.trim()) return false;
+      if (!accountId.trim()) return false;
+      if (!password.trim()) return false;
+      return true;
+    }
+    default:
+      return true;
   }
-  if (step === 3) {
-    if (!warmupTool) return false;
-    if (warmupTool === 'Other' && !warmupToolOther.trim()) return false;
-    if (!accountId.trim()) return false;
-    if (!password.trim()) return false;
-  }
-  return true;
-}, [step, inboxCount, businessName, primaryForwardUrl, domainSource, ownDomainsRaw, domainRegistrar, registrarOtherName, registrarUsername, registrarPassword, numPersonas, personas, warmupTool, warmupToolOther, accountId, password, productType]);
+}, [
+  accountId,
+  businessName,
+  currentStepKey,
+  domainRegistrar,
+  inboxCount,
+  isBuyForMeFlow,
+  isOwnDomainFlow,
+  numPersonas,
+  ownDomainsRaw,
+  password,
+  personas,
+  primaryForwardUrl,
+  productType,
+  registrarOtherName,
+  registrarPassword,
+  registrarUsername,
+  warmupTool,
+  warmupToolOther,
+]);
 
 const personaCountOptions = [1, 2, 3, 4];
 
@@ -372,15 +423,26 @@ const handlePersonaCountChange = (value: number) => {
     });
 };
 
-const goNext = () => setStep((s) => Math.min(4, s + 1));
+const currentStepTitle = currentStepMeta?.title ?? '';
+
+const goNext = () => setStep((s) => Math.min(totalSteps, s + 1));
 const goPrev = () => setStep((s) => Math.max(1, s - 1));
 
-const nextButtonLabels: Record<number, string> = {
-  1: 'Continue to personas',
-  2: 'Continue to warmup setup',
-  3: 'Review & confirm',
-};
-const nextLabel = nextButtonLabels[step] ?? 'Next';
+const nextLabel = useMemo(() => {
+  switch (currentStepKey) {
+    case 'workspace':
+      return isOwnDomainFlow ? 'Continue to registrar access' : 'Continue to personas';
+    case 'registrar':
+      return 'Continue to personas';
+    case 'personas':
+      return 'Continue to warmup setup';
+    case 'warmup':
+      return 'Review & confirm';
+    default:
+      return 'Next';
+  }
+}, [currentStepKey, isOwnDomainFlow]);
+
 const hasProductSelection = Boolean(productType || sessionData?.productType);
 const productDisplayName = getProductDisplayName(productType ?? sessionData?.productType ?? null);
 const domainPlanSummary =
@@ -389,9 +451,6 @@ const domainPlanSummary =
     : domainSource === 'BUY_FOR_ME'
       ? 'Our team will purchase and configure the domains you selected during checkout.'
       : 'You will connect your existing domains so we can manage DNS and routing.';
-const isOwnDomainFlow = domainSource === 'OWN' && (productType === 'GOOGLE' || productType === 'MICROSOFT');
-const isBuyForMeFlow = domainSource === 'BUY_FOR_ME' && (productType === 'GOOGLE' || productType === 'MICROSOFT');
-const currentStepTitle = STEP_META[step - 1]?.title ?? '';
 const personaSummaryNames = personas
   .slice(0, numPersonas)
   .map((persona, index) => {
@@ -482,7 +541,7 @@ const personaSummaryNames = personas
       <div className="mx-auto w-full max-w-4xl">
         <header className="mb-8 space-y-3 text-brand-primary">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-brand-muted-strong">
-            Step {step} of {STEP_META.length}
+            Step {step} of {totalSteps}
           </p>
           <h1 className="text-3xl font-semibold text-brand-primary sm:text-4xl">Launch your inbox fleet</h1>
           <p className="max-w-3xl text-base text-brand-secondary">
@@ -492,12 +551,13 @@ const personaSummaryNames = personas
         </header>
 
         <ol className="mb-8 grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-          {STEP_META.map((meta) => {
-            const isActive = meta.id === step;
-            const isCompleted = meta.id < step;
+          {steps.map((meta, index) => {
+            const stepNumber = index + 1;
+            const isActive = stepNumber === step;
+            const isCompleted = stepNumber < step;
             return (
               <li
-                key={meta.id}
+                key={meta.key}
                 className={`rounded-2xl border p-4 transition ${
                   isActive ? 'border-white/50 bg-white/[0.08]' : isCompleted ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-white/10 bg-white/[0.02]'
                 }`}
@@ -517,11 +577,11 @@ const personaSummaryNames = personas
                         />
                       </svg>
                     ) : (
-                      meta.id
+                      stepNumber
                     )}
                   </span>
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-brand-muted-strong">Step {meta.id}</p>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-brand-muted-strong">Step {stepNumber}</p>
                     <p className="mt-1 text-sm font-semibold text-brand-primary">{meta.title}</p>
                   </div>
                 </div>
@@ -532,7 +592,7 @@ const personaSummaryNames = personas
         </ol>
 
         <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 shadow-[0_40px_90px_-60px_rgba(10,10,15,0.8)]">
-          {step === 1 && (
+          {currentStepKey === 'workspace' && (
             <div className="space-y-8">
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold text-white">Workspace basics</h2>
@@ -639,96 +699,16 @@ const personaSummaryNames = personas
                       </p>
                     </div>
 
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-white">Primary forwarding URL</label>
-                        <p className="text-xs text-white/50">Where should warm inboxes forward once live?</p>
-                        <input
-                          className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                          placeholder="https://yourbusiness.com"
-                          value={primaryForwardUrl}
-                          onChange={(e) => setPrimaryForwardUrl(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-white">Registrar</label>
-                        <select
-                          className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                          value={domainRegistrar}
-                          onChange={(e) => setDomainRegistrar(e.target.value)}
-                          required
-                        >
-                          <option value="">Select registrar…</option>
-                          <option value="Cloudflare">Cloudflare</option>
-                          <option value="Godaddy">GoDaddy</option>
-                          <option value="Porkbun">Porkbun</option>
-                          <option value="Namecheap">Namecheap</option>
-                          <option value="Hostinger">Hostinger</option>
-                          <option value="Bluehost">Bluehost</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {domainRegistrar === 'Other' && (
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-white">Registrar name</label>
-                        <input
-                          className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                          placeholder="Who hosts these domains?"
-                          value={registrarOtherName}
-                          onChange={(e) => setRegistrarOtherName(e.target.value)}
-                          required
-                        />
-                      </div>
-                    )}
-
-                    <div className="rounded-xl border border-blue-400/30 bg-blue-500/10 p-4 text-sm text-blue-100">
-                      Please invite <span className="font-mono">team@inboxnavigator.com</span> as an admin to this registrar so we can configure DNS records.
-                    </div>
-
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-white">Registrar username</label>
-                        <input
-                          className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                          placeholder="Login email or username"
-                          value={registrarUsername}
-                          onChange={(e) => setRegistrarUsername(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-white">Registrar password</label>
-                        <div className="relative">
-                          <input
-                            type={showRegistrarPassword ? "text" : "password"}
-                            className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 pr-12 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                            placeholder="Stored securely & purged after setup"
-                            value={registrarPassword}
-                            onChange={(e) => setRegistrarPassword(e.target.value)}
-                            required
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowRegistrarPassword(!showRegistrarPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
-                          >
-                            {showRegistrarPassword ? (
-                              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10L21 2m-5.5 11.5L21 19M10.5 6.5L3 14" />
-                              </svg>
-                            ) : (
-                              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.808 9.818C4.773 6.744 7.985 4.75 12 4.75c4.016 0 7.228 1.994 9.193 5.068.282.443.282.971 0 1.414C19.228 14.306 16.016 16.3 12 16.3c-4.015 0-7.227-1.994-9.192-5.068a1.1 1.1 0 0 1 0-1.414z" />
-                                <circle cx="12" cy="11" r="3.5" />
-                              </svg>
-                            )}
-                          </button>
-                        </div>
-                        <p className="text-xs text-white/45">Only the onboarding team can view this and we remove it after DNS is configured.</p>
-                      </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-white">Primary forwarding URL</label>
+                      <p className="text-xs text-white/50">Where should warm inboxes forward once live?</p>
+                      <input
+                        className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                        placeholder="https://yourbusiness.com"
+                        value={primaryForwardUrl}
+                        onChange={(e) => setPrimaryForwardUrl(e.target.value)}
+                        required
+                      />
                     </div>
                   </div>
                 ) : isBuyForMeFlow ? (
@@ -752,7 +732,100 @@ const personaSummaryNames = personas
             </div>
           )}
 
-          {step === 2 && (
+          {currentStepKey === 'registrar' && (
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <h2 className="text-2xl font-semibold text-white">Registrar access</h2>
+                <p className="text-sm text-white/60">
+                  Share registrar credentials so our onboarding engineers can configure DNS and finalize delivery setup.
+                  We store this securely and purge it after provisioning.
+                </p>
+              </div>
+
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white">Registrar</label>
+                  <select
+                    className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                    value={domainRegistrar}
+                    onChange={(e) => setDomainRegistrar(e.target.value)}
+                    required
+                  >
+                    <option value="">Select registrar…</option>
+                    <option value="Cloudflare">Cloudflare</option>
+                    <option value="Godaddy">GoDaddy</option>
+                    <option value="Porkbun">Porkbun</option>
+                    <option value="Namecheap">Namecheap</option>
+                    <option value="Hostinger">Hostinger</option>
+                    <option value="Bluehost">Bluehost</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                {domainRegistrar === 'Other' && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white">Registrar name</label>
+                    <input
+                      className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                      placeholder="Who hosts these domains?"
+                      value={registrarOtherName}
+                      onChange={(e) => setRegistrarOtherName(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
+                <div className="rounded-xl border border-blue-400/30 bg-blue-500/10 p-4 text-sm text-blue-100">
+                  Please invite <span className="font-mono">team@inboxnavigator.com</span> as an admin to this registrar so we can configure DNS records.
+                </div>
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white">Registrar username</label>
+                    <input
+                      className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                      placeholder="Login email or username"
+                      value={registrarUsername}
+                      onChange={(e) => setRegistrarUsername(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white">Registrar password</label>
+                    <div className="relative">
+                      <input
+                        type={showRegistrarPassword ? "text" : "password"}
+                        className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 pr-12 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                        placeholder="Stored securely & purged after setup"
+                        value={registrarPassword}
+                        onChange={(e) => setRegistrarPassword(e.target.value)}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegistrarPassword(!showRegistrarPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/90"
+                      >
+                        {showRegistrarPassword ? (
+                          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10L21 2m-5.5 11.5L21 19M10.5 6.5L3 14" />
+                          </svg>
+                        ) : (
+                          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.808 9.818C4.773 6.744 7.985 4.75 12 4.75c4.016 0 7.228 1.994 9.193 5.068.282.443.282.971 0 1.414C19.228 14.306 16.016 16.3 12 16.3c-4.015 0-7.227-1.994-9.192-5.068a1.1 1.1 0 0 1 0-1.414z" />
+                            <circle cx="12" cy="11" r="3.5" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-xs text-white/45">Only the onboarding team can view this and we remove it after DNS is configured.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStepKey === 'personas' && (
             <div className="space-y-8">
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold text-white">Personas & tone</h2>
@@ -845,7 +918,7 @@ const personaSummaryNames = personas
             </div>
           )}
 
-          {step === 3 && (
+          {currentStepKey === 'warmup' && (
             <div className="space-y-8">
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold text-white">Connect your warmup tool</h2>
@@ -933,7 +1006,7 @@ const personaSummaryNames = personas
             </div>
           )}
 
-          {step === 4 && (
+          {currentStepKey === 'review' && (
             <div className="space-y-8">
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold text-white">Review & confirm</h2>
@@ -1039,7 +1112,7 @@ const personaSummaryNames = personas
             </Button>
             <div className="flex flex-col items-start gap-2 text-xs text-white/45 sm:items-end">
               <span>{hasLoadedDraft ? 'Progress auto-saves to this browser.' : 'Restoring previous progress…'}</span>
-              {step < 4 ? (
+              {step < totalSteps ? (
                 <Button
                   variant="primary"
                   onClick={goNext}

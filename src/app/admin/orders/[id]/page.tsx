@@ -287,12 +287,18 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
 
   const pricePerInbox = useMemo(() => {
     switch (order?.productType) {
-      case 'GOOGLE':
+      case 'RESELLER':
         return 300;
+      case 'EDU':
+        return 150;
+      case 'LEGACY':
+        return 250;
       case 'PREWARMED':
         return 700;
+      case 'AWS':
+        return 125;
       case 'MICROSOFT':
-        return 5000;
+        return 6000; // $60 per domain
       default:
         return 0;
     }

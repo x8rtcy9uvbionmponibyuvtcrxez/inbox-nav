@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { CheckIcon, StarIcon, ShieldCheckIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 
-type ProductType = "GOOGLE" | "PREWARMED" | "MICROSOFT";
+type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 
 interface Product {
   id: ProductType;
@@ -19,14 +19,34 @@ interface Product {
 
 const products: Product[] = [
   {
-    id: "GOOGLE",
-    name: "Google Inboxes",
+    id: "RESELLER",
+    name: "Reseller Inboxes",
     price: 3,
     description: "Standard cold email inboxes with Google Workspace",
     features: ["Basic warmup", "Reliable delivery", "IMAP/SMTP access"],
     icon: CheckIcon,
     color: "blue",
     priceId: "price_1SCFcnBTWWHTKTJvdwKiINPy",
+  },
+  {
+    id: "EDU",
+    name: "Edu Inboxes",
+    price: 1.5,
+    description: "Educational institution inboxes with special pricing",
+    features: ["Academic pricing", "Educational features", "Student support"],
+    icon: CheckIcon,
+    color: "green",
+    priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual EDU price ID
+  },
+  {
+    id: "LEGACY",
+    name: "Legacy Inboxes",
+    price: 2.5,
+    description: "Legacy inboxes with established reputation",
+    features: ["Proven reputation", "Stable delivery", "Legacy support"],
+    icon: CheckIcon,
+    color: "orange",
+    priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual LEGACY price ID
   },
   {
     id: "PREWARMED",
@@ -40,15 +60,25 @@ const products: Product[] = [
     priceId: "price_1SHmyyBTWWHTKTJvK6ohM58w",
   },
   {
+    id: "AWS",
+    name: "AWS Inboxes",
+    price: 1.25,
+    description: "AWS-powered inboxes with cloud infrastructure",
+    features: ["Cloud infrastructure", "Scalable", "AWS integration"],
+    icon: CheckIcon,
+    color: "yellow",
+    priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual AWS price ID
+  },
+  {
     id: "MICROSOFT",
     name: "Microsoft Inboxes",
-    price: 50,
-    description: "Premium Microsoft 365 enterprise inboxes",
+    price: 60,
+    description: "Premium Microsoft 365 enterprise inboxes (per domain)",
     features: ["Enterprise security", "Advanced features", "Priority support"],
     badge: "Premium",
     icon: ShieldCheckIcon,
     color: "purple",
-    priceId: "price_1SHmzdBTWWHTKTJv14sbI1cf",
+    priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
   },
 ];
 
@@ -61,13 +91,19 @@ const formatCurrency = (amountInDollars: number) =>
 
 export default function ProductsPage() {
   const [quantities, setQuantities] = useState<Record<ProductType, number>>({
-    GOOGLE: 10,
+    RESELLER: 10,
+    EDU: 10,
+    LEGACY: 10,
     PREWARMED: 10,
-    MICROSOFT: 50,
+    AWS: 20,
+    MICROSOFT: 1,
   });
   const [loading, setLoading] = useState<Record<ProductType, boolean>>({
-    GOOGLE: false,
+    RESELLER: false,
+    EDU: false,
+    LEGACY: false,
     PREWARMED: false,
+    AWS: false,
     MICROSOFT: false,
   });
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +121,11 @@ export default function ProductsPage() {
     }));
   };
 
-  const getMoq = (productId: ProductType) => (productId === 'MICROSOFT' ? 50 : 10);
+  const getMoq = (productId: ProductType) => {
+    if (productId === 'AWS') return 20;
+    if (productId === 'MICROSOFT') return 1;
+    return 10;
+  };
 
   const handleSelectPlan = async (productId: ProductType) => {
     const product = products.find(p => p.id === productId);
@@ -111,7 +151,7 @@ export default function ProductsPage() {
         if (!response.ok) throw new Error(data.error || 'Failed to create checkout session');
         if (data.url) window.location.href = data.url; else throw new Error('No checkout URL received');
       } else {
-        // Route to configuration for Google/Microsoft
+        // Route to configuration for all other products (they need domains)
         const url = `/checkout/configure?product=${productId}&qty=${quantity}`;
         window.location.href = url;
       }
@@ -176,7 +216,7 @@ export default function ProductsPage() {
           </div>
         )}
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-8 lg:grid-cols-3 xl:grid-cols-6">
           {products.map((product) => {
             const totalPrice = getTotalPrice(product.id);
 
@@ -226,7 +266,7 @@ export default function ProductsPage() {
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    placeholder={product.id === "MICROSOFT" ? "50" : "10"}
+                    placeholder={product.id === "AWS" ? "20" : product.id === "MICROSOFT" ? "1" : "10"}
                     value={quantities[product.id]}
                     onChange={(e) => {
                       const raw = e.target.value.replace(/[^0-9]/g, "");
@@ -235,7 +275,7 @@ export default function ProductsPage() {
                         product.id,
                         Number.isFinite(num)
                           ? num
-                          : (product.id === "MICROSOFT" ? 50 : 10)
+                          : (product.id === "AWS" ? 20 : product.id === "MICROSOFT" ? 1 : 10)
                       );
                     }}
                     className="w-full rounded-2xl border border-white/15 bg-black/40 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from '@/lib/prisma';
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 type StatusTone = {
   bg: string;
@@ -120,10 +120,45 @@ export default async function AdminOrdersPage({
       onboardingData: true,
       inboxes: { select: { id: true, status: true } },
       domains: { select: { id: true, status: true } },
+      pendingInvites: true,
     },
   });
 
   // Prisma connection managed by singleton
+
+  const uniqueUserIds = Array.from(
+    new Set(
+      orders
+        .map((order) => order.clerkUserId)
+        .filter((id): id is string => Boolean(id))
+    )
+  );
+  const userProfiles = new Map<string, { name: string; email: string }>();
+
+  if (uniqueUserIds.length > 0) {
+    try {
+      const client = await clerkClient();
+      const usersResponse = await client.users.getUserList({
+        userId: uniqueUserIds,
+        limit: uniqueUserIds.length,
+      });
+
+      for (const user of usersResponse.data) {
+        const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
+        const emailAddress =
+          user.primaryEmailAddress?.emailAddress ??
+          user.emailAddresses?.[0]?.emailAddress ??
+          "";
+
+        userProfiles.set(user.id, {
+          name: fullName,
+          email: emailAddress,
+        });
+      }
+    } catch (error) {
+      console.error('[ADMIN_ORDERS] Failed to load Clerk user profiles:', error);
+    }
+  }
 
   const totalInboxes = orders.reduce((sum, order) => sum + (order.inboxes?.length ?? 0), 0);
   const totalDomains = orders.reduce((sum, order) => sum + (order.domains?.length ?? 0), 0);
@@ -245,8 +280,44 @@ export default async function AdminOrdersPage({
                 {orders.map((order) => {
                   const isCancelled = order.status === "CANCELLED";
                   const hasSubscription = Boolean(order.stripeSubscriptionId);
-                  const inboxTotal = order.inboxes?.length ?? 0;
+                  const provisionedInboxes = order.inboxes?.length ?? 0;
                   const domainTotal = order.domains?.length ?? 0;
+                  const profile = order.clerkUserId ? userProfiles.get(order.clerkUserId) : undefined;
+                  const inviteEmail = order.pendingInvites?.[0]?.email ?? "";
+                  const businessName = (order.businessName ?? "").trim();
+                  const customerLines: string[] = [];
+
+                  if (profile?.name) customerLines.push(profile.name);
+
+                  for (const candidate of [profile?.email, inviteEmail]) {
+                    if (candidate && !customerLines.includes(candidate)) {
+                      customerLines.push(candidate);
+                    }
+                  }
+
+                  if (!profile?.name && businessName && !customerLines.includes(businessName)) {
+                    customerLines.push(businessName);
+                  }
+
+                  if (order.clerkUserId) {
+                    const idLabel = `ID: ${order.clerkUserId}`;
+                    if (!customerLines.includes(idLabel)) {
+                      customerLines.push(idLabel);
+                    }
+                  }
+
+                  if (customerLines.length === 0) {
+                    customerLines.push("—");
+                  }
+
+                  const [primaryCustomer, ...otherCustomerDetails] = customerLines;
+                  const inboxDisplayCount = provisionedInboxes > 0 ? provisionedInboxes : order.quantity;
+                  let inboxSecondary: string | undefined;
+                  if (provisionedInboxes === 0) {
+                    inboxSecondary = "Purchased (pending provisioning)";
+                  } else if (provisionedInboxes !== order.quantity) {
+                    inboxSecondary = `${provisionedInboxes}/${order.quantity} live`;
+                  }
 
                   return (
                     <tr
@@ -264,7 +335,24 @@ export default async function AdminOrdersPage({
                           </Link>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-white/70">{order.clerkUserId}</td>
+                      <td className="px-6 py-4 text-white/70">
+                        <div className="flex flex-col">
+                          <span
+                            className={
+                              primaryCustomer === "—" || primaryCustomer.startsWith("ID: ")
+                                ? "text-white/50"
+                                : "font-medium text-white/80"
+                            }
+                          >
+                            {primaryCustomer}
+                          </span>
+                          {otherCustomerDetails.map((detail) => (
+                            <span key={detail} className="text-xs text-white/45">
+                              {detail}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-white/70">{order.productType}</td>
                       <td className="px-6 py-4 text-white/70">{order.quantity}</td>
                       <td className="px-6 py-4">
@@ -281,7 +369,14 @@ export default async function AdminOrdersPage({
                           ) : null}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-white/70">{inboxTotal}</td>
+                      <td className="px-6 py-4 text-white/70">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-white/80">{inboxDisplayCount}</span>
+                          {inboxSecondary ? (
+                            <span className="text-xs text-white/45">{inboxSecondary}</span>
+                          ) : null}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-white/70">{domainTotal}</td>
                       <td className="px-6 py-4 text-white/50">{formatDate(order.createdAt)}</td>
                     </tr>

@@ -3,18 +3,24 @@ import { auth } from '@clerk/nextjs/server'
 import { getStripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
 
-type ProductType = 'GOOGLE' | 'PREWARMED' | 'MICROSOFT'
+type ProductType = 'RESELLER' | 'EDU' | 'LEGACY' | 'PREWARMED' | 'AWS' | 'MICROSOFT'
 type DomainSource = 'OWN' | 'BUY_FOR_ME'
 
 const INBOX_PRICING_USD: Record<ProductType, number> = {
-  GOOGLE: 3,
+  RESELLER: 3,
+  EDU: 1.5,
+  LEGACY: 2.5,
   PREWARMED: 7,
-  MICROSOFT: 50,
+  AWS: 1.25,
+  MICROSOFT: 60, // Per domain, not per inbox
 }
 
 const INBOX_PRICE_IDS: Record<ProductType, string | undefined> = {
-  GOOGLE: process.env.STRIPE_PRICE_GOOGLE_INBOX,
+  RESELLER: process.env.STRIPE_PRICE_RESELLER_INBOX,
+  EDU: process.env.STRIPE_PRICE_EDU_INBOX,
+  LEGACY: process.env.STRIPE_PRICE_LEGACY_INBOX,
   PREWARMED: process.env.STRIPE_PRICE_PREWARMED_INBOX,
+  AWS: process.env.STRIPE_PRICE_AWS_INBOX,
   MICROSOFT: process.env.STRIPE_PRICE_MICROSOFT_INBOX,
 }
 
@@ -46,8 +52,16 @@ export async function POST(request: NextRequest) {
     if (!productType || !quantity) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
-    if (quantity < 10 || quantity > 2000) {
-      return NextResponse.json({ error: 'Quantity must be between 10 and 2000' }, { status: 400 })
+    // Validate MOQ based on product type
+    const getMoq = (productType: ProductType) => {
+      if (productType === 'AWS') return 20;
+      if (productType === 'MICROSOFT') return 1;
+      return 10;
+    };
+    
+    const moq = getMoq(productType);
+    if (quantity < moq || quantity > 2000) {
+      return NextResponse.json({ error: `Quantity must be between ${moq} and 2000 for ${productType}` }, { status: 400 })
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`

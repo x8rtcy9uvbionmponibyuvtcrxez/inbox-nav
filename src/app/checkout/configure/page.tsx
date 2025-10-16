@@ -5,23 +5,32 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
-type ProductType = "GOOGLE" | "PREWARMED" | "MICROSOFT";
+type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 type DomainSource = "OWN" | "BUY_FOR_ME";
 type TLD = ".com" | ".info";
 
 function normalizeProductType(value: string | null): ProductType {
-  const v = (value || "GOOGLE").toUpperCase();
-  return ["GOOGLE", "PREWARMED", "MICROSOFT"].includes(v) ? (v as ProductType) : "GOOGLE";
+  const v = (value || "RESELLER").toUpperCase();
+  return ["RESELLER", "EDU", "LEGACY", "PREWARMED", "AWS", "MICROSOFT"].includes(v) ? (v as ProductType) : "RESELLER";
 }
 
 function getDefaultInboxesPerDomain(product: ProductType): number {
-  if (product === "GOOGLE") return 3;
+  if (product === "RESELLER") return 3;
+  if (product === "EDU") return 3;
+  if (product === "LEGACY") return 3;
+  if (product === "AWS") return 3;
   if (product === "MICROSOFT") return 50;
   return 3; // PREWARMED fixed
 }
 
 function getPricePerInbox(product: ProductType): number {
-  return product === "GOOGLE" ? 3 : product === "PREWARMED" ? 7 : 50;
+  if (product === "RESELLER") return 3;
+  if (product === "EDU") return 1.5;
+  if (product === "LEGACY") return 2.5;
+  if (product === "PREWARMED") return 7;
+  if (product === "AWS") return 1.25;
+  if (product === "MICROSOFT") return 60; // Per domain, not per inbox
+  return 3;
 }
 
 function ConfigurePageContent() {
@@ -51,7 +60,11 @@ function ConfigurePageContent() {
   }, [product]);
 
   const domainsNeeded = useMemo(() => {
-    const perDomain = product === "GOOGLE" ? Math.max(1, Math.min(3, inboxesPerDomain || 3)) : product === "MICROSOFT" ? 50 : 3;
+    const perDomain = product === "RESELLER" ? Math.max(1, Math.min(3, inboxesPerDomain || 3)) : 
+                     product === "EDU" ? Math.max(1, Math.min(3, inboxesPerDomain || 3)) :
+                     product === "LEGACY" ? Math.max(1, Math.min(3, inboxesPerDomain || 3)) :
+                     product === "AWS" ? Math.max(1, Math.min(3, inboxesPerDomain || 3)) :
+                     product === "MICROSOFT" ? 50 : 3;
     return Math.max(1, Math.ceil(quantity / perDomain));
   }, [inboxesPerDomain, product, quantity]);
 
@@ -71,7 +84,7 @@ function ConfigurePageContent() {
         body: JSON.stringify({
           productType: product,
           quantity,
-          inboxesPerDomain: product === "GOOGLE" ? Math.max(1, Math.min(3, inboxesPerDomain || 3)) : getDefaultInboxesPerDomain(product),
+          inboxesPerDomain: (product === "RESELLER" || product === "EDU" || product === "LEGACY" || product === "AWS") ? Math.max(1, Math.min(3, inboxesPerDomain || 3)) : getDefaultInboxesPerDomain(product),
           domainSource,
           domainTLD: domainSource === "BUY_FOR_ME" ? domainTLD : undefined,
           domainsNeeded,
@@ -113,7 +126,7 @@ function ConfigurePageContent() {
         <div className="space-y-8">
           <div className="rounded-xl border border-white/10 bg-gray-900 p-6">
             <div className="mb-4 text-sm font-medium text-gray-300">Inboxes per Domain</div>
-            {product === "GOOGLE" ? (
+            {(product === "RESELLER" || product === "EDU" || product === "LEGACY" || product === "AWS") ? (
               <div className="flex items-center gap-3">
                 {[1, 2, 3].map((n) => (
                   <button

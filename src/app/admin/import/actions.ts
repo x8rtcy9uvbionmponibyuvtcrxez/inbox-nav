@@ -74,7 +74,7 @@ export async function validateCSVAction(csvData: CSVRow[]): Promise<ValidationRe
       }
       
       // Validate product_type
-      const validProductTypes = ['GOOGLE', 'PREWARMED', 'MICROSOFT'];
+      const validProductTypes = ['RESELLER', 'EDU', 'LEGACY', 'PREWARMED', 'AWS', 'MICROSOFT'];
       if (!row.product_type || !validProductTypes.includes(row.product_type.toUpperCase())) {
         rowErrors.push(`Row ${rowNum}: product_type must be one of: ${validProductTypes.join(', ')}`);
       }
@@ -171,7 +171,16 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
         // Calculate pricing
         const productType = firstRow.product_type.toUpperCase();
         const quantity = parseInt(firstRow.quantity);
-        const pricePerInbox = productType === 'GOOGLE' ? 3 : productType === 'PREWARMED' ? 7 : 50;
+        const getPricePerInbox = (pt: string) => {
+          if (pt === 'RESELLER') return 3;
+          if (pt === 'EDU') return 1.5;
+          if (pt === 'LEGACY') return 2.5;
+          if (pt === 'PREWARMED') return 7;
+          if (pt === 'AWS') return 1.25;
+          if (pt === 'MICROSOFT') return 60;
+          return 3;
+        };
+        const pricePerInbox = getPricePerInbox(productType);
         const totalAmountCents = quantity * pricePerInbox * 100;
         
         // Create order

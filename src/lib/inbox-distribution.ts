@@ -6,7 +6,7 @@ interface Persona {
 }
 
 interface DistributionInput {
-  productType: 'GOOGLE' | 'PREWARMED' | 'MICROSOFT';
+  productType: 'RESELLER' | 'EDU' | 'LEGACY' | 'PREWARMED' | 'AWS' | 'MICROSOFT';
   domainSource: 'OWN' | 'BUY_FOR_ME';
   totalInboxes: number;
   personas: Persona[];
@@ -75,19 +75,19 @@ export function distributeInboxes(input: DistributionInput): DistributionResult 
     return distributeMicrosoft(totalInboxes, personas, providedDomains[0]);
   }
   
-  // Google & Prewarmed = multiple domains
+  // Reseller, Edu, Legacy, AWS & Prewarmed = multiple domains
   return distributeMultipleDomains(totalInboxes, personas, providedDomains, perDomain);
 }
 
 function getInboxesPerDomain(productType: string, userPreference?: number): number {
-  if (productType === 'GOOGLE') {
+  if (productType === 'RESELLER' || productType === 'EDU' || productType === 'LEGACY' || productType === 'AWS') {
     return userPreference || 3;
   }
   if (productType === 'PREWARMED') {
     return 5;
   }
   if (productType === 'MICROSOFT') {
-    return 0;
+    return 50; // Microsoft uses 50 inboxes per domain
   }
   return 3;
 }
