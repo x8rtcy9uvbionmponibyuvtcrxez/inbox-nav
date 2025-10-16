@@ -284,7 +284,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
             productType: normalizedProductType as any,
             quantity: input.inboxCount,
             totalAmount: totalAmountCents,
-            status: "PENDING" as OrderStatus,
+            status: OrderStatus.PENDING,
             stripeSessionId: null,
             subscriptionStatus: 'manual',
           } as any,
@@ -415,7 +415,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         // BUY_FOR_ME branch - set order status and return
         await prisma.order.update({
           where: { id: order.id },
-          data: { status: 'PENDING' as OrderStatus },
+          data: { status: OrderStatus.PENDING },
         });
         // Optionally store calculatedDomainCount on onboarding
         await prisma.onboardingData.update({
@@ -443,7 +443,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       const domainData = distribution.domainsUsed.map(domain => ({
         orderId: order.id,
         domain,
-        status: 'PENDING' as const,
+        status: DomainStatus.PENDING,
         tags: input.internalTags || [],
         inboxCount: domainInboxCounts.get(domain) || 0,
         forwardingUrl: (sessionForwardingUrl ?? input.primaryForwardUrl) || domain,
@@ -470,7 +470,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           lastName: allocation.lastName,
           personaName: `${allocation.firstName} ${allocation.lastName}`.trim(),
           espPlatform: input.warmupTool,
-          status: 'PENDING' as const,
+          status: InboxStatus.PENDING,
           tags: input.internalTags || [],
           businessName: input.businessName,
           forwardingDomain: (sessionForwardingUrl ?? input.primaryForwardUrl) || allocation.domain,

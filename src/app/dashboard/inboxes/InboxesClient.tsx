@@ -48,7 +48,7 @@ type Props = {
 type DatePreset = "7" | "30" | "90" | "ALL";
 
 type FilterState = {
-  statuses: string[];
+  statuses: InboxStatus[];
   product: string;
   persona: string;
   tags: string[];
@@ -202,7 +202,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     const dateTo = filters.dateRange.to ? endOfDay(filters.dateRange.to) : null;
 
     return safeInboxes.filter((inbox) => {
-      if (!showDeleted && inbox.status === 'DELETED') return false;
+      if (!showDeleted && inbox.status === InboxStatus.DELETED) return false;
       
       // Only compute haystack if we have a search term
       let matchesSearch = true;
@@ -380,7 +380,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const toggleStatus = (status: string) => {
+  const toggleStatus = (status: InboxStatus) => {
     setFilters((prev) => {
       const already = prev.statuses.includes(status);
       const statuses = already ? prev.statuses.filter((value) => value !== status) : [...prev.statuses, status];
@@ -421,7 +421,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     filters.statuses.forEach((status) => {
       chips.push({
         id: `status:${status}`,
-        label: `Status: ${status}`,
+        label: `Status: ${status.toLowerCase()}`,
         onClear: () =>
           setFilters((prev) => ({ ...prev, statuses: prev.statuses.filter((value) => value !== status) })),
       });
