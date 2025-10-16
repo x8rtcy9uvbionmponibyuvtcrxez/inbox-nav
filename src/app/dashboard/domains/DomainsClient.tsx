@@ -528,7 +528,7 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
         <div className="flex-1 max-w-2xl">
           <h1 className="text-4xl font-bold text-brand-primary">Domain Portfolio</h1>
           <p className="mt-3 text-lg text-brand-secondary leading-relaxed">
-            Track every sending domain, forwarding target, and the inbox capacity we've associated with it.
+            Track every sending domain, forwarding target, and the inbox capacity we&apos;ve associated with it.
           </p>
         </div>
         <Button asChild variant="primary" size="lg" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)] hover:shadow-[0_25px_50px_-25px_rgba(255,255,255,0.8)] transition-all duration-200">

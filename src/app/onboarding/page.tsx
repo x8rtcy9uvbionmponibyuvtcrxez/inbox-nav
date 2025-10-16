@@ -552,11 +552,11 @@ const personaSummaryNames = personas
             <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-brand-muted-strong">
               Step {step} of {totalSteps}
             </span>
-            <span className="text-xs uppercase tracking-[0.25em] text-brand-muted-strong">You're on: <span className="text-brand-primary font-semibold">{currentStepTitle}</span></span>
+            <span className="text-xs uppercase tracking-[0.25em] text-brand-muted-strong">You&apos;re on: <span className="text-brand-primary font-semibold">{currentStepTitle}</span></span>
           </div>
           <h1 className="text-4xl font-bold text-brand-primary sm:text-5xl">Launch your inbox setup</h1>
           <p className="max-w-3xl text-lg text-brand-secondary leading-relaxed">
-            We'll use these details to set up inboxes, domains, and your sending platform. Everything saves automatically.
+            We&apos;ll use these details to set up inboxes, domains, and your sending platform. Everything saves automatically.
           </p>
         </header>
 
@@ -704,7 +704,7 @@ const personaSummaryNames = personas
                   <div className="space-y-5">
                     <div>
                       <label className="text-sm font-medium text-white">Domains we should use</label>
-                      <p className="text-xs text-white/50">Add the domains you'll use (one per line). We'll automatically configure SPF, DKIM, and DMARC records.</p>
+                      <p className="text-xs text-white/50">Add the domains you&apos;ll use (one per line). We&apos;ll automatically configure SPF, DKIM, and DMARC records.</p>
                       <textarea
                         className="mt-2 h-28 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
                         placeholder="example1.com&#10;example2.io&#10;example3.net"

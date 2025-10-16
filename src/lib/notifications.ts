@@ -346,7 +346,7 @@ export function formatUserSignupEmailNotification(user: UserData) {
  * Format subscription cancelled notification for Slack
  */
 export function formatSubscriptionCancelledSlackNotification(order: OrderData, subscription: SubscriptionData, affectedCounts: { inboxes: number; domains: number }) {
-  const totalAmount = (order.totalAmount / 100).toFixed(2);
+  // const totalAmount = (order.totalAmount / 100).toFixed(2);
   const adminUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.inboxnavigator.com'}/admin/orders/${order.id}`;
   const cancelledAt = subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toLocaleString() : 'Unknown';
 
@@ -418,7 +418,7 @@ export function formatSubscriptionCancelledSlackNotification(order: OrderData, s
  * Format subscription cancelled notification for email
  */
 export function formatSubscriptionCancelledEmailNotification(order: OrderData, subscription: SubscriptionData, affectedCounts: { inboxes: number; domains: number }) {
-  const totalAmount = (order.totalAmount / 100).toFixed(2);
+  // const totalAmount = (order.totalAmount / 100).toFixed(2);
   const adminUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.inboxnavigator.com'}/admin/orders/${order.id}`;
   const cancelledAt = subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toLocaleString() : 'Unknown';
 

@@ -100,10 +100,10 @@ function StatusPill({ status, order }: { status: InboxStatus; order?: { subscrip
   );
 }
 
-function formatDate(value: Date | string) {
-  const date = typeof value === "string" ? new Date(value) : value;
-  return format(date, "MMM d, yyyy");
-}
+// function formatDate(value: Date | string) {
+//   const date = typeof value === "string" ? new Date(value) : value;
+//   return format(date, "MMM d, yyyy");
+// }
 
 function calculateAverageAge(inboxList: InboxRecord[]): number {
   if (!inboxList.length) return 0;
@@ -288,14 +288,14 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
   const paginatedInboxes = filteredInboxes.slice(startIndex, endIndex);
 
   const inboxCount = safeInboxes.length;
-  const uniqueDomains = useMemo(() => {
-    const set = new Set<string>();
-    safeInboxes.forEach((inbox) => {
-      const domain = parseInboxDomain(inbox);
-      if (domain) set.add(domain);
-    });
-    return set;
-  }, [safeInboxes]);
+  // const uniqueDomains = useMemo(() => {
+  //   const set = new Set<string>();
+  //   safeInboxes.forEach((inbox) => {
+  //     const domain = parseInboxDomain(inbox);
+  //     if (domain) set.add(domain);
+  //   });
+  //   return set;
+  // }, [safeInboxes]);
 
   const averageAge = useMemo(() => calculateAverageAge(safeInboxes), [safeInboxes]);
 
