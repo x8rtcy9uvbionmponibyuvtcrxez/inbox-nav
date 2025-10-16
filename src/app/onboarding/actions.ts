@@ -6,7 +6,7 @@ import { distributeInboxes, validateDistribution } from '@/lib/inbox-distributio
 import { prisma } from '@/lib/prisma';
 import { ProductType, type OrderStatus } from '@prisma/client';
 import { protectSecret } from '@/lib/encryption';
-import crypto from "node:crypto";
+import * as crypto from "node:crypto";
 import { notifyOrderCreated } from '@/lib/notifications';
 
 export type SaveOnboardingInput = {
@@ -36,11 +36,21 @@ export type SaveOnboardingInput = {
   sessionId?: string; // Stripe session ID for existing orders
 };
 
-const PRODUCT_TYPES: ProductType[] = [ProductType.EDU, ProductType.LEGACY, ProductType.RESELLER, ProductType.PREWARMED, ProductType.AWS, ProductType.MICROSOFT];
+const PRODUCT_TYPES: ProductType[] = [
+  ProductType.RESELLER,
+  ProductType.EDU,
+  ProductType.LEGACY,
+  ProductType.PREWARMED,
+  ProductType.AWS,
+  ProductType.MICROSOFT,
+];
 
 function coerceProductType(value?: string | null): ProductType {
   if (!value) return ProductType.EDU;
-  const candidate = value.toUpperCase() as ProductType;
+  const upper = value.toUpperCase();
+  // Map legacy names → new enum
+  const normalized = upper === 'GOOGLE' ? 'RESELLER' : upper;
+  const candidate = normalized as ProductType;
   return PRODUCT_TYPES.includes(candidate) ? candidate : ProductType.EDU;
 }
 
@@ -344,7 +354,15 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         stepCompleted: 4,
         isCompleted: true,
         domainSource: sessionDomainSource ?? (input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME')),
-        inboxesPerDomain: sessionInboxesPerDomain ?? (input.inboxesPerDomain ?? (orderProductType === ProductType.RESELLER || orderProductType === ProductType.EDU || orderProductType === ProductType.LEGACY || orderProductType === ProductType.AWS ? 3 : orderProductType === ProductType.PREWARMED ? 3 : 50)),
+        inboxesPerDomain: sessionInboxesPerDomain ?? (
+          input.inboxesPerDomain ?? (
+            orderProductType === ProductType.MICROSOFT
+              ? 50
+              : orderProductType === ProductType.PREWARMED
+                ? 5
+                : 3
+          )
+        ),
         providedDomains: (input.domainSource === 'OWN' || input.domainStatus === 'own')
           ? input.ownDomains ?? input.providedDomains ?? input.domainList ?? []
           : sessionDomainSource === 'OWN'
