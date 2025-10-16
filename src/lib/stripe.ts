@@ -17,7 +17,13 @@ export function getStripe(): Stripe | null {
 }
 
 export function assertStripe(): Stripe {
+  console.log('[STRIPE DEBUG] assertStripe called');
+  console.log('[STRIPE DEBUG] process.env.STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
+  console.log('[STRIPE DEBUG] process.env.STRIPE_SECRET_KEY length:', process.env.STRIPE_SECRET_KEY?.length);
+  console.log('[STRIPE DEBUG] stripeClient exists:', !!stripeClient);
+  
   if (!stripeClient) {
+    console.error('[STRIPE DEBUG] stripeClient is null/undefined');
     throw new Error('Stripe secret key is not configured')
   }
   return stripeClient
