@@ -201,7 +201,7 @@ export default function DashboardClient({
             {hasVisited ? `Welcome back, ${displayName}.` : "Welcome to Inbox Nav — we're excited to have you here!"}
           </p>
           <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-brand-primary mb-4">
-            {hasVisited ? 'Your control center for every inbox.' : 'Let's launch your inbox fleet.'}
+            {hasVisited ? 'Your control center for every inbox.' : "Let's launch your inbox fleet."}
           </h1>
           <p className="text-lg text-brand-secondary leading-relaxed">
             Track orders, manage domains, and launch inboxes — all in one place.
