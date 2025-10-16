@@ -218,42 +218,51 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <div className="w-full max-w-7xl mx-auto px-6 lg:px-8 xl:px-12 space-y-20">
         {/* Hero Section */}
-        <div className="flex flex-col gap-16 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex-1 space-y-8">
-            <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-              Plans
-            </span>
-            <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-tight">
-              Choose the inbox setup that fits your scale.
-            </h1>
-            <p className="text-xl lg:text-2xl text-[var(--text-secondary)] leading-relaxed max-w-4xl">
-              Every plan includes domain authentication (SPF, DKIM, DMARC), deliverability checks, and human support. Scale from 10 to thousands with clarity.
-            </p>
-            <div className="flex flex-wrap items-center gap-8 text-base text-[var(--text-muted)]">
-              <span className="flex items-center gap-3">⚡ Instant setup</span>
-              <span className="flex items-center gap-3">🛡️ Authenticated domains</span>
-              <span className="flex items-center gap-3">🎯 Concierge support</span>
+        <header className="rounded-[32px] border border-[var(--border-subtle)] bg-[rgba(35,35,35,0.78)] px-8 py-12 backdrop-blur">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)] lg:items-start">
+            <div className="space-y-6">
+              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                Plans
+              </span>
+              <div className="space-y-4">
+                <h1 className="text-4xl font-semibold leading-tight text-[var(--text-primary)] lg:text-5xl">
+                  Pick the inbox runway that matches your outreach ambitions.
+                </h1>
+                <p className="max-w-3xl text-lg text-[var(--text-secondary)]">
+                  Every fleet ships with warming, deliverability monitoring, and human support. Scale campaigns with confidence—whether you need a handful of senders or an entire squadron.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-muted)]">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.06)] px-3 py-1.5">
+                  ⚡ Instant provisioning
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.06)] px-3 py-1.5">
+                  • Reputation-safe warmup
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.06)] px-3 py-1.5">
+                  • Concierge support included
+                </span>
+              </div>
+            </div>
+            <div className="rounded-[24px] border border-[var(--border-medium)] bg-[rgba(20,20,20,0.78)] p-6 text-sm text-[var(--text-secondary)] shadow-[0_30px_70px_-40px_rgba(0,0,0,0.85)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[var(--text-muted)]">
+                Need a custom fleet?
+              </p>
+              <p className="mt-3 text-base leading-relaxed">
+                Talk to us about tiered enterprise pricing and dedicated deliverability ops.
+              </p>
+              <a
+                href="https://calendly.com/inboxnavigator/demo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center gap-2 rounded-[14px] border border-[var(--border-medium)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--border-strong)]"
+              >
+                Book a Call
+                <ArrowRightIcon className="h-4 w-4" />
+              </a>
             </div>
           </div>
-
-          <div className="surface-card max-w-lg space-y-6 p-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-              Need a custom setup?
-            </p>
-            <p className="text-lg text-[var(--text-secondary)] leading-relaxed">
-              Scaling beyond <strong>3,000 inboxes</strong>? Get bulk pricing and dedicated support.
-            </p>
-            <a
-              href="https://calendly.com/inboxnavigator/demo"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 text-base font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)] transition-colors duration-200"
-            >
-              Contact Sales →
-              <ArrowRightIcon className="h-5 w-5" />
-            </a>
-          </div>
-        </div>
+        </header>
 
         {error && (
           <div className="rounded-[16px] border border-[#ff8d8d]/40 bg-[#ff8d8d]/10 p-6 text-sm text-[#ffb0b0]">
@@ -314,7 +323,7 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <h2 className="text-2xl font-bold text-[var(--text-primary)]">{product.name}</h2>
                     {product.badge ? (
@@ -323,24 +332,18 @@ export default function ProductsPage() {
                       </span>
                     ) : null}
                   </div>
-                  <p className="text-base text-[var(--text-secondary)] leading-relaxed">{product.description}</p>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{product.description}</p>
                 </div>
 
-                <div className="space-y-3 text-base text-[var(--text-secondary)]">
+                <ul className="min-h-[132px] space-y-2 rounded-[16px] border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.05)] px-4 py-4 text-sm text-[var(--text-secondary)] leading-relaxed">
                   {product.features.map((feature) => (
-                    <div key={feature} className="flex items-start">
-                      <span className="leading-relaxed">• {feature}</span>
-                    </div>
+                    <li key={feature}>• {feature}</li>
                   ))}
-                  {product.id === "MICROSOFT" && (
-                    <div className="flex items-start text-[var(--text-primary)]">
-                      <span className="leading-relaxed">• Elite reputation floor & dedicated SPF records</span>
-                    </div>
-                  )}
-                </div>
+                  {product.id === "MICROSOFT" && <li className="text-[var(--text-primary)]">• Elite reputation floor & dedicated SPF records</li>}
+                </ul>
 
                 <div className="space-y-4">
-                  <label className="text-sm font-semibold text-[var(--text-primary)]">
+                  <label className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">
                     Inbox count
                   </label>
                   <input
@@ -363,11 +366,11 @@ export default function ProductsPage() {
                           : 10,
                       );
                     }}
-                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-4 text-lg font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none focus:ring-2 focus:ring-[var(--border-medium)]/20 transition-all duration-200"
+                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-base font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none focus:ring-2 focus:ring-[var(--border-medium)]/20 transition-all duration-200"
                   />
                   {quantities[product.id] < getMoq(product.id) && (
-                    <p className="text-sm text-[var(--text-muted)] bg-[var(--bg-tertiary)] rounded-lg px-3 py-2">
-                      Minimum order: {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
+                    <p className="rounded-lg bg-[rgba(254,254,254,0.06)] px-3 py-2 text-sm text-[var(--text-muted)]">
+                      We have a minimum order of {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
                     </p>
                   )}
                 </div>
