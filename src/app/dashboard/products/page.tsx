@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, StarIcon, ShieldCheckIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
 
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
@@ -15,6 +15,7 @@ interface Product {
   description: string;
   features: string[];
   badge?: string;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   priceId: string;
   tab: TabId;
@@ -31,25 +32,25 @@ const tabs: Tab[] = [
   {
     id: "google",
     label: "Google",
-    emoji: "",
+    emoji: "📧",
     productIds: ["EDU", "LEGACY", "RESELLER"]
   },
   {
     id: "microsoft",
     label: "Microsoft",
-    emoji: "",
+    emoji: "💼",
     productIds: ["MICROSOFT"]
   },
   {
     id: "prewarmed",
     label: "Prewarmed",
-    emoji: "",
+    emoji: "🔥",
     productIds: ["PREWARMED"]
   },
   {
     id: "smtp",
     label: "SMTP",
-    emoji: "",
+    emoji: "📨",
     productIds: ["AWS"]
   }
 ];
@@ -59,8 +60,9 @@ const products: Product[] = [
     id: "EDU",
     name: "Edu Inboxes",
     price: 1.5,
-    description: "Cost-efficient Google inboxes designed for high-volume sending at the best price.",
-    features: ["Lowest cost per inbox", "Built for large outbound volume", "Managed Google risk (isolation & spread)"],
+    description: "Educational institution inboxes with special pricing",
+    features: ["Academic pricing", "Educational features", "Student support"],
+    icon: CheckIcon,
     color: "green",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual EDU price ID
     tab: "google",
@@ -69,8 +71,9 @@ const products: Product[] = [
     id: "LEGACY",
     name: "Legacy Inboxes",
     price: 2.5,
-    description: "Balanced Google setup for teams that want reliability and predictable spend.",
-    features: ["Best balance of cost + risk", "Very low chance of Google deactivations", "Ideal for steady, long-term outreach"],
+    description: "Legacy inboxes with established reputation",
+    features: ["Proven reputation", "Stable delivery", "Legacy support"],
+    icon: CheckIcon,
     color: "orange",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual LEGACY price ID
     tab: "google",
@@ -79,8 +82,9 @@ const products: Product[] = [
     id: "RESELLER",
     name: "Reseller Inboxes",
     price: 3,
-    description: "Higher-trust Google inboxes for programs that need extra stability.",
-    features: ["Safer Google setup (more isolation)", "Great for high-stakes/managed accounts", "Full IMAP/SMTP access"],
+    description: "Standard cold email inboxes with Google Workspace",
+    features: ["Basic warmup", "Reliable delivery", "IMAP/SMTP access"],
+    icon: CheckIcon,
     color: "blue",
     priceId: "price_1SCFcnBTWWHTKTJvdwKiINPy",
     tab: "google",
@@ -89,9 +93,10 @@ const products: Product[] = [
     id: "PREWARMED",
     name: "Prewarmed Inboxes",
     price: 7,
-    description: "Ready-to-send inboxes with proven sender history.",
-    features: ["Instant activation", "Strong reputation floor", "Zero ramp-up time"],
+    description: "Pre-warmed inboxes ready to send immediately",
+    features: ["Already warmed", "Higher reputation", "Instant setup"],
     badge: "Popular",
+    icon: StarIcon,
     color: "green",
     priceId: "price_1SHmyyBTWWHTKTJvK6ohM58w",
     tab: "prewarmed",
@@ -100,8 +105,9 @@ const products: Product[] = [
     id: "AWS",
     name: "AWS Inboxes",
     price: 1.25,
-    description: "AWS-backed inboxes for scalable, flexible infrastructure.",
-    features: ["Built on AWS for scale", "Flexible integration options", "Stable, cloud-native setup"],
+    description: "AWS-powered inboxes with cloud infrastructure",
+    features: ["Cloud infrastructure", "Scalable", "AWS integration"],
+    icon: CheckIcon,
     color: "yellow",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual AWS price ID
     tab: "smtp",
@@ -110,9 +116,10 @@ const products: Product[] = [
     id: "MICROSOFT",
     name: "Microsoft Inboxes",
     price: 60,
-    description: "Microsoft 365 enterprise inboxes with security and compliance built-in.",
-    features: ["Enterprise-grade security & controls", "Dedicated SPF/DKIM setup per domain", "Priority support & SLAs"],
+    description: "Premium Microsoft 365 enterprise inboxes (per domain)",
+    features: ["Enterprise security", "Advanced features", "Priority support"],
     badge: "Premium",
+    icon: ShieldCheckIcon,
     color: "purple",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
     tab: "microsoft",
@@ -146,7 +153,7 @@ export default function ProductsPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const hasLargeQuantity = useMemo(
-    () => Math.max(...Object.values(quantities)) > 3000,
+    () => Math.max(...Object.values(quantities)) > 500,
     [quantities],
   );
 
@@ -216,53 +223,43 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      <div className="w-full max-w-7xl mx-auto px-6 lg:px-8 xl:px-12 space-y-20">
-        {/* Hero Section */}
-        <header className="rounded-[32px] border border-[var(--border-subtle)] bg-[rgba(35,35,35,0.78)] px-8 py-12 backdrop-blur">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)] lg:items-start">
-            <div className="space-y-6">
-              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-                Plans
-              </span>
-              <div className="space-y-4">
-                <h1 className="text-4xl font-semibold leading-tight text-[var(--text-primary)] lg:text-5xl">
-                  Pick the inbox runway that matches your outreach ambitions.
-                </h1>
-                <p className="max-w-3xl text-lg text-[var(--text-secondary)]">
-                  Every fleet ships with warming, deliverability monitoring, and human support. Scale campaigns with confidence—whether you need a handful of senders or an entire squadron.
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-muted)]">
-                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.06)] px-3 py-1.5">
-                  ⚡ Instant provisioning
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.06)] px-3 py-1.5">
-                  • Reputation-safe warmup
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.06)] px-3 py-1.5">
-                  • Concierge support included
-                </span>
-              </div>
-            </div>
-            <div className="rounded-[24px] border border-[var(--border-medium)] bg-[rgba(20,20,20,0.78)] p-6 text-sm text-[var(--text-secondary)] shadow-[0_30px_70px_-40px_rgba(0,0,0,0.85)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[var(--text-muted)]">
-                Need a custom fleet?
-              </p>
-              <p className="mt-3 text-base leading-relaxed">
-                Talk to us about tiered enterprise pricing and dedicated deliverability ops.
-              </p>
-              <a
-                href="https://calendly.com/inboxnavigator/demo"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 rounded-[14px] border border-[var(--border-medium)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--border-strong)]"
-              >
-                Book a Call
-                <ArrowRightIcon className="h-4 w-4" />
-              </a>
+      <div className="app-shell space-y-16">
+        <div className="flex flex-col gap-12 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl space-y-5">
+            <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+              Plans
+            </span>
+            <h1>
+              Pick the inbox runway that matches your outreach ambitions.
+            </h1>
+            <p className="text-lg text-[var(--text-secondary)]">
+              Every fleet ships with warming, deliverability monitoring, and human support. Scale campaigns with confidence—whether you need a handful of senders or an entire squadron.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
+              <span>⚡ Instant provisioning</span>
+              <span>• Reputation-safe warmup</span>
+              <span>• Concierge support included</span>
             </div>
           </div>
-        </header>
+
+          <div className="surface-card max-w-md space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+              Need a custom fleet?
+            </p>
+            <p className="text-base text-[var(--text-secondary)]">
+              Talk to us about tiered enterprise pricing and dedicated deliverability ops.
+            </p>
+            <a
+              href="https://calendly.com/inboxnavigator/demo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)]"
+            >
+              Book a Call
+              <ArrowRightIcon className="h-4 w-4" />
+            </a>
+          </div>
+        </div>
 
         {error && (
           <div className="rounded-[16px] border border-[#ff8d8d]/40 bg-[#ff8d8d]/10 p-6 text-sm text-[#ffb0b0]">
@@ -275,22 +272,21 @@ export default function ProductsPage() {
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <nav className="border-b border-[var(--border-subtle)] pb-8">
-          <div className="flex flex-wrap justify-center gap-4">
+        <nav className="border-b border-[var(--border-subtle)] pb-6">
+          <div className="flex flex-wrap justify-center gap-3">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex h-12 items-center gap-3 rounded-[12px] px-6 text-base font-semibold transition-all duration-200 ${
+                  className={`flex h-11 items-center gap-3 rounded-[12px] px-5 text-base font-medium transition-colors ${
                     isActive
-                      ? 'border border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)] shadow-sm'
-                      : 'border border-transparent text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:bg-[rgba(254,254,254,0.08)] hover:text-[var(--text-primary)] hover:shadow-sm'
+                      ? 'border border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)]'
+                      : 'border border-transparent text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:bg-[rgba(254,254,254,0.08)] hover:text-[var(--text-primary)]'
                   }`}
                 >
-                  {tab.emoji && <span className="text-xl">{tab.emoji}</span>}
+                  <span className="text-lg">{tab.emoji}</span>
                   <span>{tab.label}</span>
                 </button>
               );
@@ -298,13 +294,12 @@ export default function ProductsPage() {
           </div>
         </nav>
 
-        {/* Product Cards */}
         <div
-          className={`grid gap-8 ${
+          className={`grid gap-6 ${
             filteredProducts.length === 1
               ? 'grid-cols-1 max-w-lg mx-auto'
               : filteredProducts.length === 2
-              ? 'grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto'
+              ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
               : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'
           }`}
         >
@@ -312,11 +307,14 @@ export default function ProductsPage() {
             const totalPrice = getTotalPrice(product.id);
 
             return (
-              <div key={product.id} className="surface-card group flex h-full flex-col gap-8 p-8 transition-all duration-200 hover:shadow-lg">
-                <div className="flex items-start justify-end gap-4">
+              <div key={product.id} className="surface-card flex h-full flex-col gap-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-primary)]/80">
+                    <product.icon className="h-6 w-6" />
+                  </div>
                   <div className="text-right">
                     <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
-                    <p className="text-3xl font-bold text-[var(--text-primary)]">
+                    <p className="text-3xl font-semibold text-[var(--text-primary)]">
                       ${product.price}
                       <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ inbox</span>
                     </p>
@@ -324,27 +322,33 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-2xl font-bold text-[var(--text-primary)]">{product.name}</h2>
-                    {product.badge ? (
-                      <span className="inline-flex w-fit items-center rounded-[10px] border border-[var(--border-medium)] bg-[var(--bg-tertiary)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]">
-                        {product.badge}
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{product.description}</p>
+                  <h2 className="text-2xl font-semibold text-[var(--text-primary)]">{product.name}</h2>
+                  <p className="text-base text-[var(--text-secondary)]">{product.description}</p>
+                  {product.badge ? (
+                    <span className="inline-flex w-fit items-center rounded-[10px] border border-[var(--border-medium)] bg-[var(--bg-tertiary)] px-3 py-1 text-xs font-medium uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+                      {product.badge}
+                    </span>
+                  ) : null}
                 </div>
 
-                <ul className="min-h-[132px] space-y-2 rounded-[16px] border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.05)] px-4 py-4 text-sm text-[var(--text-secondary)] leading-relaxed">
+                <div className="space-y-3 text-base text-[var(--text-secondary)]">
                   {product.features.map((feature) => (
-                    <li key={feature}>• {feature}</li>
+                    <div key={feature} className="flex items-center gap-3">
+                      <CheckIcon className="h-4 w-4 text-[var(--text-primary)]/80" />
+                      <span>{feature}</span>
+                    </div>
                   ))}
-                  {product.id === "MICROSOFT" && <li className="text-[var(--text-primary)]">• Elite reputation floor & dedicated SPF records</li>}
-                </ul>
+                  {product.id === "MICROSOFT" && (
+                    <div className="flex items-center gap-3 text-[var(--text-primary)]">
+                      <StarIcon className="h-4 w-4" />
+                      <span>Elite reputation floor & dedicated SPF records</span>
+                    </div>
+                  )}
+                </div>
 
-                <div className="space-y-4">
-                  <label className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">
-                    Inbox count
+                <div className="space-y-3">
+                  <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                    Inbox volume
                   </label>
                   <input
                     type="text"
@@ -366,36 +370,36 @@ export default function ProductsPage() {
                           : 10,
                       );
                     }}
-                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-base font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none focus:ring-2 focus:ring-[var(--border-medium)]/20 transition-all duration-200"
+                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none"
                   />
                   {quantities[product.id] < getMoq(product.id) && (
-                    <p className="rounded-lg bg-[rgba(254,254,254,0.06)] px-3 py-2 text-sm text-[var(--text-muted)]">
+                    <p className="text-sm text-[var(--text-muted)]">
                       We have a minimum order of {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
                     </p>
                   )}
                 </div>
 
                 <div className="mt-auto space-y-6">
-                  <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-6 py-4">
-                    <span className="text-sm font-semibold text-[var(--text-muted)]">Total monthly</span>
-                    <span className="text-2xl font-bold text-[var(--text-primary)]">
+                  <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                    <span>Total monthly</span>
+                    <span className="text-xl font-semibold text-[var(--text-primary)]">
                       {formatCurrency(totalPrice)}
                     </span>
                   </div>
 
                   <Button
                     variant="primary"
-                    className="w-full justify-center gap-3 text-base font-semibold"
+                    className="w-full justify-center gap-2"
                     disabled={loading[product.id] || quantities[product.id] < getMoq(product.id)}
                     onClick={() => handleSelectPlan(product.id)}
                   >
                     {loading[product.id] ? (
                       <>
-                        <svg className="h-5 w-5 animate-spin text-[var(--text-dark)]/70" viewBox="0 0 24 24" fill="none">
+                        <svg className="h-4 w-4 animate-spin text-[var(--text-dark)]/70" viewBox="0 0 24 24" fill="none">
                           <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
                         </svg>
-                        Processing…
+                        Processing
                       </>
                     ) : (
                       <>

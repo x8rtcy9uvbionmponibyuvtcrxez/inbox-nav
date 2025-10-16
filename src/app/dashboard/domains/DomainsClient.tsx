@@ -4,7 +4,6 @@ import { useMemo, useState, memo, useEffect } from "react";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
 import type { Prisma } from "@prisma/client";
-import { DomainStatus, OrderStatus } from "@prisma/client";
 import { GlobeAltIcon, FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { TableSkeleton } from "@/components/skeletons";
 import { endOfDay, format, startOfDay, subDays } from "date-fns";
@@ -12,19 +11,19 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/Button";
 import Pagination from "@/components/Pagination";
 
-const STATUS_COLORS: Record<DomainStatus | 'DEFAULT', string> = {
-  [DomainStatus.LIVE]: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
-  [DomainStatus.PENDING]: "bg-amber-400/25 text-amber-100 border border-amber-300/40",
-  [DomainStatus.DELETED]: "bg-red-500/15 text-red-300 border border-red-500/30",
-  [DomainStatus.DECOMMISSIONED]: "bg-red-500/15 text-red-300 border border-red-500/30",
-  [DomainStatus.CANCELLED]: "bg-orange-500/15 text-orange-300 border border-orange-500/30",
+const STATUS_COLORS: Record<string, string> = {
+  LIVE: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+  PENDING: "bg-amber-400/25 text-amber-100 border border-amber-300/40",
+  DELETED: "bg-red-500/15 text-red-300 border border-red-500/30",
+  DECOMMISSIONED: "bg-red-500/15 text-red-300 border border-red-500/30",
+  CANCELLED: "bg-orange-500/15 text-orange-300 border border-orange-500/30",
   DEFAULT: "bg-white/10 text-brand-muted border border-white/10",
 };
 
-const STATUS_DISPLAY_ORDER = [DomainStatus.LIVE, DomainStatus.PENDING, DomainStatus.DECOMMISSIONED, DomainStatus.DELETED];
+const STATUS_DISPLAY_ORDER = ["LIVE", "PENDING", "DECOMMISSIONED", "DELETED"];
 
-const STATUS_FILTER_MATCHERS: Record<string, DomainStatus[]> = {
-  DECOMMISSIONED: [DomainStatus.DECOMMISSIONED, DomainStatus.DELETED],
+const STATUS_FILTER_MATCHERS: Record<string, string[]> = {
+  DECOMMISSIONED: ["DECOMMISSIONED", "DELETED"],
 };
 
 const PRODUCT_DISPLAY_ORDER = ["EDU", "LEGACY", "RESELLER", "PREWARMED", "AWS", "MICROSOFT"];
@@ -84,11 +83,11 @@ const DEFAULT_FILTERS: FilterState = {
   dateRange: { from: null, to: null },
 };
 
-function StatusPill({ status, order }: { status: DomainStatus; order?: { subscriptionStatus?: string; status?: OrderStatus } }) {
+function StatusPill({ status, order }: { status: string; order?: { subscriptionStatus?: string; status?: string } }) {
   // Check if the order is cancelled
-  const isOrderCancelled = order?.subscriptionStatus === 'cancel_at_period_end' || order?.status === OrderStatus.CANCELLED;
-  const displayStatus = isOrderCancelled ? DomainStatus.CANCELLED : status;
-  const pillClass = STATUS_COLORS[displayStatus] ?? STATUS_COLORS.DEFAULT;
+  const isOrderCancelled = order?.subscriptionStatus === 'cancel_at_period_end' || order?.status === 'CANCELLED';
+  const displayStatus = isOrderCancelled ? 'CANCELLED' : status;
+  const pillClass = STATUS_COLORS[displayStatus.toUpperCase()] ?? STATUS_COLORS.DEFAULT;
   
   return (
     <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${pillClass}`}>
@@ -523,28 +522,26 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
 
   return (
     <div className="space-y-10 text-brand-primary">
-      {/* Header Section */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex-1 max-w-2xl">
-          <h1 className="text-4xl font-bold text-brand-primary">Domain Portfolio</h1>
-          <p className="mt-3 text-lg text-brand-secondary leading-relaxed">
-            Track every sending domain, forwarding target, and the inbox capacity we&apos;ve associated with it.
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold text-brand-primary">Domain portfolio</h1>
+          <p className="mt-2 max-w-xl text-base text-brand-secondary">
+            Track every sending domain, forwarding target, and the inbox capacity we’ve associated with it.
           </p>
         </div>
-        <Button asChild variant="primary" size="lg" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)] hover:shadow-[0_25px_50px_-25px_rgba(255,255,255,0.8)] transition-all duration-200">
+        <Button asChild variant="primary" size="md" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)]">
           <Link href="/dashboard/products">Buy more inboxes</Link>
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Total domains</p>
-          <p className="mt-4 text-4xl font-bold text-brand-primary">{domains.length}</p>
+      <div className="grid gap-5 md:grid-cols-2">
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Total domains</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{domains.length}</p>
         </div>
-        <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Total inbox capacity</p>
-          <p className="mt-4 text-4xl font-bold text-brand-primary">{totalInboxSlots}</p>
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Total inbox capacity</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{totalInboxSlots}</p>
         </div>
       </div>
 
@@ -762,21 +759,21 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                       className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
                     />
                   </th>
-                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Domain</th>
-                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Status</th>
-                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Inbox count</th>
-                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Forwarding URL</th>
-                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Tags</th>
-                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Business</th>
-                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Product</th>
-                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Order</th>
-                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Created</th>
+                  <th scope="col" className="px-6 py-3 text-left">Domain</th>
+                  <th scope="col" className="px-6 py-3 text-left">Status</th>
+                  <th scope="col" className="px-6 py-3 text-left">Inbox count</th>
+                  <th scope="col" className="px-6 py-3 text-left">Forwarding URL</th>
+                  <th scope="col" className="px-6 py-3 text-left">Tags</th>
+                  <th scope="col" className="px-6 py-3 text-left">Business</th>
+                  <th scope="col" className="px-6 py-3 text-left">Product</th>
+                  <th scope="col" className="px-6 py-3 text-left">Order</th>
+                  <th scope="col" className="px-6 py-3 text-left">Created</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {paginatedDomains.map((domain) => (
-                  <tr key={domain.id} className="group transition-all duration-200 hover:bg-white/[0.04]">
-                    <td className="px-6 py-5">
+                  <tr key={domain.id} className="transition hover:bg-white/[0.04]">
+                    <td className="px-6 py-4">
                       <input
                         type="checkbox"
                         checked={selectedIds.has(domain.id)}
@@ -784,21 +781,21 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                         className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
                       />
                     </td>
-                    <td className="px-6 py-5 font-mono text-sm font-medium text-brand-primary">{domain.domain}</td>
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-4 font-mono text-xs text-brand-primary">{domain.domain}</td>
+                    <td className="px-6 py-4">
                       <StatusPill status={domain.status} order={domain.order} />
                     </td>
-                    <td className="px-6 py-5 text-sm text-brand-secondary">{domain.inboxCount}</td>
-                    <td className="px-6 py-5 text-sm text-brand-muted">{domain.forwardingUrl || "—"}</td>
-                    <td className="px-6 py-5 text-sm text-brand-secondary">
+                    <td className="px-6 py-4 text-brand-secondary">{domain.inboxCount}</td>
+                    <td className="px-6 py-4 text-brand-muted">{domain.forwardingUrl || "—"}</td>
+                    <td className="px-6 py-4 text-brand-secondary">
                       {domain.tags.length ? domain.tags.slice(0, 3).join(", ") : <span className="text-brand-muted">—</span>}
                     </td>
-                    <td className="px-6 py-5 text-sm text-brand-secondary">{domain.businessName || "—"}</td>
-                    <td className="px-6 py-5 text-sm text-brand-secondary">{getProductLabel(domain.order?.productType)}</td>
-                    <td className="px-6 py-5 font-mono text-xs text-brand-muted">
+                    <td className="px-6 py-4 text-brand-secondary">{domain.businessName || "—"}</td>
+                    <td className="px-6 py-4 text-brand-secondary">{getProductLabel(domain.order?.productType)}</td>
+                    <td className="px-6 py-4 font-mono text-[11px] text-brand-muted">
                       {domain.order?.id ? `${domain.order.id.slice(0, 8)}…` : "—"}
                     </td>
-                    <td className="px-6 py-5 text-sm text-brand-muted">{formatDate(domain.createdAt)}</td>
+                    <td className="px-6 py-4 text-brand-muted">{formatDate(domain.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

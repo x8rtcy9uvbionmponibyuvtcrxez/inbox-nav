@@ -4,7 +4,6 @@ import { useMemo, useState, useCallback, memo, useEffect } from "react";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
 import type { Prisma } from "@prisma/client";
-import { InboxStatus, OrderStatus } from "@prisma/client";
 import { InboxIcon, SparklesIcon, FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { TableSkeleton } from "@/components/skeletons";
 import { endOfDay, format, startOfDay, subDays } from "date-fns";
@@ -12,15 +11,15 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/Button";
 import Pagination from "@/components/Pagination";
 
-const STATUS_COLORS: Record<InboxStatus | 'DEFAULT', string> = {
-  [InboxStatus.LIVE]: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
-  [InboxStatus.PENDING]: "bg-amber-400/25 text-amber-100 border border-amber-300/40",
-  [InboxStatus.DELETED]: "bg-red-500/15 text-red-300 border border-red-500/30",
-  [InboxStatus.CANCELLED]: "bg-orange-500/15 text-orange-300 border border-orange-500/30",
+const STATUS_COLORS: Record<string, string> = {
+  LIVE: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+  PENDING: "bg-amber-400/25 text-amber-100 border border-amber-300/40",
+  DELETED: "bg-red-500/15 text-red-300 border border-red-500/30",
+  CANCELLED: "bg-orange-500/15 text-orange-300 border border-orange-500/30",
   DEFAULT: "bg-white/10 text-brand-muted border border-white/10",
 };
 
-const STATUS_DISPLAY_ORDER = [InboxStatus.LIVE, InboxStatus.PENDING, InboxStatus.DELETED];
+const STATUS_DISPLAY_ORDER = ["LIVE", "PENDING", "DELETED"];
 const PRODUCT_DISPLAY_ORDER = ["EDU", "LEGACY", "RESELLER", "PREWARMED", "AWS", "MICROSOFT"];
 const ITEMS_PER_PAGE = 50;
 
@@ -48,7 +47,7 @@ type Props = {
 type DatePreset = "7" | "30" | "90" | "ALL";
 
 type FilterState = {
-  statuses: InboxStatus[];
+  statuses: string[];
   product: string;
   persona: string;
   tags: string[];
@@ -71,39 +70,23 @@ const DEFAULT_FILTERS: FilterState = {
   dateRange: { from: null, to: null },
 };
 
-function StatusPill({ status, order }: { status: InboxStatus; order?: { subscriptionStatus?: string; status?: OrderStatus } }) {
+function StatusPill({ status, order }: { status: string; order?: { subscriptionStatus?: string; status?: string } }) {
   // Check if the order is cancelled
-  const isOrderCancelled = order?.subscriptionStatus === 'cancel_at_period_end' || order?.status === OrderStatus.CANCELLED;
-  const displayStatus = isOrderCancelled ? InboxStatus.CANCELLED : status;
-  const pillClass = STATUS_COLORS[displayStatus] ?? STATUS_COLORS.DEFAULT;
-  
-  // Map status to display labels
-  const getStatusLabel = (status: InboxStatus) => {
-    switch (status) {
-      case InboxStatus.LIVE:
-        return 'Active';
-      case InboxStatus.PENDING:
-        return 'Warming';
-      case InboxStatus.DELETED:
-        return 'Paused';
-      case InboxStatus.CANCELLED:
-        return 'Paused';
-      default:
-        return String(status).toLowerCase();
-    }
-  };
+  const isOrderCancelled = order?.subscriptionStatus === 'cancel_at_period_end' || order?.status === 'CANCELLED';
+  const displayStatus = isOrderCancelled ? 'CANCELLED' : status;
+  const pillClass = STATUS_COLORS[displayStatus.toUpperCase()] ?? STATUS_COLORS.DEFAULT;
   
   return (
     <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${pillClass}`}>
-      {getStatusLabel(displayStatus)}
+      {displayStatus.toLowerCase()}
     </span>
   );
 }
 
-// function formatDate(value: Date | string) {
-//   const date = typeof value === "string" ? new Date(value) : value;
-//   return format(date, "MMM d, yyyy");
-// }
+function formatDate(value: Date | string) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  return format(date, "MMM d, yyyy");
+}
 
 function calculateAverageAge(inboxList: InboxRecord[]): number {
   if (!inboxList.length) return 0;
@@ -114,9 +97,7 @@ function calculateAverageAge(inboxList: InboxRecord[]): number {
     return sum + diff / (1000 * 60 * 60 * 24);
   }, 0);
   const average = totalDays / inboxList.length;
-  if (!Number.isFinite(average)) return 0;
-  const rounded = Math.round(average);
-  return Math.max(1, rounded);
+  return Number.isFinite(average) ? average : 0;
 }
 
 function downloadCsv(rows: string[][], filename: string) {
@@ -220,7 +201,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     const dateTo = filters.dateRange.to ? endOfDay(filters.dateRange.to) : null;
 
     return safeInboxes.filter((inbox) => {
-      if (!showDeleted && inbox.status === InboxStatus.DELETED) return false;
+      if (!showDeleted && inbox.status === 'DELETED') return false;
       
       // Only compute haystack if we have a search term
       let matchesSearch = true;
@@ -290,14 +271,14 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
   const paginatedInboxes = filteredInboxes.slice(startIndex, endIndex);
 
   const inboxCount = safeInboxes.length;
-  // const uniqueDomains = useMemo(() => {
-  //   const set = new Set<string>();
-  //   safeInboxes.forEach((inbox) => {
-  //     const domain = parseInboxDomain(inbox);
-  //     if (domain) set.add(domain);
-  //   });
-  //   return set;
-  // }, [safeInboxes]);
+  const uniqueDomains = useMemo(() => {
+    const set = new Set<string>();
+    safeInboxes.forEach((inbox) => {
+      const domain = parseInboxDomain(inbox);
+      if (domain) set.add(domain);
+    });
+    return set;
+  }, [safeInboxes]);
 
   const averageAge = useMemo(() => calculateAverageAge(safeInboxes), [safeInboxes]);
 
@@ -398,7 +379,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const toggleStatus = (status: InboxStatus) => {
+  const toggleStatus = (status: string) => {
     setFilters((prev) => {
       const already = prev.statuses.includes(status);
       const statuses = already ? prev.statuses.filter((value) => value !== status) : [...prev.statuses, status];
@@ -439,7 +420,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
     filters.statuses.forEach((status) => {
       chips.push({
         id: `status:${status}`,
-        label: `Status: ${status.toLowerCase()}`,
+        label: `Status: ${status}`,
         onClear: () =>
           setFilters((prev) => ({ ...prev, statuses: prev.statuses.filter((value) => value !== status) })),
       });
@@ -528,8 +509,8 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
       <div className="space-y-8 text-brand-primary">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-brand-primary">Manage your inboxes</h1>
-            <p className="mt-2 text-base text-brand-secondary">View active inboxes, track health, and manage connections.</p>
+            <h1 className="text-3xl font-semibold text-brand-primary">Inboxes</h1>
+            <p className="mt-2 text-base text-brand-secondary">Manage your email inboxes</p>
           </div>
         </div>
         <TableSkeleton rows={5} cols={6} />
@@ -560,7 +541,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
         <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
           <InboxIcon className="h-8 w-8 text-brand-secondary" />
         </div>
-        <h2 className="text-2xl font-semibold text-brand-primary">No inboxes yet — launch your first set and start sending.</h2>
+        <h2 className="text-2xl font-semibold text-brand-primary">No inboxes yet</h2>
         <p className="mt-3 max-w-sm text-base text-brand-secondary">
           Your inboxes appear here once fulfillment is complete. Launch a package to start building out your fleet.
         </p>
@@ -569,40 +550,38 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
           className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90"
         >
           <SparklesIcon className="h-4 w-4" />
-          Add Inbox
+          Create inboxes
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-10 text-brand-primary">
-      {/* Header Section */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex-1 max-w-2xl">
-          <h1 className="text-4xl font-bold text-brand-primary">Manage your inboxes and sending power.</h1>
-          <p className="mt-3 text-lg text-brand-secondary leading-relaxed">
-            See every inbox in one place.
+    <div className="space-y-8 text-brand-primary">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-brand-primary text-3xl font-semibold">Inbox inventory</h1>
+          <p className="mt-2 max-w-xl text-base text-brand-secondary">
+            Every sender you’ve provisioned, plus their current delivery status, tags, and linked orders.
           </p>
         </div>
-        <Button asChild variant="primary" size="lg" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)] hover:shadow-[0_25px_50px_-25px_rgba(255,255,255,0.8)] transition-all duration-200">
-          <Link href="/dashboard/products">Add Inbox</Link>
+        <Button asChild variant="primary" size="md" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)]">
+          <Link href="/dashboard/products">Add more inboxes</Link>
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Live inboxes</p>
-          <p className="mt-4 text-4xl font-bold text-brand-primary">{inboxCount}</p>
+      <div className="grid gap-5 md:grid-cols-3">
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Total inboxes</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{inboxCount}</p>
         </div>
-        <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Paused</p>
-          <p className="mt-4 text-4xl font-bold text-brand-primary">0</p>
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Domains represented</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{uniqueDomains.size}</p>
         </div>
-        <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Average age of Inboxes</p>
-          <p className="mt-4 text-4xl font-bold text-brand-primary">{averageAge} days</p>
+        <div className="surface-card px-6 py-5">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Average inbox age</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{averageAge.toFixed(1)} days</p>
         </div>
       </div>
 
@@ -664,72 +643,67 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                   </Button>
                 </Popover.Trigger>
                 <Popover.Portal>
-                  <Popover.Content sideOffset={8} align="end" className="z-50 w-80 rounded-2xl border border-white/10 bg-white/[0.08] p-6 text-brand-primary shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] backdrop-blur-xl">
-                    <div className="space-y-6 text-sm text-brand-secondary">
+                  <Popover.Content sideOffset={8} align="end" className="surface-pop z-50 w-72 p-4 text-brand-primary backdrop-blur">
+                    <div className="space-y-4 text-xs text-brand-secondary">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Show deleted inboxes</span>
-                        <label className="inline-flex items-center gap-3 text-brand-secondary">
-                          <input 
-                            type="checkbox" 
-                            checked={showDeleted} 
-                            onChange={(e) => setShowDeleted(e.target.checked)}
-                            className="h-4 w-4 rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
-                          />
-                          <span className="text-sm font-medium">Show</span>
+                        <span className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Show deleted inboxes</span>
+                        <label className="inline-flex items-center gap-2 text-brand-secondary">
+                          <input type="checkbox" checked={showDeleted} onChange={(e) => setShowDeleted(e.target.checked)} />
+                          <span>Show</span>
                         </label>
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Business</label>
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Business</label>
                         <input
                           value={filters.business}
                           onChange={(event) => setFilterValue("business", event.target.value)}
                           placeholder="e.g. Acme"
-                          className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary placeholder:text-brand-muted focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
                         />
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Order ID</label>
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Order ID</label>
                         <input
                           value={filters.orderId}
                           onChange={(event) => setFilterValue("orderId", event.target.value)}
                           placeholder="Search by order ID"
-                          className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary placeholder:text-brand-muted focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
                         />
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">ESP platforms</label>
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">ESP platforms</label>
                         <div className="flex flex-wrap gap-2">
                           {uniquePlatforms.length ? (
                             uniquePlatforms.map((platform) => (
                               <button
                                 key={platform}
                                 onClick={() => togglePlatform(platform)}
-                                className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                                className={`rounded-full px-3 py-1 ${
                                   filters.platforms.includes(platform)
-                                    ? 'bg-white text-black shadow-sm'
-                                    : 'border border-white/20 text-brand-muted hover:border-white/40 hover:text-brand-primary'
+                                    ? 'bg-white/90 text-black'
+                                    : 'border border-white/15 text-brand-muted'
                                 }`}
                               >
                                 {platform}
                               </button>
                             ))
                           ) : (
-                            <span className="text-sm text-brand-muted">No ESP data yet.</span>
+                            <span className="text-brand-muted">No ESP data yet.</span>
                           )}
                         </div>
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Tags</label>
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Tags</label>
                         <input
                           value={filters.tags.join(', ')}
                           onChange={(event) => setFilterValue("tags", event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean))}
                           placeholder="primary, warmup"
-                          className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary placeholder:text-brand-muted focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
+                          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary placeholder:text-brand-muted focus:border-white/35 focus:outline-none focus:ring-0"
                         />
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-muted">Created</label>
-                        <div className="flex items-center gap-3">
+                      <div className="space-y-2">
+                        <label className="text-[11px] uppercase tracking-[0.3em] text-brand-muted">Created</label>
+                        <div className="flex items-center gap-2">
                           <input
                             type="date"
                             value={filters.dateRange.from ? format(filters.dateRange.from, 'yyyy-MM-dd') : ''}
@@ -741,7 +715,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                                 dateRange: { ...prev.dateRange, from: value },
                               }));
                             }}
-                            className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
+                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
                           />
                           <input
                             type="date"
@@ -754,10 +728,10 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                                 dateRange: { ...prev.dateRange, to: value },
                               }));
                             }}
-                            className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-brand-primary focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
+                            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-brand-primary focus:border-white/35 focus:outline-none focus:ring-0"
                           />
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-brand-muted">
                           {(['ALL', '7', '30', '90'] as DatePreset[]).map((preset) => (
                             <button
                               key={preset}
@@ -765,22 +739,18 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                                 const range = applyDatePreset(preset);
                                 setFilters((prev) => ({ ...prev, datePreset: preset, dateRange: range }));
                               }}
-                              className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                                filters.datePreset === preset 
-                                  ? 'bg-white text-black shadow-sm' 
-                                  : 'border border-white/20 text-brand-muted hover:border-white/40 hover:text-brand-primary'
-                              }`}
+                              className={`rounded-full px-3 py-1 ${filters.datePreset === preset ? 'bg-white/90 text-black' : 'border border-white/15'}`}
                             >
                               {preset === 'ALL' ? 'All' : `Last ${preset}d`}
                             </button>
                           ))}
                         </div>
                       </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-brand-secondary hover:text-brand-primary px-6">
+                    <div className="flex items-center justify-between pt-1">
+                      <Button variant="ghost" size="sm" onClick={resetFilters} className="text-brand-secondary hover:text-brand-primary">
                         Clear all
                       </Button>
-                      <Button variant="primary" size="sm" onClick={() => setIsFilterSheetOpen(false)} className="px-8">
+                      <Button variant="primary" size="sm" onClick={() => setIsFilterSheetOpen(false)}>
                         Done
                       </Button>
                     </div>
@@ -832,37 +802,51 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                   className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
                 />
               </th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Inbox</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Domain</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Plan</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Status</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">View</th>
+              <th scope="col" className="px-6 py-3 text-left">Email</th>
+              <th scope="col" className="px-6 py-3 text-left">Status</th>
+              <th scope="col" className="px-6 py-3 text-left">Persona</th>
+              <th scope="col" className="px-6 py-3 text-left">Tags</th>
+              <th scope="col" className="px-6 py-3 text-left">Business</th>
+              <th scope="col" className="px-6 py-3 text-left">Domain</th>
+              <th scope="col" className="px-6 py-3 text-left">Password</th>
+              <th scope="col" className="px-6 py-3 text-left">Product</th>
+              <th scope="col" className="px-6 py-3 text-left">ESP</th>
+              <th scope="col" className="px-6 py-3 text-left">Order</th>
+              <th scope="col" className="px-6 py-3 text-left">Created</th>
             </tr>
           </thead>
               <tbody className="divide-y divide-white/5">
                 {paginatedInboxes.map((inbox) => {
                   const domain = parseInboxDomain(inbox);
                   return (
-                    <tr key={inbox.id} className="group transition-all duration-200 hover:bg-white/[0.04]">
-                      <td className="px-6 py-5">
+                    <tr key={inbox.id} className="transition hover:bg-white/[0.04]">
+                      <td className="px-6 py-4">
                         <input
                           type="checkbox"
                           checked={selectedIds.has(inbox.id)}
-                          onChange={() => handleToggleSelect(inbox.id)}
-                          className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
-                        />
-                      </td>
-                      <td className="px-6 py-5 font-mono text-sm font-medium text-brand-primary">{inbox.email}</td>
-                      <td className="px-6 py-5 text-sm text-brand-muted">{domain || "—"}</td>
-                      <td className="px-6 py-5 text-sm text-brand-secondary">{getProductLabel(inbox.order?.productType)}</td>
-                      <td className="px-6 py-5">
+                      onChange={() => handleToggleSelect(inbox.id)}
+                      className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
+                    />
+                  </td>
+                      <td className="px-6 py-4 font-mono text-xs text-brand-primary">{inbox.email}</td>
+                      <td className="px-6 py-4">
                         <StatusPill status={inbox.status} order={inbox.order} />
                       </td>
-                      <td className="px-6 py-5">
-                        <Button size="sm" variant="secondary" className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          View
-                        </Button>
+                      <td className="px-6 py-4 text-brand-secondary">{[inbox.firstName, inbox.lastName].filter(Boolean).join(' ') || '—'}</td>
+                      <td className="px-6 py-4 text-brand-secondary">
+                        {inbox.tags.length ? inbox.tags.slice(0, 3).join(", ") : <span className="text-brand-muted">—</span>}
                       </td>
+                      <td className="px-6 py-4 text-brand-secondary">{inbox.businessName || "—"}</td>
+                      <td className="px-6 py-4 text-brand-muted">{domain || "—"}</td>
+                      <td className="px-6 py-4 font-mono text-xs text-brand-secondary">
+                        {inbox.password ? inbox.password : "—"}
+                      </td>
+                      <td className="px-6 py-4 text-brand-secondary">{getProductLabel(inbox.order?.productType)}</td>
+                      <td className="px-6 py-4 text-brand-muted">{inbox.espPlatform || "—"}</td>
+                      <td className="px-6 py-4 font-mono text-[11px] text-brand-muted">
+                        {inbox.order?.id ? `${inbox.order.id.slice(0, 8)}…` : "—"}
+                      </td>
+                      <td className="px-6 py-4 text-brand-muted">{formatDate(inbox.createdAt)}</td>
                     </tr>
                   );
                 })}
