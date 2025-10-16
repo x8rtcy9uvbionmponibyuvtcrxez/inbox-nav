@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from '@/lib/prisma';
+import { OrderStatus } from '@prisma/client';
 import { auth, clerkClient } from "@clerk/nextjs/server";
 
 type StatusTone = {
@@ -9,32 +10,32 @@ type StatusTone = {
   label: string;
 };
 
-const STATUS_THEME: Record<string, StatusTone> = {
-  FULFILLED: {
+const STATUS_THEME: Record<OrderStatus, StatusTone> = {
+  [OrderStatus.FULFILLED]: {
     bg: "from-emerald-400/20 to-emerald-500/10",
     ring: "ring-emerald-400/30",
     glow: "shadow-[0_0_25px_rgba(52,211,153,0.25)]",
     label: "Fulfilled",
   },
-  PAID: {
+  [OrderStatus.PAID]: {
     bg: "from-sky-400/20 to-sky-500/10",
     ring: "ring-sky-400/30",
     glow: "shadow-[0_0_25px_rgba(56,189,248,0.25)]",
     label: "Paid",
   },
-  PENDING: {
+  [OrderStatus.PENDING]: {
     bg: "from-amber-400/20 to-amber-500/10",
     ring: "ring-amber-400/30",
     glow: "shadow-[0_0_25px_rgba(251,191,36,0.25)]",
     label: "Pending",
   },
-  PENDING_DOMAIN_PURCHASE: {
+  [OrderStatus.PENDING_DOMAIN_PURCHASE]: {
     bg: "from-purple-400/20 to-purple-500/10",
     ring: "ring-purple-400/30",
     glow: "shadow-[0_0_25px_rgba(192,132,252,0.25)]",
     label: "Domain Purchase",
   },
-  CANCELLED: {
+  [OrderStatus.CANCELLED]: {
     bg: "from-rose-500/30 to-rose-500/10",
     ring: "ring-rose-400/30",
     glow: "shadow-[0_0_25px_rgba(244,114,182,0.25)]",
@@ -42,13 +43,12 @@ const STATUS_THEME: Record<string, StatusTone> = {
   },
 };
 
-function prettyStatus(value: string) {
-  const upper = value.toUpperCase();
-  return STATUS_THEME[upper]?.label ?? value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+function prettyStatus(value: OrderStatus) {
+  return STATUS_THEME[value]?.label ?? value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const key = status.toUpperCase();
+function StatusBadge({ status }: { status: OrderStatus }) {
+  const key = status;
   const theme = STATUS_THEME[key] ?? {
     bg: "from-slate-400/20 to-slate-500/10",
     ring: "ring-slate-400/30",
@@ -261,7 +261,7 @@ export default async function AdminOrdersPage({
                 </tr>
               )}
                 {orders.map((order) => {
-                  const isCancelled = order.status === "CANCELLED";
+                  const isCancelled = order.status === OrderStatus.CANCELLED;
                   const hasSubscription = Boolean(order.stripeSubscriptionId);
                   const provisionedInboxes = order.inboxes?.length ?? 0;
                   const domainTotal = order.domains?.length ?? 0;

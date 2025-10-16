@@ -1,7 +1,7 @@
 "use server";
 
 import { requireAdmin } from '@/lib/admin-auth';
-import { Prisma } from '@prisma/client';
+import { Prisma, ProductType, DomainStatus, InboxStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { sendClerkInvitation } from '@/lib/clerk-invites';
 
@@ -74,8 +74,8 @@ export async function validateCSVAction(csvData: CSVRow[]): Promise<ValidationRe
       }
       
       // Validate product_type
-      const validProductTypes = ['EDU', 'LEGACY', 'RESELLER', 'PREWARMED', 'AWS', 'MICROSOFT'];
-      if (!row.product_type || !validProductTypes.includes(row.product_type.toUpperCase())) {
+      const validProductTypes = Object.values(ProductType);
+      if (!row.product_type || !validProductTypes.includes(row.product_type.toUpperCase() as ProductType)) {
         rowErrors.push(`Row ${rowNum}: product_type must be one of: ${validProductTypes.join(', ')}`);
       }
       
@@ -187,10 +187,10 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
         const order = await prisma.order.create({
           data: {
             externalId,
-            productType: productType as any, // Cast to any for now, will fix properly
+            productType: productType as ProductType,
             quantity,
             totalAmount: totalAmountCents,
-            status: 'FULFILLED', // Imported orders are considered fulfilled
+            status: 'FULFILLED' as any, // Will be fixed when we update to use OrderStatus enum
             businessName: firstRow.business_name.trim(),
             stripeSubscriptionId: firstRow.stripe_subscription_id?.trim() || null,
             clerkUserId: null, // Will be linked when user signs up
@@ -225,7 +225,7 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
             firstName: row.first_name?.trim() || null,
             lastName: row.last_name?.trim() || null,
             espPlatform: row.esp_platform?.trim() || 'Smartlead',
-            status: 'LIVE',
+            status: InboxStatus.LIVE,
             tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()) : [],
             businessName: order.businessName,
             forwardingDomain: row.forwarding_domain?.trim() || null,
@@ -240,7 +240,7 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
         const domainData = Array.from(domainMap.entries()).map(([domain, info]) => ({
           orderId: order.id,
           domain,
-          status: 'LIVE',
+          status: DomainStatus.LIVE,
           inboxCount: info.emails.length,
           forwardingUrl: info.forwardingUrl || domain,
           businessName: order.businessName,

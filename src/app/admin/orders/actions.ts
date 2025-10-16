@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { DomainStatus, InboxStatus, OrderStatus } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { invalidateCache } from '@/lib/redis';
 
@@ -116,7 +117,7 @@ export async function markOrderAsFulfilledAction(
           const { distributeInboxes } = await import('@/lib/inbox-distribution');
           
           const distribution = distributeInboxes({
-            productType: order.productType as 'RESELLER' | 'EDU' | 'LEGACY' | 'PREWARMED' | 'AWS' | 'MICROSOFT',
+            productType: order.productType,
             domainSource: 'OWN',
             totalInboxes: order.quantity,
             personas: personas.map((p) => ({
@@ -135,7 +136,7 @@ export async function markOrderAsFulfilledAction(
             const domainInserts = distribution.domainsUsed.map(domain => ({
               orderId,
               domain,
-              status: 'LIVE' as const,
+              status: DomainStatus.LIVE,
               inboxCount: 0, // Will be updated after inbox creation
               forwardingUrl: onboardingData.website || '',
               tags: [],
@@ -158,7 +159,7 @@ export async function markOrderAsFulfilledAction(
               personaName: `${allocation.firstName} ${allocation.lastName}`.trim(),
               password: uniformPassword?.trim() || 'temp_password_123',
               espPlatform: onboardingData.espProvider || 'Smartlead',
-              status: 'LIVE' as const,
+              status: DomainStatus.LIVE,
               tags: [],
               businessName,
               forwardingDomain: allocation.domain,
@@ -207,7 +208,7 @@ export async function markOrderAsFulfilledAction(
       await tx.inbox.updateMany({
         where: { orderId },
         data: { 
-          status: 'LIVE',
+          status: InboxStatus.LIVE,
           fulfilledAt: fulfillmentTime,
           updatedAt: fulfillmentTime
         }
@@ -217,7 +218,7 @@ export async function markOrderAsFulfilledAction(
       await tx.domain.updateMany({
         where: { orderId },
         data: { 
-          status: 'LIVE',
+          status: InboxStatus.LIVE,
           fulfilledAt: fulfillmentTime,
           updatedAt: fulfillmentTime
         }
@@ -312,7 +313,7 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
         personaName: first_name && last_name ? `${first_name} ${last_name}`.trim() : null,
         password: password.trim(),
         espPlatform: 'Smartlead',
-        status: 'LIVE' as const,
+        status: InboxStatus.LIVE,
         tags: [],
         businessName,
         forwardingDomain: domain || null,
@@ -327,7 +328,7 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
     const domainInserts = Array.from(domainsToCreate).map(domain => ({
       orderId,
       domain,
-      status: 'LIVE' as const,
+      status: InboxStatus.LIVE,
       inboxCount: 0, // Will be updated after inbox creation
       forwardingUrl: order?.onboardingData?.website || '',
       tags: [],
@@ -471,7 +472,7 @@ async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, 
   const domainRecords = Array.from(domainMap.entries()).map(([domain, info]) => ({
     orderId: order.id,
     domain,
-    status: 'LIVE',
+    status: DomainStatus.LIVE,
     inboxCount: info.emails.length,
     forwardingUrl: info.forwardingUrl ?? defaultForwarding,
     businessName: defaultBusinessName,
@@ -493,7 +494,7 @@ async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, 
           forwardingUrl: record.forwardingUrl,
           businessName: record.businessName,
           tags: record.tags,
-          status: 'LIVE',
+          status: InboxStatus.LIVE,
           fulfilledAt: now,
           updatedAt: now,
         },
@@ -505,7 +506,7 @@ async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, 
   if (inboxData.length > 0) {
     const inboxCreatePayload = inboxData.map((inbox) => ({
       ...inbox,
-      status: 'LIVE' as const,
+      status: InboxStatus.LIVE,
       fulfilledAt: now,
       updatedAt: now,
     }));
@@ -523,7 +524,7 @@ async function processBuyForMeCsv(db: typeof prisma, order: OrderWithRelations, 
           tags: inbox.tags,
           businessName: inbox.businessName,
           forwardingDomain: inbox.forwardingDomain,
-          status: 'LIVE',
+          status: InboxStatus.LIVE,
           fulfilledAt: now,
           updatedAt: now,
         },

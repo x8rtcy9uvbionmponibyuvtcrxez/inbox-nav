@@ -4,7 +4,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { assertStripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
-import { ProductType, type OrderStatus } from '@prisma/client';
+import { ProductType, OrderStatus, InboxStatus, DomainStatus } from '@prisma/client';
 import { protectSecret } from '@/lib/encryption';
 import * as crypto from "node:crypto";
 // Notifications are optional; dynamically import when needed to avoid bundling
@@ -216,7 +216,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
                 productType: sessionProductTypeCanonical,
                 quantity: sessionQuantity,
                 totalAmount: sessionTotalAmountCents,
-                status: "PENDING" as OrderStatus, // Start as PENDING, admin will mark FULFILLED
+                status: OrderStatus.PENDING, // Start as PENDING, admin will mark FULFILLED
                 stripeSessionId: input.sessionId,
                 stripeCustomerId:
                   typeof session.customer === "string"

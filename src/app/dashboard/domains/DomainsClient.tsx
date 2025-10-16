@@ -4,6 +4,7 @@ import { useMemo, useState, memo, useEffect } from "react";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
 import type { Prisma } from "@prisma/client";
+import { DomainStatus, OrderStatus } from "@prisma/client";
 import { GlobeAltIcon, FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { TableSkeleton } from "@/components/skeletons";
 import { endOfDay, format, startOfDay, subDays } from "date-fns";
@@ -11,19 +12,19 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/Button";
 import Pagination from "@/components/Pagination";
 
-const STATUS_COLORS: Record<string, string> = {
-  LIVE: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
-  PENDING: "bg-amber-400/25 text-amber-100 border border-amber-300/40",
-  DELETED: "bg-red-500/15 text-red-300 border border-red-500/30",
-  DECOMMISSIONED: "bg-red-500/15 text-red-300 border border-red-500/30",
-  CANCELLED: "bg-orange-500/15 text-orange-300 border border-orange-500/30",
+const STATUS_COLORS: Record<DomainStatus | 'DEFAULT', string> = {
+  [DomainStatus.LIVE]: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+  [DomainStatus.PENDING]: "bg-amber-400/25 text-amber-100 border border-amber-300/40",
+  [DomainStatus.DELETED]: "bg-red-500/15 text-red-300 border border-red-500/30",
+  [DomainStatus.DECOMMISSIONED]: "bg-red-500/15 text-red-300 border border-red-500/30",
+  [DomainStatus.CANCELLED]: "bg-orange-500/15 text-orange-300 border border-orange-500/30",
   DEFAULT: "bg-white/10 text-brand-muted border border-white/10",
 };
 
-const STATUS_DISPLAY_ORDER = ["LIVE", "PENDING", "DECOMMISSIONED", "DELETED"];
+const STATUS_DISPLAY_ORDER = [DomainStatus.LIVE, DomainStatus.PENDING, DomainStatus.DECOMMISSIONED, DomainStatus.DELETED];
 
-const STATUS_FILTER_MATCHERS: Record<string, string[]> = {
-  DECOMMISSIONED: ["DECOMMISSIONED", "DELETED"],
+const STATUS_FILTER_MATCHERS: Record<string, DomainStatus[]> = {
+  DECOMMISSIONED: [DomainStatus.DECOMMISSIONED, DomainStatus.DELETED],
 };
 
 const PRODUCT_DISPLAY_ORDER = ["EDU", "LEGACY", "RESELLER", "PREWARMED", "AWS", "MICROSOFT"];
@@ -83,11 +84,11 @@ const DEFAULT_FILTERS: FilterState = {
   dateRange: { from: null, to: null },
 };
 
-function StatusPill({ status, order }: { status: string; order?: { subscriptionStatus?: string; status?: string } }) {
+function StatusPill({ status, order }: { status: DomainStatus; order?: { subscriptionStatus?: string; status?: OrderStatus } }) {
   // Check if the order is cancelled
-  const isOrderCancelled = order?.subscriptionStatus === 'cancel_at_period_end' || order?.status === 'CANCELLED';
-  const displayStatus = isOrderCancelled ? 'CANCELLED' : status;
-  const pillClass = STATUS_COLORS[displayStatus.toUpperCase()] ?? STATUS_COLORS.DEFAULT;
+  const isOrderCancelled = order?.subscriptionStatus === 'cancel_at_period_end' || order?.status === OrderStatus.CANCELLED;
+  const displayStatus = isOrderCancelled ? DomainStatus.CANCELLED : status;
+  const pillClass = STATUS_COLORS[displayStatus] ?? STATUS_COLORS.DEFAULT;
   
   return (
     <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${pillClass}`}>

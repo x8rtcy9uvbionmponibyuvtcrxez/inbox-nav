@@ -13,7 +13,7 @@ model Order {
   productType          ProductType          @map("product_type")
   quantity             Int
   totalAmount          Int
-  status               String               @default("PENDING")
+  status               OrderStatus          @default(PENDING)
   stripeSessionId      String?              @map("stripe_session_id")
   stripeCustomerId     String?              @map("stripe_customer_id")
   stripeSubscriptionId String?              @map("stripe_subscription_id")
@@ -33,10 +33,10 @@ model Order {
 }
 
 model OnboardingData {
-  id                    String   @id @default(uuid())
-  orderId               String   @unique
+  id                    String     @id @default(uuid())
+  orderId               String     @unique
   clerkUserId           String
-  productType           String?  @map("product_type")
+  productType           ProductType? @map("product_type")
   businessType          String?
   industry              String?
   companySize           String?
@@ -45,57 +45,57 @@ model OnboardingData {
   personas              Json?
   espProvider           String?
   specialRequirements   String?
-  stepCompleted         Int      @default(0)
-  isCompleted           Boolean  @default(false)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  domainSource          String   @default("OWN") @map("domain_source")
-  inboxesPerDomain      Int      @default(3) @map("inboxes_per_domain")
-  providedDomains       String[] @default([]) @map("provided_domains")
-  calculatedDomainCount Int?     @map("calculated_domain_count")
-  domainRegistrar       String?  @map("domain_registrar")
-  registrarAdminEmail   String?  @map("registrar_admin_email")
-  registrarUsername     String?  @map("registrar_username")
-  registrarPassword     String?  @map("registrar_password")
-  order                 Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  stepCompleted         Int        @default(0)
+  isCompleted           Boolean    @default(false)
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  domainSource          String     @default("OWN") @map("domain_source")
+  inboxesPerDomain      Int        @default(3) @map("inboxes_per_domain")
+  providedDomains       String[]   @default([]) @map("provided_domains")
+  calculatedDomainCount Int?       @map("calculated_domain_count")
+  domainRegistrar       String?    @map("domain_registrar")
+  registrarAdminEmail   String?    @map("registrar_admin_email")
+  registrarUsername     String?    @map("registrar_username")
+  registrarPassword     String?    @map("registrar_password")
+  order                 Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("onboarding_data")
 }
 
 model Inbox {
-  id               String    @id @default(cuid())
-  orderId          String    @map("order_id")
-  email            String    @unique
-  firstName        String?   @map("first_name")
-  lastName         String?   @map("last_name")
-  espPlatform      String    @map("esp_platform")
-  status           String    @default("PENDING")
-  tags             String[]  @default([])
-  businessName     String?   @map("business_name")
-  forwardingDomain String?   @map("forwarding_domain")
-  password         String?   @map("password")
-  fulfilledAt      DateTime? @map("fulfilled_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  personaName      String?   @map("persona_name")
-  order            Order     @relation(fields: [orderId], references: [id])
+  id               String      @id @default(cuid())
+  orderId          String      @map("order_id")
+  email            String      @unique
+  firstName        String?     @map("first_name")
+  lastName         String?     @map("last_name")
+  espPlatform      String      @map("esp_platform")
+  status           InboxStatus @default(PENDING)
+  tags             String[]    @default([])
+  businessName     String?     @map("business_name")
+  forwardingDomain String?     @map("forwarding_domain")
+  password         String?     @map("password")
+  fulfilledAt      DateTime?   @map("fulfilled_at")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+  personaName      String?     @map("persona_name")
+  order            Order       @relation(fields: [orderId], references: [id])
 
   @@map("inboxes")
 }
 
 model Domain {
-  id            String    @id @default(cuid())
-  orderId       String    @map("order_id")
-  domain        String    @unique
-  status        String    @default("PENDING")
-  tags          String[]  @default([])
-  inboxCount    Int       @default(0) @map("inbox_count")
-  forwardingUrl String    @map("forwarding_url")
-  businessName  String?   @map("business_name")
-  fulfilledAt   DateTime? @map("fulfilled_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  order         Order     @relation(fields: [orderId], references: [id])
+  id            String       @id @default(cuid())
+  orderId       String       @map("order_id")
+  domain        String       @unique
+  status        DomainStatus @default(PENDING)
+  tags          String[]     @default([])
+  inboxCount    Int          @default(0) @map("inbox_count")
+  forwardingUrl String       @map("forwarding_url")
+  businessName  String?      @map("business_name")
+  fulfilledAt   DateTime?    @map("fulfilled_at")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  order         Order        @relation(fields: [orderId], references: [id])
 
   @@map("domains")
 }
@@ -134,6 +134,23 @@ enum ProductType {
 
 enum OrderStatus {
   PENDING
+  PAID
   FULFILLED
+  PENDING_DOMAIN_PURCHASE
+  CANCELLED
+}
+
+enum InboxStatus {
+  PENDING
+  LIVE
+  DELETED
+  CANCELLED
+}
+
+enum DomainStatus {
+  PENDING
+  LIVE
+  DELETED
+  DECOMMISSIONED
   CANCELLED
 }

@@ -26,8 +26,24 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_live_..."
 STRIPE_SECRET_KEY="sk_live_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
 
+# Stripe Price IDs (for checkout)
+STRIPE_PRICE_RESELLER_INBOX="price_..."
+STRIPE_PRICE_EDU_INBOX="price_..."
+STRIPE_PRICE_LEGACY_INBOX="price_..."
+STRIPE_PRICE_PREWARMED_INBOX="price_..."
+STRIPE_PRICE_AWS_INBOX="price_..."
+STRIPE_PRICE_MICROSOFT_INBOX="price_..."
+
+# Notifications
+SLACK_WEBHOOK_ORDERS="https://hooks.slack.com/services/..."
+SLACK_WEBHOOK_SIGNUPS="https://hooks.slack.com/services/..."
+SLACK_WEBHOOK_CANCELLATIONS="https://hooks.slack.com/services/..."
+RESEND_API_KEY="re_..."
+NOTIFICATION_EMAIL="team@inboxnavigator.com"
+
 # App Configuration
 NEXT_PUBLIC_APP_URL="https://your-domain.vercel.app"
+APP_URL="https://your-domain.vercel.app"  # Server-side URL for API routes
 ADMIN_USER_IDS="user_123,user_456"
 ```
 
