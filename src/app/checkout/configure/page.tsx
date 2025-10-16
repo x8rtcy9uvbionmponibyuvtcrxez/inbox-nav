@@ -35,7 +35,6 @@ function getPricePerInbox(product: ProductType): number {
 }
 
 function ConfigurePageContent() {
-  const router = useRouter();
   const params = useSearchParams();
 
   const product = normalizeProductType(params.get("product"));
@@ -43,28 +42,6 @@ function ConfigurePageContent() {
 
   // Check for missing required parameters
   const productParam = params.get("product");
-  if (!productParam) {
-    return (
-      <ErrorBoundary>
-        <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-          <div className="app-shell">
-            <div className="flex flex-col items-center justify-center space-y-6 py-20">
-              <h1 className="text-2xl font-bold text-[var(--text-primary)]">Configuration Error</h1>
-              <p className="text-center text-[var(--text-secondary)]">
-                Missing product parameter. Please select a product from the products page.
-              </p>
-              <Button asChild>
-                <Link href="/dashboard/products">← Back to Products</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </ErrorBoundary>
-    );
-  }
-
-  // PREWARMED products don't need domain configuration
-  // They go directly to checkout, but we still show the form for consistency
 
   const [inboxesPerDomain, setInboxesPerDomain] = useState<number>(getDefaultInboxesPerDomain(product));
   const [domainSource, setDomainSource] = useState<DomainSource>("OWN");
@@ -90,6 +67,30 @@ function ConfigurePageContent() {
   const totalInboxPrice = useMemo(() => quantity * getPricePerInbox(product), [quantity, product]);
   const tldPrice = domainTLD === ".com" ? 12 : 4;
   const totalDomainPrice = useMemo(() => (domainSource === "BUY_FOR_ME" ? domainsNeeded * tldPrice : 0), [domainSource, domainsNeeded, tldPrice]);
+
+  // Check for missing required parameters after hooks
+  if (!productParam) {
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+          <div className="app-shell">
+            <div className="flex flex-col items-center justify-center space-y-6 py-20">
+              <h1 className="text-2xl font-bold text-[var(--text-primary)]">Configuration Error</h1>
+              <p className="text-center text-[var(--text-secondary)]">
+                Missing product parameter. Please select a product from the products page.
+              </p>
+              <Button asChild>
+                <Link href="/dashboard/products">← Back to Products</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
+  // PREWARMED products don't need domain configuration
+  // They go directly to checkout, but we still show the form for consistency
 
   const formatUsd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 
