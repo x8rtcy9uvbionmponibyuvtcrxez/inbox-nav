@@ -5,8 +5,10 @@ interface Persona {
   lastName: string;
 }
 
+import { ProductType } from '@prisma/client';
+
 interface DistributionInput {
-  productType: 'RESELLER' | 'EDU' | 'LEGACY' | 'PREWARMED' | 'AWS' | 'MICROSOFT';
+  productType: ProductType;
   domainSource: 'OWN' | 'BUY_FOR_ME';
   totalInboxes: number;
   personas: Persona[];
@@ -71,7 +73,7 @@ export function distributeInboxes(input: DistributionInput): DistributionResult 
   const perDomain = getInboxesPerDomain(productType, inboxesPerDomain);
   
   // Microsoft = 1 domain only, all inboxes on it
-  if (productType === 'MICROSOFT') {
+  if (productType === ProductType.MICROSOFT) {
     return distributeMicrosoft(totalInboxes, personas, providedDomains[0]);
   }
   
@@ -79,14 +81,14 @@ export function distributeInboxes(input: DistributionInput): DistributionResult 
   return distributeMultipleDomains(totalInboxes, personas, providedDomains, perDomain);
 }
 
-function getInboxesPerDomain(productType: string, userPreference?: number): number {
-  if (productType === 'RESELLER' || productType === 'EDU' || productType === 'LEGACY' || productType === 'AWS') {
+function getInboxesPerDomain(productType: ProductType, userPreference?: number): number {
+  if (productType === ProductType.RESELLER || productType === ProductType.EDU || productType === ProductType.LEGACY || productType === ProductType.AWS) {
     return userPreference || 3;
   }
-  if (productType === 'PREWARMED') {
+  if (productType === ProductType.PREWARMED) {
     return 5;
   }
-  if (productType === 'MICROSOFT') {
+  if (productType === ProductType.MICROSOFT) {
     return 50; // Microsoft uses 50 inboxes per domain
   }
   return 3;

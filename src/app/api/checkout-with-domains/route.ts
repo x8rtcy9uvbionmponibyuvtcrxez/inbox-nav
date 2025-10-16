@@ -3,25 +3,25 @@ import { auth } from '@clerk/nextjs/server'
 import { getStripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
 
-type ProductType = 'RESELLER' | 'EDU' | 'LEGACY' | 'PREWARMED' | 'AWS' | 'MICROSOFT'
+import { ProductType } from '@prisma/client';
 type DomainSource = 'OWN' | 'BUY_FOR_ME'
 
 const INBOX_PRICING_USD: Record<ProductType, number> = {
-  RESELLER: 3,
-  EDU: 1.5,
-  LEGACY: 2.5,
-  PREWARMED: 7,
-  AWS: 1.25,
-  MICROSOFT: 60, // Per domain, not per inbox
+  [ProductType.RESELLER]: 3,
+  [ProductType.EDU]: 1.5,
+  [ProductType.LEGACY]: 2.5,
+  [ProductType.PREWARMED]: 7,
+  [ProductType.AWS]: 1.25,
+  [ProductType.MICROSOFT]: 60, // Per domain, not per inbox
 }
 
 const INBOX_PRICE_IDS: Record<ProductType, string | undefined> = {
-  RESELLER: process.env.STRIPE_PRICE_RESELLER_INBOX,
-  EDU: process.env.STRIPE_PRICE_EDU_INBOX,
-  LEGACY: process.env.STRIPE_PRICE_LEGACY_INBOX,
-  PREWARMED: process.env.STRIPE_PRICE_PREWARMED_INBOX,
-  AWS: process.env.STRIPE_PRICE_AWS_INBOX,
-  MICROSOFT: process.env.STRIPE_PRICE_MICROSOFT_INBOX,
+  [ProductType.RESELLER]: process.env.STRIPE_PRICE_RESELLER_INBOX,
+  [ProductType.EDU]: process.env.STRIPE_PRICE_EDU_INBOX,
+  [ProductType.LEGACY]: process.env.STRIPE_PRICE_LEGACY_INBOX,
+  [ProductType.PREWARMED]: process.env.STRIPE_PRICE_PREWARMED_INBOX,
+  [ProductType.AWS]: process.env.STRIPE_PRICE_AWS_INBOX,
+  [ProductType.MICROSOFT]: process.env.STRIPE_PRICE_MICROSOFT_INBOX,
 }
 
 const DOMAIN_PRICING_USD = {
@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
     }
     // Validate MOQ based on product type
     const getMoq = (productType: ProductType) => {
-      if (productType === 'AWS') return 20;
-      if (productType === 'MICROSOFT') return 1;
+      if (productType === ProductType.AWS) return 20;
+      if (productType === ProductType.MICROSOFT) return 1;
       return 10;
     };
     
