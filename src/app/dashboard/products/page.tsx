@@ -31,25 +31,25 @@ const tabs: Tab[] = [
   {
     id: "google",
     label: "Google",
-    emoji: "📧",
+    emoji: "",
     productIds: ["EDU", "LEGACY", "RESELLER"]
   },
   {
     id: "microsoft",
     label: "Microsoft",
-    emoji: "💼",
+    emoji: "",
     productIds: ["MICROSOFT"]
   },
   {
     id: "prewarmed",
     label: "Prewarmed",
-    emoji: "🔥",
+    emoji: "",
     productIds: ["PREWARMED"]
   },
   {
     id: "smtp",
     label: "SMTP",
-    emoji: "📨",
+    emoji: "",
     productIds: ["AWS"]
   }
 ];
@@ -59,8 +59,8 @@ const products: Product[] = [
     id: "EDU",
     name: "Edu Inboxes",
     price: 1.5,
-    description: "Educational institution inboxes with special pricing",
-    features: ["Academic pricing", "Educational features", "Student support"],
+    description: "Cost-efficient Google inboxes designed for high-volume sending at the best price.",
+    features: ["Lowest cost per inbox", "Built for large outbound volume", "Managed Google risk (isolation & spread)"],
     color: "green",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual EDU price ID
     tab: "google",
@@ -69,8 +69,8 @@ const products: Product[] = [
     id: "LEGACY",
     name: "Legacy Inboxes",
     price: 2.5,
-    description: "Legacy inboxes with established reputation",
-    features: ["Proven reputation", "Stable delivery", "Legacy support"],
+    description: "Balanced Google setup for teams that want reliability and predictable spend.",
+    features: ["Best balance of cost + risk", "Very low chance of Google deactivations", "Ideal for steady, long-term outreach"],
     color: "orange",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual LEGACY price ID
     tab: "google",
@@ -79,8 +79,8 @@ const products: Product[] = [
     id: "RESELLER",
     name: "Reseller Inboxes",
     price: 3,
-    description: "Standard cold email inboxes with Google Workspace",
-    features: ["Basic warmup", "Reliable delivery", "IMAP/SMTP access"],
+    description: "Higher-trust Google inboxes for programs that need extra stability.",
+    features: ["Safer Google setup (more isolation)", "Great for high-stakes/managed accounts", "Full IMAP/SMTP access"],
     color: "blue",
     priceId: "price_1SCFcnBTWWHTKTJvdwKiINPy",
     tab: "google",
@@ -89,8 +89,8 @@ const products: Product[] = [
     id: "PREWARMED",
     name: "Prewarmed Inboxes",
     price: 7,
-    description: "Pre-warmed inboxes ready to send immediately",
-    features: ["Already warmed", "Higher reputation", "Instant setup"],
+    description: "Ready-to-send inboxes with proven sender history.",
+    features: ["Instant activation", "Strong reputation floor", "Zero ramp-up time"],
     badge: "Popular",
     color: "green",
     priceId: "price_1SHmyyBTWWHTKTJvK6ohM58w",
@@ -100,8 +100,8 @@ const products: Product[] = [
     id: "AWS",
     name: "AWS Inboxes",
     price: 1.25,
-    description: "AWS-powered inboxes with cloud infrastructure",
-    features: ["Cloud infrastructure", "Scalable", "AWS integration"],
+    description: "AWS-backed inboxes for scalable, flexible infrastructure.",
+    features: ["Built on AWS for scale", "Flexible integration options", "Stable, cloud-native setup"],
     color: "yellow",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual AWS price ID
     tab: "smtp",
@@ -110,8 +110,8 @@ const products: Product[] = [
     id: "MICROSOFT",
     name: "Microsoft Inboxes",
     price: 60,
-    description: "Premium Microsoft 365 enterprise inboxes (per domain)",
-    features: ["Enterprise security", "Advanced features", "Priority support"],
+    description: "Microsoft 365 enterprise inboxes with security and compliance built-in.",
+    features: ["Enterprise-grade security & controls", "Dedicated SPF/DKIM setup per domain", "Priority support & SLAs"],
     badge: "Premium",
     color: "purple",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
@@ -146,7 +146,7 @@ export default function ProductsPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const hasLargeQuantity = useMemo(
-    () => Math.max(...Object.values(quantities)) > 500,
+    () => Math.max(...Object.values(quantities)) > 3000,
     [quantities],
   );
 
@@ -224,24 +224,24 @@ export default function ProductsPage() {
               Plans
             </span>
             <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-tight">
-              Pick the inbox runway that matches your outreach ambitions.
+              Choose the inbox setup that fits your scale.
             </h1>
             <p className="text-xl lg:text-2xl text-[var(--text-secondary)] leading-relaxed max-w-4xl">
-              Every fleet ships with warming, deliverability monitoring, and human support. Scale campaigns with confidence—whether you need a handful of senders or an entire squadron.
+              Every plan includes domain authentication (SPF, DKIM, DMARC), deliverability checks, and human support. Scale from 10 to thousands with clarity.
             </p>
             <div className="flex flex-wrap items-center gap-8 text-base text-[var(--text-muted)]">
-              <span className="flex items-center gap-3">⚡ Instant provisioning</span>
-              <span className="flex items-center gap-3">🛡️ Reputation-safe warmup</span>
-              <span className="flex items-center gap-3">🎯 Concierge support included</span>
+              <span className="flex items-center gap-3">⚡ Instant setup</span>
+              <span className="flex items-center gap-3">🛡️ Authenticated domains</span>
+              <span className="flex items-center gap-3">🎯 Concierge support</span>
             </div>
           </div>
 
           <div className="surface-card max-w-lg space-y-6 p-8">
             <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-              Need a custom fleet?
+              Need a custom setup?
             </p>
             <p className="text-lg text-[var(--text-secondary)] leading-relaxed">
-              Talk to us about tiered enterprise pricing and dedicated deliverability ops.
+              Scaling beyond <strong>3,000 inboxes</strong>? Get bulk pricing and dedicated support.
             </p>
             <a
               href="https://calendly.com/inboxnavigator/demo"
@@ -249,7 +249,7 @@ export default function ProductsPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 text-base font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)] transition-colors duration-200"
             >
-              Book a Call
+              Contact Sales →
               <ArrowRightIcon className="h-5 w-5" />
             </a>
           </div>
@@ -281,7 +281,7 @@ export default function ProductsPage() {
                       : 'border border-transparent text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:bg-[rgba(254,254,254,0.08)] hover:text-[var(--text-primary)] hover:shadow-sm'
                   }`}
                 >
-                  <span className="text-xl">{tab.emoji}</span>
+                  {tab.emoji && <span className="text-xl">{tab.emoji}</span>}
                   <span>{tab.label}</span>
                 </button>
               );
@@ -341,7 +341,7 @@ export default function ProductsPage() {
 
                 <div className="space-y-4">
                   <label className="text-sm font-semibold text-[var(--text-primary)]">
-                    Inbox volume
+                    Inbox count
                   </label>
                   <input
                     type="text"
@@ -367,7 +367,7 @@ export default function ProductsPage() {
                   />
                   {quantities[product.id] < getMoq(product.id) && (
                     <p className="text-sm text-[var(--text-muted)] bg-[var(--bg-tertiary)] rounded-lg px-3 py-2">
-                      We have a minimum order of {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
+                      Minimum order: {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
                     </p>
                   )}
                 </div>
@@ -393,11 +393,11 @@ export default function ProductsPage() {
                           <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
                         </svg>
-                        Processing
+                        Processing…
                       </>
                     ) : (
                       <>
-                        Launch this fleet
+                        Start setup
                         <ArrowRightIcon className="h-5 w-5" />
                       </>
                     )}
@@ -411,7 +411,7 @@ export default function ProductsPage() {
         {hasLargeQuantity ? (
           <div className="surface-panel text-sm text-[var(--text-secondary)]">
             <span>
-              Scaling beyond 500 inboxes? We’ll layer in custom deliverability ops, pool management, and dedicated IP reputation monitoring.
+              Scaling beyond <strong>3,000 inboxes</strong>? Get bulk deals and priority support.
             </span>
             <a href="mailto:contact@inboxnavigator.com" className="ml-2 inline-flex items-center text-[var(--text-primary)] underline">
               Reach out for enterprise pricing →
