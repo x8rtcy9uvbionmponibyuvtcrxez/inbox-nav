@@ -190,7 +190,7 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
             productType: productType as ProductType,
             quantity,
             totalAmount: totalAmountCents,
-            status: 'FULFILLED' as any, // Will be fixed when we update to use OrderStatus enum
+            status: OrderStatus.FULFILLED,
             businessName: firstRow.business_name.trim(),
             stripeSubscriptionId: firstRow.stripe_subscription_id?.trim() || null,
             clerkUserId: null, // Will be linked when user signs up

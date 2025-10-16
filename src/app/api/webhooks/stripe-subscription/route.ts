@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
             id: subscription.id,
             status: subscription.status,
             canceled_at: subscription.canceled_at,
-            cancel_reason: (subscription as any).cancel_reason,
+            cancel_reason: (subscription as { cancel_reason?: string }).cancel_reason,
           };
 
           await notifySubscriptionCancelled(orderData, subscriptionData, affectedCounts);

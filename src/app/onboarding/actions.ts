@@ -1,6 +1,6 @@
 "use server";
 
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { assertStripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
@@ -36,14 +36,14 @@ export type SaveOnboardingInput = {
   sessionId?: string; // Stripe session ID for existing orders
 };
 
-const PRODUCT_TYPES: ProductType[] = [
-  ProductType.RESELLER,
-  ProductType.EDU,
-  ProductType.LEGACY,
-  ProductType.PREWARMED,
-  ProductType.AWS,
-  ProductType.MICROSOFT,
-];
+// const PRODUCT_TYPES: ProductType[] = [
+//   ProductType.RESELLER,
+//   ProductType.EDU,
+//   ProductType.LEGACY,
+//   ProductType.PREWARMED,
+//   ProductType.AWS,
+//   ProductType.MICROSOFT,
+// ];
 
 function coerceProductType(value?: string | null): ProductType {
   if (!value) return ProductType.EDU;
@@ -281,13 +281,13 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           data: {
             id: tempOrderId,
             clerkUserId: userId,
-            productType: normalizedProductType as any,
+            productType: normalizedProductType,
             quantity: input.inboxCount,
             totalAmount: totalAmountCents,
             status: OrderStatus.PENDING,
             stripeSessionId: null,
             subscriptionStatus: 'manual',
-          } as any,
+          },
         });
       }
 

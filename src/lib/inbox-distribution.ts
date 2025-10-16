@@ -5,7 +5,7 @@ interface Persona {
   lastName: string;
 }
 
-import { ProductType, InboxStatus, DomainStatus } from '@prisma/client';
+import { ProductType } from '@prisma/client';
 
 interface DistributionInput {
   productType: ProductType;

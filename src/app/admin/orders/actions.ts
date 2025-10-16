@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { DomainStatus, InboxStatus, OrderStatus } from '@prisma/client';
+import { DomainStatus, InboxStatus } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { invalidateCache } from '@/lib/redis';
 
