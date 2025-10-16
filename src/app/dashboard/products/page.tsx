@@ -216,41 +216,41 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      <div className="app-shell space-y-20">
+      <div className="w-full max-w-7xl mx-auto px-6 lg:px-8 xl:px-12 space-y-20">
         {/* Hero Section */}
-        <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex-1 max-w-4xl space-y-6">
+        <div className="flex flex-col gap-16 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex-1 space-y-8">
             <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
               Plans
             </span>
-            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">
+            <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-tight">
               Pick the inbox runway that matches your outreach ambitions.
             </h1>
-            <p className="text-xl text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-xl lg:text-2xl text-[var(--text-secondary)] leading-relaxed max-w-4xl">
               Every fleet ships with warming, deliverability monitoring, and human support. Scale campaigns with confidence—whether you need a handful of senders or an entire squadron.
             </p>
-            <div className="flex flex-wrap items-center gap-6 text-sm text-[var(--text-muted)]">
-              <span className="flex items-center gap-2">⚡ Instant provisioning</span>
-              <span className="flex items-center gap-2">🛡️ Reputation-safe warmup</span>
-              <span className="flex items-center gap-2">🎯 Concierge support included</span>
+            <div className="flex flex-wrap items-center gap-8 text-base text-[var(--text-muted)]">
+              <span className="flex items-center gap-3">⚡ Instant provisioning</span>
+              <span className="flex items-center gap-3">🛡️ Reputation-safe warmup</span>
+              <span className="flex items-center gap-3">🎯 Concierge support included</span>
             </div>
           </div>
 
-          <div className="surface-card max-w-md space-y-4 p-6">
+          <div className="surface-card max-w-lg space-y-6 p-8">
             <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
               Need a custom fleet?
             </p>
-            <p className="text-base text-[var(--text-secondary)]">
+            <p className="text-lg text-[var(--text-secondary)] leading-relaxed">
               Talk to us about tiered enterprise pricing and dedicated deliverability ops.
             </p>
             <a
               href="https://calendly.com/inboxnavigator/demo"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)] transition-colors duration-200"
+              className="inline-flex items-center gap-3 text-base font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)] transition-colors duration-200"
             >
               Book a Call
-              <ArrowRightIcon className="h-4 w-4" />
+              <ArrowRightIcon className="h-5 w-5" />
             </a>
           </div>
         </div>
