@@ -15,18 +15,18 @@ export default function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex-1 px-6 py-4">
-      <ul className="space-y-2">
+    <nav className="flex-1 px-6 py-6">
+      <ul className="space-y-3">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           return (
             <li key={item.name}>
               <Link
                 href={item.href}
-                className={`flex items-center gap-3 rounded-[12px] border px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 rounded-[12px] border px-4 py-3 text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
-                    : "border-transparent text-[var(--text-secondary)] hover:border-[var(--border-subtle)] hover:bg-[rgba(99,99,99,0.2)] hover:text-[var(--text-primary)]"
+                    ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)] shadow-sm"
+                    : "border-transparent text-[var(--text-secondary)] hover:border-[var(--border-subtle)] hover:bg-[rgba(99,99,99,0.2)] hover:text-[var(--text-primary)] hover:shadow-sm"
                 }`}
               >
                 <item.icon className="h-5 w-5" />
