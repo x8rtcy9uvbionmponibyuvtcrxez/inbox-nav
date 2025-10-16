@@ -75,7 +75,8 @@ export async function validateCSVAction(csvData: CSVRow[]): Promise<ValidationRe
       
       // Validate product_type
       const validProductTypes = Object.values(ProductType);
-      if (!row.product_type || !validProductTypes.includes(row.product_type.toUpperCase() as ProductType)) {
+      const productTypeUpper = row.product_type?.toUpperCase();
+      if (!row.product_type || !validProductTypes.includes(productTypeUpper as ProductType)) {
         rowErrors.push(`Row ${rowNum}: product_type must be one of: ${validProductTypes.join(', ')}`);
       }
       
@@ -169,15 +170,15 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
         }
         
         // Calculate pricing
-        const productType = firstRow.product_type.toUpperCase();
+        const productType = firstRow.product_type.toUpperCase() as ProductType;
         const quantity = parseInt(firstRow.quantity);
-        const getPricePerInbox = (pt: string) => {
-          if (pt === 'RESELLER') return 3;
-          if (pt === 'EDU') return 1.5;
-          if (pt === 'LEGACY') return 2.5;
-          if (pt === 'PREWARMED') return 7;
-          if (pt === 'AWS') return 1.25;
-          if (pt === 'MICROSOFT') return 60;
+        const getPricePerInbox = (pt: ProductType) => {
+          if (pt === ProductType.RESELLER) return 3;
+          if (pt === ProductType.EDU) return 1.5;
+          if (pt === ProductType.LEGACY) return 2.5;
+          if (pt === ProductType.PREWARMED) return 7;
+          if (pt === ProductType.AWS) return 1.25;
+          if (pt === ProductType.MICROSOFT) return 60;
           return 3;
         };
         const pricePerInbox = getPricePerInbox(productType);
@@ -187,7 +188,7 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
         const order = await prisma.order.create({
           data: {
             externalId,
-            productType: productType as ProductType,
+            productType: productType,
             quantity,
             totalAmount: totalAmountCents,
             status: OrderStatus.FULFILLED,

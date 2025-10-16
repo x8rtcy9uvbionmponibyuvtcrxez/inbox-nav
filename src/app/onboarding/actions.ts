@@ -5,6 +5,7 @@ import { assertStripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
 import { ProductType, OrderStatus, InboxStatus, DomainStatus } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { protectSecret } from '@/lib/encryption';
 import * as crypto from "node:crypto";
 // Notifications are optional; dynamically import when needed to avoid bundling
@@ -283,14 +284,13 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           data: {
             id: tempOrderId,
             clerkUserId: userId,
-            productType: normalizedProductType as string, // Cast to string for production DB compatibility
+            productType: normalizedProductType,
             quantity: input.inboxCount,
             totalAmount: totalAmountCents,
             status: OrderStatus.PENDING,
             stripeSessionId: null,
             subscriptionStatus: 'manual',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any, // Cast entire object to bypass type checking for production DB compatibility
+          },
         });
       }
 
@@ -305,11 +305,16 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       return { success: false, error: `Failed to process order: ${orderError instanceof Error ? orderError.message : 'Unknown error'}` };
     }
 
+    const orderProductType = coerceProductType(order.productType);
+    let derivedInboxesPerDomain =
+      sessionInboxesPerDomain ??
+      (typeof input.inboxesPerDomain === 'number' ? input.inboxesPerDomain : undefined) ??
+      DEFAULT_INBOXES_PER_DOMAIN[orderProductType];
+
     // Step 5: Create OnboardingData record
     let onboarding;
     try {
       console.log("[ACTION] Step 2: Creating OnboardingData...");
-      const orderProductType = coerceProductType(order.productType);
       
       const domainPreferenceList =
         (input.domainSource === 'OWN' || input.domainStatus === 'own')
@@ -317,11 +322,16 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           : sessionDomainSource === 'OWN'
             ? sessionOwnDomains ?? []
             : [];
+      
+      derivedInboxesPerDomain =
+        sessionInboxesPerDomain ??
+        (typeof input.inboxesPerDomain === 'number' ? input.inboxesPerDomain : undefined) ??
+        DEFAULT_INBOXES_PER_DOMAIN[orderProductType];
 
-      const onboardingData = {
+      const onboardingData: Prisma.OnboardingDataUncheckedCreateInput = {
         orderId: order.id, // Use the actual order ID (from existing or newly created)
         clerkUserId: userId,
-        productType: orderProductType as string, // Cast to string for production DB compatibility
+        productType: orderProductType,
         businessType: input.businessName,
         website: sessionForwardingUrl ?? input.primaryForwardUrl,
         domainPreferences: {
@@ -340,15 +350,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         stepCompleted: 4,
         isCompleted: true,
         domainSource: sessionDomainSource ?? (input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME')),
-        inboxesPerDomain: sessionInboxesPerDomain ?? (
-          input.inboxesPerDomain ?? (
-            orderProductType === ProductType.MICROSOFT
-              ? 50
-              : orderProductType === ProductType.PREWARMED
-                ? 5
-                : 3
-          )
-        ),
+        inboxesPerDomain: derivedInboxesPerDomain,
         providedDomains: (input.domainSource === 'OWN' || input.domainStatus === 'own')
           ? input.ownDomains ?? input.providedDomains ?? input.domainList ?? []
           : sessionDomainSource === 'OWN'
@@ -363,11 +365,11 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       };
 
       console.log("[ACTION] 📝 OnboardingData payload:", {
-        orderId: onboardingData.orderId,
-        clerkUserId: onboardingData.clerkUserId,
+        orderId: order.id,
+        clerkUserId: userId,
         businessType: onboardingData.businessType,
         website: onboardingData.website,
-        personasCount: onboardingData.personas.length,
+        personasCount: input.personas.length,
         espProvider: onboardingData.espProvider,
         productType: onboardingData.productType,
         stepCompleted: onboardingData.stepCompleted,
@@ -375,8 +377,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       });
 
       onboarding = await prisma.onboardingData.create({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data: onboardingData as any, // Cast to any for production DB compatibility
+        data: onboardingData,
       });
 
       console.log("[ACTION] ✅ OnboardingData created:", onboarding.id);
@@ -398,13 +399,18 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       const productType = coerceProductType(order.productType);
       const personasLite = (input.personas || []).map(p => ({ firstName: p.firstName, lastName: p.lastName }));
 
+      const providedDomains =
+        domainSource === 'OWN'
+          ? sessionOwnDomains ?? (input.ownDomains ?? input.providedDomains ?? input.domainList ?? [])
+          : [];
+
       const distribution = distributeInboxes({
-        productType: productType,
+        productType,
         domainSource,
         totalInboxes: input.inboxCount,
         personas: personasLite,
-        providedDomains: domainSource === 'OWN' ? (sessionOwnDomains ?? (input.ownDomains ?? input.providedDomains ?? input.domainList ?? [])) : [],
-        inboxesPerDomain: sessionInboxesPerDomain ?? input.inboxesPerDomain,
+        providedDomains,
+        inboxesPerDomain: derivedInboxesPerDomain,
         businessName: input.businessName,
       });
 
@@ -420,7 +426,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         sessionDomainSource,
         inputDomainSource: input.domainSource,
         inputDomainStatus: input.domainStatus,
-        providedDomains: domainSource === 'OWN' ? (sessionOwnDomains ?? (input.ownDomains ?? input.providedDomains ?? input.domainList ?? [])) : [],
+        providedDomains,
         sessionOwnDomains,
         inputOwnDomains: input.ownDomains,
         inputProvidedDomains: input.providedDomains,

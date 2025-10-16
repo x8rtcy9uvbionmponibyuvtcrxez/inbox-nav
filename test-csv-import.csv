@@ -1,0 +1,7 @@
+external_id,client_email,product_type,quantity,business_name,domain,email,first_name,last_name,password,esp_platform,tags,forwarding_url,forwarding_domain,stripe_subscription_id
+order_001,client1@example.com,RESELLER,50,Acme Corp,acme.com,john@acme.com,John,Smith,password123,Smartlead,internal,https://acme.com,acme.com,sub_1234567890
+order_001,client1@example.com,RESELLER,50,Acme Corp,acme.com,jane@acme.com,Jane,Doe,password456,Smartlead,internal,https://acme.com,acme.com,sub_1234567890
+order_002,client2@example.com,PREWARMED,25,Tech Startup,techstartup.io,ceo@techstartup.io,CEO,Johnson,password789,Instantly,startup,https://techstartup.io,techstartup.io,sub_0987654321
+order_002,client2@example.com,PREWARMED,25,Tech Startup,techstartup.io,marketing@techstartup.io,Marketing,Team,password101,Instantly,startup,https://techstartup.io,techstartup.io,sub_0987654321
+order_003,client3@example.com,EDU,30,University,university.edu,professor@university.edu,Dr,Smith,password202,Plusvibe,education,https://university.edu,university.edu,sub_1122334455
+order_003,client3@example.com,EDU,30,University,university.edu,student@university.edu,Student,Johnson,password303,Plusvibe,education,https://university.edu,university.edu,sub_1122334455
