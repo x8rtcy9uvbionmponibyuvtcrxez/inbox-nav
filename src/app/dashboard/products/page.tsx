@@ -385,8 +385,7 @@ export default function ProductsPage() {
 
                   <Button
                     variant="primary"
-                    size="lg"
-                    className="w-full justify-center gap-3 font-semibold"
+                    className="w-full justify-center gap-3 text-base font-semibold"
                     disabled={loading[product.id] || quantities[product.id] < getMoq(product.id)}
                     onClick={() => handleSelectPlan(product.id)}
                   >
@@ -400,8 +399,8 @@ export default function ProductsPage() {
                       </>
                     ) : (
                       <>
-                        Start setup
-                        <ArrowRightIcon className="h-5 w-5" />
+                        Launch this fleet
+                        <ArrowRightIcon className="h-4 w-4" />
                       </>
                     )}
                   </Button>
@@ -414,7 +413,7 @@ export default function ProductsPage() {
         {hasLargeQuantity ? (
           <div className="surface-panel text-sm text-[var(--text-secondary)]">
             <span>
-              Scaling beyond <strong>3,000 inboxes</strong>? Get bulk deals and priority support.
+              Scaling beyond 500 inboxes? We’ll layer in custom deliverability ops, pool management, and dedicated IP reputation monitoring.
             </span>
             <a href="mailto:contact@inboxnavigator.com" className="ml-2 inline-flex items-center text-[var(--text-primary)] underline">
               Reach out for enterprise pricing →
