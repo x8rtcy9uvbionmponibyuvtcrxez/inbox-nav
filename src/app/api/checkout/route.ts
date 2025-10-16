@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
           quantity: quantity,
         },
       ],
+      allow_promotion_codes: true,
       metadata: {
         clerkUserId: userId,
         productType: productType,

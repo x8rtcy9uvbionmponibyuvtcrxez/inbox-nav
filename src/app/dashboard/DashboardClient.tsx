@@ -193,27 +193,28 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="space-y-6 text-brand-primary">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p className="text-base text-brand-secondary">
+    <div className="space-y-8 text-brand-primary">
+      {/* Hero Section */}
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex-1 max-w-2xl">
+          <p className="text-base text-brand-secondary mb-2">
             {hasVisited ? `Welcome back, ${displayName}.` : "Welcome to Inbox Nav — we're excited to have you here!"}
           </p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-brand-primary">
-            {hasVisited ? 'Your mission control for every inbox.' : 'Let’s launch your inbox fleet.'}
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-brand-primary mb-4">
+            {hasVisited ? 'Your mission control for every inbox.' : 'Let's launch your inbox fleet.'}
           </h1>
-          <p className="mt-3 text-base text-brand-secondary">
+          <p className="text-lg text-brand-secondary leading-relaxed">
             Track fulfillment in real time, review order history, and spin up new inboxes whenever you&rsquo;re ready.
           </p>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:justify-end">
-          <Button asChild variant="primary" className="gap-2 shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-stretch lg:min-w-[200px]">
+          <Button asChild variant="primary" size="lg" className="gap-3 shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)] hover:shadow-[0_15px_40px_-15px_rgba(255,255,255,0.9)] transition-all duration-200">
             <Link href="/dashboard/products">
               <SparklesIcon className="h-5 w-5" />
               Create Inboxes
             </Link>
           </Button>
-          <Button asChild variant="outline" className="gap-2">
+          <Button asChild variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
             <a href="mailto:contact@inboxnavigator.com">
               <EnvelopeIcon className="h-5 w-5" />
               Talk to Support

@@ -123,6 +123,7 @@ export async function POST(request: NextRequest) {
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       line_items: lineItems,
+      allow_promotion_codes: true,
       metadata: {
         clerkUserId: userId,
         productType,
