@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Resolve base URL dynamically (env first, then fallback to current PORT or 3000)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`
+    const baseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`
 
     const stripe = getStripe()
     if (!stripe) {

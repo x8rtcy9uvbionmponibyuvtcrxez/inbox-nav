@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Quantity must be between ${moq} and 2000 for ${productType}` }, { status: 400 })
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`
+    const baseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`
 
     const inboxPriceId = INBOX_PRICE_IDS[productType]
     const inboxUnitAmount = INBOX_PRICING_USD[productType] * 100
