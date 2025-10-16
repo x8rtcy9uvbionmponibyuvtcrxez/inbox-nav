@@ -77,9 +77,25 @@ function StatusPill({ status, order }: { status: InboxStatus; order?: { subscrip
   const displayStatus = isOrderCancelled ? InboxStatus.CANCELLED : status;
   const pillClass = STATUS_COLORS[displayStatus] ?? STATUS_COLORS.DEFAULT;
   
+  // Map status to display labels
+  const getStatusLabel = (status: InboxStatus) => {
+    switch (status) {
+      case InboxStatus.LIVE:
+        return 'Active';
+      case InboxStatus.PENDING:
+        return 'Warming';
+      case InboxStatus.DELETED:
+        return 'Paused';
+      case InboxStatus.CANCELLED:
+        return 'Paused';
+      default:
+        return status.toLowerCase();
+    }
+  };
+  
   return (
     <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${pillClass}`}>
-      {displayStatus.toLowerCase()}
+      {getStatusLabel(displayStatus)}
     </span>
   );
 }
@@ -510,8 +526,8 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
       <div className="space-y-8 text-brand-primary">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-brand-primary">Inboxes</h1>
-            <p className="mt-2 text-base text-brand-secondary">Manage your email inboxes</p>
+            <h1 className="text-3xl font-semibold text-brand-primary">Manage your inboxes</h1>
+            <p className="mt-2 text-base text-brand-secondary">View active inboxes, track health, and manage connections.</p>
           </div>
         </div>
         <TableSkeleton rows={5} cols={6} />
@@ -542,7 +558,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
         <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
           <InboxIcon className="h-8 w-8 text-brand-secondary" />
         </div>
-        <h2 className="text-2xl font-semibold text-brand-primary">No inboxes yet</h2>
+        <h2 className="text-2xl font-semibold text-brand-primary">No inboxes yet — launch your first set and start sending.</h2>
         <p className="mt-3 max-w-sm text-base text-brand-secondary">
           Your inboxes appear here once fulfillment is complete. Launch a package to start building out your fleet.
         </p>
@@ -551,7 +567,7 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
           className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90"
         >
           <SparklesIcon className="h-4 w-4" />
-          Create inboxes
+          Add Inbox
         </Link>
       </div>
     );
@@ -562,28 +578,28 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
       {/* Header Section */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex-1 max-w-2xl">
-          <h1 className="text-4xl font-bold text-brand-primary">Inbox Inventory</h1>
+          <h1 className="text-4xl font-bold text-brand-primary">Manage your inboxes and sending power.</h1>
           <p className="mt-3 text-lg text-brand-secondary leading-relaxed">
-            Every sender you've provisioned, plus their current delivery status, tags, and linked orders.
+            See every inbox in one place.
           </p>
         </div>
         <Button asChild variant="primary" size="lg" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)] hover:shadow-[0_25px_50px_-25px_rgba(255,255,255,0.8)] transition-all duration-200">
-          <Link href="/dashboard/products">Add more inboxes</Link>
+          <Link href="/dashboard/products">Add Inbox</Link>
         </Button>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">
         <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Total inboxes</p>
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Live inboxes</p>
           <p className="mt-4 text-4xl font-bold text-brand-primary">{inboxCount}</p>
         </div>
         <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Domains represented</p>
-          <p className="mt-4 text-4xl font-bold text-brand-primary">{uniqueDomains.size}</p>
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Paused</p>
+          <p className="mt-4 text-4xl font-bold text-brand-primary">0</p>
         </div>
         <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Average inbox age</p>
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Average age of Inboxes</p>
           <p className="mt-4 text-4xl font-bold text-brand-primary">{averageAge.toFixed(1)} days</p>
         </div>
       </div>
@@ -814,17 +830,11 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                   className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
                 />
               </th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Email</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Status</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Persona</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Tags</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Business</th>
+              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Inbox</th>
               <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Domain</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Password</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Product</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">ESP</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Order</th>
-              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Created</th>
+              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Plan</th>
+              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Status</th>
+              <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">View</th>
             </tr>
           </thead>
               <tbody className="divide-y divide-white/5">
@@ -841,24 +851,16 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                         />
                       </td>
                       <td className="px-6 py-5 font-mono text-sm font-medium text-brand-primary">{inbox.email}</td>
+                      <td className="px-6 py-5 text-sm text-brand-muted">{domain || "—"}</td>
+                      <td className="px-6 py-5 text-sm text-brand-secondary">{getProductLabel(inbox.order?.productType)}</td>
                       <td className="px-6 py-5">
                         <StatusPill status={inbox.status} order={inbox.order} />
                       </td>
-                      <td className="px-6 py-5 text-sm text-brand-secondary">{[inbox.firstName, inbox.lastName].filter(Boolean).join(' ') || '—'}</td>
-                      <td className="px-6 py-5 text-sm text-brand-secondary">
-                        {inbox.tags.length ? inbox.tags.slice(0, 3).join(", ") : <span className="text-brand-muted">—</span>}
+                      <td className="px-6 py-5">
+                        <Button size="sm" variant="secondary" className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          View
+                        </Button>
                       </td>
-                      <td className="px-6 py-5 text-sm text-brand-secondary">{inbox.businessName || "—"}</td>
-                      <td className="px-6 py-5 text-sm text-brand-muted">{domain || "—"}</td>
-                      <td className="px-6 py-5 font-mono text-xs text-brand-secondary">
-                        {inbox.password ? inbox.password : "—"}
-                      </td>
-                      <td className="px-6 py-5 text-sm text-brand-secondary">{getProductLabel(inbox.order?.productType)}</td>
-                      <td className="px-6 py-5 text-sm text-brand-muted">{inbox.espPlatform || "—"}</td>
-                      <td className="px-6 py-5 font-mono text-xs text-brand-muted">
-                        {inbox.order?.id ? `${inbox.order.id.slice(0, 8)}…` : "—"}
-                      </td>
-                      <td className="px-6 py-5 text-sm text-brand-muted">{formatDate(inbox.createdAt)}</td>
                     </tr>
                   );
                 })}
