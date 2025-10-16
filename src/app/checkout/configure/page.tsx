@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/Button";
