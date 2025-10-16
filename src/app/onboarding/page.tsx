@@ -547,18 +547,20 @@ const personaSummaryNames = personas
     <ErrorBoundary>
     <div className="min-h-screen bg-gradient-to-br from-[#06040f] via-[#0b0d1f] to-[#050509] px-4 py-10 text-slate-100">
       <div className="mx-auto w-full max-w-4xl">
-        <header className="mb-8 space-y-3 text-brand-primary">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-brand-muted-strong">
-            Step {step} of {totalSteps}
+        <header className="mb-12 space-y-4 text-brand-primary">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-brand-muted-strong">
+              Step {step} of {totalSteps}
+            </span>
+            <span className="text-xs uppercase tracking-[0.25em] text-brand-muted-strong">Current focus: <span className="text-brand-primary font-semibold">{currentStepTitle}</span></span>
+          </div>
+          <h1 className="text-4xl font-bold text-brand-primary sm:text-5xl">Launch your inbox fleet</h1>
+          <p className="max-w-3xl text-lg text-brand-secondary leading-relaxed">
+            We'll use these details to provision inboxes, align forwarding, and plug into your warmup tooling. Everything auto-saves in this browser so you can come back any time.
           </p>
-          <h1 className="text-3xl font-semibold text-brand-primary sm:text-4xl">Launch your inbox fleet</h1>
-          <p className="max-w-3xl text-base text-brand-secondary">
-            We’ll use these details to provision inboxes, align forwarding, and plug into your warmup tooling. Everything auto-saves in this browser so you can come back any time.
-          </p>
-          <p className="text-xs uppercase tracking-[0.25em] text-brand-muted-strong">Current focus: <span className="text-brand-primary">{currentStepTitle}</span></p>
         </header>
 
-        <ol className="mb-8 grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+        <ol className="mb-12 grid gap-6 text-sm md:grid-cols-2 lg:grid-cols-4">
           {steps.map((meta, index) => {
             const stepNumber = index + 1;
             const isActive = stepNumber === step;
@@ -566,18 +568,26 @@ const personaSummaryNames = personas
             return (
               <li
                 key={meta.key}
-                className={`rounded-2xl border p-4 transition ${
-                  isActive ? 'border-white/50 bg-white/[0.08]' : isCompleted ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-white/10 bg-white/[0.02]'
+                className={`rounded-2xl border p-6 transition-all duration-200 ${
+                  isActive 
+                    ? 'border-white/50 bg-white/[0.08] shadow-lg' 
+                    : isCompleted 
+                      ? 'border-emerald-400/40 bg-emerald-500/10 hover:border-emerald-400/60' 
+                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
-                      isCompleted ? 'bg-emerald-400 text-emerald-950' : isActive ? 'bg-white text-black' : 'bg-white/10 text-brand-muted'
+                    className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all duration-200 ${
+                      isCompleted 
+                        ? 'bg-emerald-400 text-emerald-950 shadow-sm' 
+                        : isActive 
+                          ? 'bg-white text-black shadow-sm' 
+                          : 'bg-white/10 text-brand-muted'
                     }`}
                   >
                     {isCompleted ? (
-                      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path
                           fillRule="evenodd"
                           d="M16.704 5.29a1 1 0 0 1 .006 1.414l-7.25 7.334a1 1 0 0 1-1.438 0L3.29 9.225a1 1 0 1 1 1.418-1.41l3.13 3.147 6.53-6.598a1 1 0 0 1 1.336-.074z"
@@ -588,18 +598,18 @@ const personaSummaryNames = personas
                       stepNumber
                     )}
                   </span>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-[10px] uppercase tracking-[0.3em] text-brand-muted-strong">Step {stepNumber}</p>
-                    <p className="mt-1 text-sm font-semibold text-brand-primary">{meta.title}</p>
+                    <p className="mt-1 text-base font-bold text-brand-primary">{meta.title}</p>
                   </div>
                 </div>
-                <p className="mt-3 text-sm text-brand-secondary">{meta.caption}</p>
+                <p className="mt-4 text-sm text-brand-secondary leading-relaxed">{meta.caption}</p>
               </li>
             );
           })}
         </ol>
 
-        <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 shadow-[0_40px_90px_-60px_rgba(10,10,15,0.8)]">
+        <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-8 shadow-[0_40px_90px_-60px_rgba(10,10,15,0.8)] backdrop-blur-sm">
           {currentStepKey === 'workspace' && (
             <div className="space-y-8">
               <div className="space-y-2">
@@ -1110,33 +1120,38 @@ const personaSummaryNames = personas
             </div>
           )}
 
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-12 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <Button
               variant="outline"
+              size="lg"
               onClick={goPrev}
               disabled={step === 1 || loading}
+              className="px-8"
             >
               Back
             </Button>
-            <div className="flex flex-col items-start gap-2 text-xs text-white/45 sm:items-end">
-              <span>{hasLoadedDraft ? 'Progress auto-saves to this browser.' : 'Restoring previous progress…'}</span>
+            <div className="flex flex-col items-start gap-3 text-xs text-white/45 sm:items-end">
+              <span className="text-sm">{hasLoadedDraft ? 'Progress auto-saves to this browser.' : 'Restoring previous progress…'}</span>
               {step < totalSteps ? (
                 <Button
                   variant="primary"
+                  size="lg"
                   onClick={goNext}
                   disabled={!canNext || loading}
+                  className="px-8"
                 >
                   {loading ? 'Saving…' : nextLabel}
                 </Button>
               ) : (
                 <Button
                   variant="primary"
+                  size="lg"
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="gap-2"
+                  className="gap-3 px-8"
                 >
                   {loading && (
-                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-black border-r-transparent" />
+                    <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-black border-r-transparent" />
                   )}
                   Complete Order
                 </Button>
