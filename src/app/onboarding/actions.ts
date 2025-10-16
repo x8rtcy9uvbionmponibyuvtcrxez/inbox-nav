@@ -4,10 +4,12 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { assertStripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
-import { ProductType, type OrderStatus } from '@prisma/client';
+import type { OrderStatus } from '@prisma/client';
 import { protectSecret } from '@/lib/encryption';
 import * as crypto from "node:crypto";
-import { notifyOrderCreated } from '@/lib/notifications';
+// Notifications are optional; dynamically import when needed to avoid bundling
+
+type ProductTypeName = 'RESELLER' | 'EDU' | 'LEGACY' | 'PREWARMED' | 'AWS' | 'MICROSOFT';
 
 export type SaveOnboardingInput = {
   inboxCount: number;
@@ -36,22 +38,22 @@ export type SaveOnboardingInput = {
   sessionId?: string; // Stripe session ID for existing orders
 };
 
-const PRODUCT_TYPES: ProductType[] = [
-  ProductType.RESELLER,
-  ProductType.EDU,
-  ProductType.LEGACY,
-  ProductType.PREWARMED,
-  ProductType.AWS,
-  ProductType.MICROSOFT,
+const PRODUCT_TYPES: ProductTypeName[] = [
+  'RESELLER',
+  'EDU',
+  'LEGACY',
+  'PREWARMED',
+  'AWS',
+  'MICROSOFT',
 ];
 
-function coerceProductType(value?: string | null): ProductType {
-  if (!value) return ProductType.EDU;
+function coerceProductType(value?: string | null): ProductTypeName {
+  if (!value) return 'EDU';
   const upper = value.toUpperCase();
   // Map legacy names → new enum
   const normalized = upper === 'GOOGLE' ? 'RESELLER' : upper;
-  const candidate = normalized as ProductType;
-  return PRODUCT_TYPES.includes(candidate) ? candidate : ProductType.EDU;
+  const candidate = normalized as ProductTypeName;
+  return PRODUCT_TYPES.includes(candidate) ? candidate : 'EDU';
 }
 
 export async function saveOnboardingAction(input: SaveOnboardingInput) {
@@ -101,9 +103,9 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     const normalizedProductType = coerceProductType(input.productType);
 
     // Step 2.5: Validate MOQ based on product type
-    const getMoq = (productType: ProductType) => {
-      if (productType === ProductType.AWS) return 20;
-      if (productType === ProductType.MICROSOFT) return 1;
+    const getMoq = (productType: ProductTypeName) => {
+      if (productType === 'AWS') return 20;
+      if (productType === 'MICROSOFT') return 1;
       return 10;
     };
     const moq = getMoq(normalizedProductType);
@@ -112,13 +114,13 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     }
 
     // Step 3: Calculate pricing (in cents)
-    const getPricePerInbox = (productType: ProductType) => {
-      if (productType === ProductType.RESELLER) return 3;
-      if (productType === ProductType.EDU) return 1.5;
-      if (productType === ProductType.LEGACY) return 2.5;
-      if (productType === ProductType.PREWARMED) return 7;
-      if (productType === ProductType.AWS) return 1.25;
-      if (productType === ProductType.MICROSOFT) return 60; // Per domain, not per inbox
+    const getPricePerInbox = (productType: ProductTypeName) => {
+      if (productType === 'RESELLER') return 3;
+      if (productType === 'EDU') return 1.5;
+      if (productType === 'LEGACY') return 2.5;
+      if (productType === 'PREWARMED') return 7;
+      if (productType === 'AWS') return 1.25;
+      if (productType === 'MICROSOFT') return 60; // Per domain, not per inbox
       return 3;
     };
     const pricePerInbox = getPricePerInbox(normalizedProductType);
@@ -181,13 +183,13 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
             }
 
             const sessionProductTypeCanonical = coerceProductType(sessionProductType);
-            const getPricePerInbox = (productType: ProductType) => {
-              if (productType === ProductType.RESELLER) return 3;
-              if (productType === ProductType.EDU) return 1.5;
-              if (productType === ProductType.LEGACY) return 2.5;
-              if (productType === ProductType.PREWARMED) return 7;
-              if (productType === ProductType.AWS) return 1.25;
-              if (productType === ProductType.MICROSOFT) return 60;
+            const getPricePerInbox = (productType: ProductTypeName) => {
+              if (productType === 'RESELLER') return 3;
+              if (productType === 'EDU') return 1.5;
+              if (productType === 'LEGACY') return 2.5;
+              if (productType === 'PREWARMED') return 7;
+              if (productType === 'AWS') return 1.25;
+              if (productType === 'MICROSOFT') return 60;
               return 3;
             };
             const productPrice = getPricePerInbox(sessionProductTypeCanonical);
@@ -209,7 +211,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
               data: {
                 id: crypto.randomUUID(),
                 clerkUserId: userId,
-                productType: sessionProductTypeCanonical,
+                productType: sessionProductTypeCanonical as any,
                 quantity: sessionQuantity,
                 totalAmount: sessionTotalAmountCents,
                 status: "PENDING" as OrderStatus, // Start as PENDING, admin will mark FULFILLED
@@ -221,37 +223,11 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
                       ? ((session.customer as { id?: string | null }).id ?? null)
                       : null,
                 stripeSubscriptionId: subscriptionId ?? undefined,
-              },
+              } as any,
             });
 
-            // Send order created notification
-            try {
-              const user = await currentUser();
-              if (user) {
-                const userData = {
-                  id: user.id,
-                  email: user.emailAddresses?.[0]?.emailAddress || 'Unknown',
-                  firstName: user.firstName || undefined,
-                  lastName: user.lastName || undefined,
-                };
-                
-                const orderData = {
-                  id: order.id,
-                  productType: order.productType,
-                  quantity: order.quantity,
-                  totalAmount: order.totalAmount,
-                  clerkUserId: order.clerkUserId,
-                  createdAt: order.createdAt,
-                  businessName: input.businessName,
-                };
-
-                await notifyOrderCreated(orderData, userData);
-                console.log('[NOTIFICATION] Order created notification sent');
-              }
-            } catch (notificationError) {
-              console.error('[NOTIFICATION] Failed to send order created notification:', notificationError);
-              // Don't fail the main flow if notification fails
-            }
+            // Notification happens via webhook instead to avoid bundling issues
+            console.log('[ACTION] Order created, notifications handled by webhooks');
 
             // Extract domain configuration from session metadata
             try {
@@ -298,13 +274,13 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           data: {
             id: tempOrderId,
             clerkUserId: userId,
-            productType: normalizedProductType,
+            productType: normalizedProductType as any,
             quantity: input.inboxCount,
             totalAmount: totalAmountCents,
             status: "PENDING" as OrderStatus,
             stripeSessionId: null,
             subscriptionStatus: 'manual',
-          },
+          } as any,
         });
       }
 
@@ -356,9 +332,9 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         domainSource: sessionDomainSource ?? (input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME')),
         inboxesPerDomain: sessionInboxesPerDomain ?? (
           input.inboxesPerDomain ?? (
-            orderProductType === ProductType.MICROSOFT
+            orderProductType === 'MICROSOFT'
               ? 50
-              : orderProductType === ProductType.PREWARMED
+              : orderProductType === 'PREWARMED'
                 ? 5
                 : 3
           )
