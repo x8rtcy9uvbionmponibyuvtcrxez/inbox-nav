@@ -99,7 +99,7 @@ function StatusBadge({ status }: { status: string }) {
   const style = statusStyles[status] ?? statusStyles.DEFAULT;
   return (
     <span className={`rounded-full px-3 py-1 text-xs font-medium tracking-wide ${style}`}>
-      {status === "FULFILLED" ? "Fulfilled" : status === "PENDING" ? "Pending" : status === "CANCELLED" ? "Cancelled" : toTitle(status)}
+      {status === "FULFILLED" ? "Active" : status === "PENDING" ? "Pending" : status === "CANCELLED" ? "Completed" : toTitle(status)}
     </span>
   );
 }
@@ -167,7 +167,7 @@ export default function DashboardClient({
         <p className="mt-3 max-w-md text-base text-brand-secondary">
           {fetchError
             ? "We hit a snag loading your workspace. Refresh or drop us a note and we&rsquo;ll take a look immediately."
-            : "You don&rsquo;t have any active orders yet. Grab your first inbox package to kick things off."}
+            : "No orders yet — spin up your first inbox and get sending in minutes."}
         </p>
         {fetchError ? (
           <p className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300">
@@ -178,13 +178,13 @@ export default function DashboardClient({
           <Button asChild variant="primary" size="md" className="gap-2">
             <Link href="/dashboard/products">
               <ShoppingCartIcon className="h-4 w-4" />
-              Create inboxes
+              Launch Inbox
             </Link>
           </Button>
           <Button asChild variant="outline" size="md" className="gap-2">
             <a href="mailto:contact@inboxnavigator.com">
               <EnvelopeIcon className="h-4 w-4" />
-              Talk to support
+              Get Support
             </a>
           </Button>
         </div>
@@ -201,23 +201,23 @@ export default function DashboardClient({
             {hasVisited ? `Welcome back, ${displayName}.` : "Welcome to Inbox Nav — we're excited to have you here!"}
           </p>
           <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-brand-primary mb-4">
-            {hasVisited ? 'Your mission control for every inbox.' : 'Let's launch your inbox fleet.'}
+            {hasVisited ? 'Your control center for every inbox.' : 'Let's launch your inbox fleet.'}
           </h1>
           <p className="text-lg text-brand-secondary leading-relaxed">
-            Track fulfillment in real time, review order history, and spin up new inboxes whenever you&rsquo;re ready.
+            Track orders, manage domains, and launch inboxes — all in one place.
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-stretch lg:min-w-[200px]">
           <Button asChild variant="primary" size="lg" className="gap-3 shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)] hover:shadow-[0_15px_40px_-15px_rgba(255,255,255,0.9)] transition-all duration-200">
             <Link href="/dashboard/products">
               <SparklesIcon className="h-5 w-5" />
-              Create Inboxes
+              Create Inbox
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
             <a href="mailto:contact@inboxnavigator.com">
               <EnvelopeIcon className="h-5 w-5" />
-              Talk to Support
+              Contact Support
             </a>
           </Button>
         </div>
@@ -225,9 +225,9 @@ export default function DashboardClient({
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        <SummaryCard label="Total inboxes live" value={totalInboxes.toString()} icon={InboxIcon} accent={cardAccent.inboxes} />
-        <SummaryCard label="Domains under management" value={totalDomains.toString()} icon={GlobeAltIcon} accent={cardAccent.domains} />
-        <SummaryCard label="Monthly subscription" value={formatCurrency(totalMonthlySpend)} icon={CurrencyDollarIcon} accent={cardAccent.revenue} />
+        <SummaryCard label="Live inboxes" value={totalInboxes.toString()} icon={InboxIcon} accent={cardAccent.inboxes} />
+        <SummaryCard label="Managed domains" value={totalDomains.toString()} icon={GlobeAltIcon} accent={cardAccent.domains} />
+        <SummaryCard label="Monthly total" value={formatCurrency(totalMonthlySpend)} icon={CurrencyDollarIcon} accent={cardAccent.revenue} />
       </div>
 
       {fetchError ? (
@@ -241,8 +241,8 @@ export default function DashboardClient({
         <div className="border-b border-white/5 px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-brand-primary">Order History</h2>
-              <p className="mt-1 text-sm text-brand-secondary">Your most recent onboarding submissions and fulfillment progress.</p>
+              <h2 className="text-xl font-bold text-brand-primary">Recent Orders</h2>
+              <p className="mt-1 text-sm text-brand-secondary">Monitor fulfillment and account activity in real time.</p>
             </div>
             <div className="text-xs text-brand-muted">
               {orders.length} {orders.length === 1 ? 'order' : 'orders'}
@@ -253,14 +253,14 @@ export default function DashboardClient({
           <table className="min-w-full divide-y divide-white/5 text-sm">
             <thead className="bg-white/5 text-xs uppercase tracking-wider text-brand-muted">
               <tr>
-                <th scope="col" className="px-6 py-4 text-left font-semibold">Forwarding URL</th>
-                <th scope="col" className="px-6 py-4 text-left font-semibold">Business</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">URL</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Brand</th>
                 <th scope="col" className="px-6 py-4 text-left font-semibold">Product</th>
-                <th scope="col" className="px-6 py-4 text-left font-semibold">Inboxes</th>
-                <th scope="col" className="px-6 py-4 text-left font-semibold">Total</th>
-                <th scope="col" className="px-6 py-4 text-left font-semibold">Submitted</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Volume</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Amount</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Date</th>
                 <th scope="col" className="px-6 py-4 text-left font-semibold">Status</th>
-                <th scope="col" className="px-6 py-4 text-left font-semibold">Actions</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">View</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
