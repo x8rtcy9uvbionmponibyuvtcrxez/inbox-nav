@@ -225,6 +225,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
                       ? ((session.customer as { id?: string | null }).id ?? null)
                       : null,
                 stripeSubscriptionId: subscriptionId ?? undefined,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               } as any, // Cast entire object to bypass type checking for production DB compatibility
             });
 
@@ -287,6 +288,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
             status: OrderStatus.PENDING,
             stripeSessionId: null,
             subscriptionStatus: 'manual',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any, // Cast entire object to bypass type checking for production DB compatibility
         });
       }
