@@ -1,0 +1,21 @@
+{
+  "name": "Inbox Navigator",
+  "short_name": "InboxNav",
+  "description": "Email Inbox Management Platform",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#2B0AFF",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}
