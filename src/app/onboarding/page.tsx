@@ -545,8 +545,8 @@ const personaSummaryNames = personas
 
   return (
     <ErrorBoundary>
-    <div className="min-h-screen bg-gradient-to-br from-[#06040f] via-[#0b0d1f] to-[#050509] px-4 md:px-8 lg:px-12 py-10 text-slate-100">
-      <div className="mx-auto w-full max-w-5xl">
+    <div className="min-h-screen bg-gradient-to-br from-[#06040f] via-[#0b0d1f] to-[#050509] px-4 md:px-10 lg:px-16 py-10 text-slate-100">
+      <div className="mx-auto w-full max-w-6xl">
         <header className="mb-12 space-y-4 text-brand-primary">
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-brand-muted-strong">
