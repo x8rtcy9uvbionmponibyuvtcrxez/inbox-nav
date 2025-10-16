@@ -1,7 +1,7 @@
 "use server";
 
 import { requireAdmin } from '@/lib/admin-auth';
-import { Prisma, ProductType, DomainStatus, InboxStatus } from '@prisma/client';
+import { Prisma, ProductType, DomainStatus, InboxStatus, OrderStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { sendClerkInvitation } from '@/lib/clerk-invites';
 
