@@ -38,11 +38,11 @@ function ConfigurePageContent() {
   const params = useSearchParams();
 
   const product = normalizeProductType(params.get("product"));
-  const quantity = Math.max(1, parseInt(params.get("qty") || "10", 10) || 10);
 
   // Check for missing required parameters
   const productParam = params.get("product");
 
+  const [quantity, setQuantity] = useState<number>(Math.max(1, parseInt(params.get("qty") || "10", 10) || 10));
   const [inboxesPerDomain, setInboxesPerDomain] = useState<number>(getDefaultInboxesPerDomain(product));
   const [domainSource, setDomainSource] = useState<DomainSource>("OWN");
   const [domainTLD, setDomainTLD] = useState<TLD>(".com");
@@ -151,130 +151,166 @@ function ConfigurePageContent() {
           )}
 
           <div className="mt-16 space-y-12">
-            <section className="surface-card space-y-6">
-              <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">Inboxes per domain</h2>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    Balance ramp speed with inbox reputation by controlling how many senders share a domain.
-                  </p>
-                </div>
-                <span className="text-sm font-medium text-[var(--text-secondary)]">≈ {domainsNeeded} domains needed</span>
-              </div>
-
-              {(product === "RESELLER" || product === "EDU" || product === "LEGACY" || product === "AWS") ? (
-                <div className="flex flex-wrap items-center gap-3">
-                  {[1, 2, 3].map((n) => {
-                    const isActive = inboxesPerDomain === n;
-                    return (
-                      <button
-                        key={n}
-                        onClick={() => setInboxesPerDomain(n)}
-                        className={`rounded-[12px] border px-4 py-2 text-sm font-semibold transition-colors ${
-                          isActive
-                            ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
-                            : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)]"
-                        }`}
-                      >
-                        {n}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm text-[var(--text-secondary)]">
-                  {product === "MICROSOFT" ? "50 inboxes per domain (fixed)" : "3 inboxes per domain (fixed)"}
-                </div>
-              )}
-            </section>
-
+            {/* Quantity Input Section - Always shown */}
             <section className="surface-card space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Domain options</h2>
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Inbox quantity</h2>
                 <p className="text-sm text-[var(--text-secondary)]">
-                  Decide if we should procure fresh domains or if you&apos;ll connect existing inventory during onboarding.
+                  {product === "PREWARMED" 
+                    ? "How many prewarmed inboxes do you need? These are ready to send immediately."
+                    : "How many inboxes do you need for this order?"
+                  }
                 </p>
               </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <input
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value={quantity}
+                    onChange={(e) => {
+                      const newQuantity = Math.max(1, parseInt(e.target.value) || 1);
+                      // Update URL params
+                      const url = new URL(window.location.href);
+                      url.searchParams.set('qty', newQuantity.toString());
+                      window.history.replaceState({}, '', url.toString());
+                      // Update state
+                      setQuantity(newQuantity);
+                    }}
+                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-lg font-semibold text-[var(--text-primary)] focus:border-[var(--border-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--border-strong)]/20"
+                    placeholder="Enter quantity"
+                  />
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-[var(--text-secondary)]">Total cost</div>
+                  <div className="text-2xl font-bold text-[var(--text-primary)]">
+                    {formatUsd(totalInboxPrice)}
+                  </div>
+                </div>
+              </div>
+            </section>
 
-              {product !== "PREWARMED" ? (
-                <div className="space-y-4">
-                  <label
-                    className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
-                      domainSource === "BUY_FOR_ME"
-                        ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.12)] text-[var(--text-primary)]"
-                        : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)] hover:bg-[rgba(254,254,254,0.06)]"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="domainSource"
-                      className="h-4 w-4 accent-[var(--bg-white)]"
-                      checked={domainSource === "BUY_FOR_ME"}
-                      onChange={() => setDomainSource("BUY_FOR_ME")}
-                    />
-                    <span className="flex-1">Purchase domains for me</span>
-                  </label>
-
-                  {domainSource === "BUY_FOR_ME" && (
-                    <div className="space-y-4 rounded-[12px] border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] p-4 text-sm text-[var(--text-primary)]">
-                      <div className="flex flex-wrap items-center gap-4">
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            className="h-4 w-4 accent-[var(--bg-white)]"
-                            checked={domainTLD === ".com"}
-                            onChange={() => setDomainTLD(".com")}
-                          />
-                          .com ({formatUsd(12)} each) = {formatUsd(domainsNeeded * 12)}
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            className="h-4 w-4 accent-[var(--bg-white)]"
-                            checked={domainTLD === ".info"}
-                            onChange={() => setDomainTLD(".info")}
-                          />
-                          .info ({formatUsd(4)} each) = {formatUsd(domainsNeeded * 4)}
-                        </label>
-                      </div>
-                      <p className="text-xs text-[var(--text-muted)]">
-                        We&apos;ll purchase {domainsNeeded} {domainTLD} domains and stage them for DNS configuration. Forwarding destinations are collected during onboarding.
+            {/* Domain Configuration - Only for non-PREWARMED products */}
+            {product !== "PREWARMED" && (
+              <>
+                <section className="surface-card space-y-6">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold text-[var(--text-primary)]">Inboxes per domain</h2>
+                      <p className="text-sm text-[var(--text-secondary)]">
+                        Balance ramp speed with inbox reputation by controlling how many senders share a domain.
                       </p>
                     </div>
-                  )}
-                </div>
-              ) : (
-                <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm text-[var(--text-secondary)]">
-                  Prewarmed inboxes are ready to send immediately and don&apos;t require domain configuration.
-                </div>
-              )}
+                    <span className="text-sm font-medium text-[var(--text-secondary)]">≈ {domainsNeeded} domains needed</span>
+                  </div>
 
-              {product !== "PREWARMED" && (
-                <div className="space-y-4">
-                  <label
-                    className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
-                      domainSource === "OWN"
-                        ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.12)] text-[var(--text-primary)]"
-                        : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)] hover:bg-[rgba(254,254,254,0.06)]"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="domainSource"
-                      className="h-4 w-4 accent-[var(--bg-white)]"
-                      checked={domainSource === "OWN"}
-                      onChange={() => setDomainSource("OWN")}
-                    />
-                    <span className="flex-1">I have my own domains (no additional cost)</span>
-                  </label>
-                  {domainSource === "OWN" && (
-                    <div className="rounded-[12px] border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] p-4 text-xs text-[var(--text-muted)]">
-                      You&apos;ll provide your domain list, forwarding URL, and registrar access during onboarding so we can configure DNS and launch quickly.
+                  {(product === "RESELLER" || product === "EDU" || product === "LEGACY" || product === "AWS") ? (
+                    <div className="flex flex-wrap items-center gap-3">
+                      {[1, 2, 3].map((n) => {
+                        const isActive = inboxesPerDomain === n;
+                        return (
+                          <button
+                            key={n}
+                            onClick={() => setInboxesPerDomain(n)}
+                            className={`rounded-[12px] border px-4 py-2 text-sm font-semibold transition-colors ${
+                              isActive
+                                ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
+                                : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)]"
+                            }`}
+                          >
+                            {n}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+                      {product === "MICROSOFT" ? "50 inboxes per domain (fixed)" : "3 inboxes per domain (fixed)"}
                     </div>
                   )}
-                </div>
-              )}
-            </section>
+                </section>
+
+                <section className="surface-card space-y-6">
+                  <div>
+                    <h2 className="text-lg font-semibold text-[var(--text-primary)]">Domain options</h2>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      Decide if we should procure fresh domains or if you&apos;ll connect existing inventory during onboarding.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label
+                      className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
+                        domainSource === "BUY_FOR_ME"
+                          ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.12)] text-[var(--text-primary)]"
+                          : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)] hover:bg-[rgba(254,254,254,0.06)]"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="domainSource"
+                        className="h-4 w-4 accent-[var(--bg-white)]"
+                        checked={domainSource === "BUY_FOR_ME"}
+                        onChange={() => setDomainSource("BUY_FOR_ME")}
+                      />
+                      <span className="flex-1">Purchase domains for me</span>
+                    </label>
+
+                    {domainSource === "BUY_FOR_ME" && (
+                      <div className="space-y-4 rounded-[12px] border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] p-4 text-sm text-[var(--text-primary)]">
+                        <div className="flex flex-wrap items-center gap-4">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              className="h-4 w-4 accent-[var(--bg-white)]"
+                              checked={domainTLD === ".com"}
+                              onChange={() => setDomainTLD(".com")}
+                            />
+                            .com ({formatUsd(12)} each) = {formatUsd(domainsNeeded * 12)}
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              className="h-4 w-4 accent-[var(--bg-white)]"
+                              checked={domainTLD === ".info"}
+                              onChange={() => setDomainTLD(".info")}
+                            />
+                            .info ({formatUsd(4)} each) = {formatUsd(domainsNeeded * 4)}
+                          </label>
+                        </div>
+                        <p className="text-xs text-[var(--text-muted)]">
+                          We&apos;ll purchase {domainsNeeded} {domainTLD} domains and stage them for DNS configuration. Forwarding destinations are collected during onboarding.
+                        </p>
+                      </div>
+                    )}
+
+                    <label
+                      className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
+                        domainSource === "OWN"
+                          ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.12)] text-[var(--text-primary)]"
+                          : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)] hover:bg-[rgba(254,254,254,0.06)]"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="domainSource"
+                        className="h-4 w-4 accent-[var(--bg-white)]"
+                        checked={domainSource === "OWN"}
+                        onChange={() => setDomainSource("OWN")}
+                      />
+                      <span className="flex-1">I have my own domains (no additional cost)</span>
+                    </label>
+                    {domainSource === "OWN" && (
+                      <div className="rounded-[12px] border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] p-4 text-xs text-[var(--text-muted)]">
+                        You&apos;ll provide your domain list, forwarding URL, and registrar access during onboarding so we can configure DNS and launch quickly.
+                      </div>
+                    )}
+                  </div>
+                </section>
+              </>
+            )}
           </div>
 
           <div className="mt-12 flex flex-col gap-4 border-t border-[var(--border-subtle)] pt-6 sm:flex-row sm:items-center sm:justify-between">
