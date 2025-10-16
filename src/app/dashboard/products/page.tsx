@@ -64,7 +64,7 @@ const products: Product[] = [
     features: ["Lowest cost per inbox", "Built for large outbound volume", "Managed Google risk (isolation & spread)"],
     icon: CheckIcon,
     color: "green",
-    priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual EDU price ID
+    priceId: "price_1SIoynBRlmSshMl5kKycrio6",
     tab: "google",
   },
   {
@@ -75,7 +75,7 @@ const products: Product[] = [
     features: ["Best balance of cost + risk", "Very low chance of Google deactivations", "Ideal for steady, long-term outreach"],
     icon: CheckIcon,
     color: "orange",
-    priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual LEGACY price ID
+    priceId: "price_1RW8EkBRlmSshMl5LIGqjcHw",
     tab: "google",
   },
   {
@@ -86,7 +86,7 @@ const products: Product[] = [
     features: ["Safer Google setup (more isolation)", "Great for high-stakes/managed accounts", "Full IMAP/SMTP access"],
     icon: CheckIcon,
     color: "blue",
-    priceId: "price_1SCFcnBTWWHTKTJvdwKiINPy",
+    priceId: "price_1SIoyCBRlmSshMl5OSvRIr36",
     tab: "google",
   },
   {
@@ -98,7 +98,7 @@ const products: Product[] = [
     badge: "Popular",
     icon: StarIcon,
     color: "green",
-    priceId: "price_1SHmyyBTWWHTKTJvK6ohM58w",
+    priceId: "price_1RSKvSBRlmSshMl5HORm2Mzs",
     tab: "prewarmed",
   },
   {
@@ -109,7 +109,7 @@ const products: Product[] = [
     features: ["Built on AWS for scale", "Flexible integration options", "Stable, cloud-native setup"],
     icon: CheckIcon,
     color: "yellow",
-    priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual AWS price ID
+    priceId: "price_1SIoxQBRlmSshMl5cPgeqUNj",
     tab: "smtp",
   },
   {
