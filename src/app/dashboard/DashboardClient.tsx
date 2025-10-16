@@ -194,7 +194,7 @@ export default function DashboardClient({
 
   return (
     <div className="space-y-6 text-brand-primary">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-base text-brand-secondary">
             {hasVisited ? `Welcome back, ${displayName}.` : "Welcome to Inbox Nav — we're excited to have you here!"}
@@ -206,7 +206,7 @@ export default function DashboardClient({
             Track fulfillment in real time, review order history, and spin up new inboxes whenever you&rsquo;re ready.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:justify-end">
           <Button asChild variant="primary" className="gap-2 shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)]">
             <Link href="/dashboard/products">
               <SparklesIcon className="h-5 w-5" />
