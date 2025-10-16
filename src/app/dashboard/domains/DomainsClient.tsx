@@ -523,26 +523,28 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
 
   return (
     <div className="space-y-10 text-brand-primary">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-brand-primary">Domain portfolio</h1>
-          <p className="mt-2 max-w-xl text-base text-brand-secondary">
-            Track every sending domain, forwarding target, and the inbox capacity we’ve associated with it.
+      {/* Header Section */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex-1 max-w-2xl">
+          <h1 className="text-4xl font-bold text-brand-primary">Domain Portfolio</h1>
+          <p className="mt-3 text-lg text-brand-secondary leading-relaxed">
+            Track every sending domain, forwarding target, and the inbox capacity we've associated with it.
           </p>
         </div>
-        <Button asChild variant="primary" size="md" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)]">
+        <Button asChild variant="primary" size="lg" className="shadow-[0_20px_46px_-26px_rgba(255,255,255,0.65)] hover:shadow-[0_25px_50px_-25px_rgba(255,255,255,0.8)] transition-all duration-200">
           <Link href="/dashboard/products">Buy more inboxes</Link>
         </Button>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        <div className="surface-card px-6 py-5">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Total domains</p>
-          <p className="mt-3 text-3xl font-semibold text-brand-primary">{domains.length}</p>
+      {/* Stats Cards */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Total domains</p>
+          <p className="mt-4 text-4xl font-bold text-brand-primary">{domains.length}</p>
         </div>
-        <div className="surface-card px-6 py-5">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Total inbox capacity</p>
-          <p className="mt-3 text-3xl font-semibold text-brand-primary">{totalInboxSlots}</p>
+        <div className="surface-card px-8 py-6 group hover:bg-white/[0.04] transition-all duration-200">
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em] font-semibold">Total inbox capacity</p>
+          <p className="mt-4 text-4xl font-bold text-brand-primary">{totalInboxSlots}</p>
         </div>
       </div>
 
@@ -760,21 +762,21 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                       className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
                     />
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left">Domain</th>
-                  <th scope="col" className="px-6 py-3 text-left">Status</th>
-                  <th scope="col" className="px-6 py-3 text-left">Inbox count</th>
-                  <th scope="col" className="px-6 py-3 text-left">Forwarding URL</th>
-                  <th scope="col" className="px-6 py-3 text-left">Tags</th>
-                  <th scope="col" className="px-6 py-3 text-left">Business</th>
-                  <th scope="col" className="px-6 py-3 text-left">Product</th>
-                  <th scope="col" className="px-6 py-3 text-left">Order</th>
-                  <th scope="col" className="px-6 py-3 text-left">Created</th>
+                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Domain</th>
+                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Status</th>
+                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Inbox count</th>
+                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Forwarding URL</th>
+                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Tags</th>
+                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Business</th>
+                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Product</th>
+                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Order</th>
+                  <th scope="col" className="px-6 py-4 text-left font-semibold text-brand-primary">Created</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {paginatedDomains.map((domain) => (
-                  <tr key={domain.id} className="transition hover:bg-white/[0.04]">
-                    <td className="px-6 py-4">
+                  <tr key={domain.id} className="group transition-all duration-200 hover:bg-white/[0.04]">
+                    <td className="px-6 py-5">
                       <input
                         type="checkbox"
                         checked={selectedIds.has(domain.id)}
@@ -782,21 +784,21 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                         className="h-4 w-4 cursor-pointer rounded border border-white/30 bg-black/40 text-indigo-500 focus:ring-indigo-500"
                       />
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-brand-primary">{domain.domain}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5 font-mono text-sm font-medium text-brand-primary">{domain.domain}</td>
+                    <td className="px-6 py-5">
                       <StatusPill status={domain.status} order={domain.order} />
                     </td>
-                    <td className="px-6 py-4 text-brand-secondary">{domain.inboxCount}</td>
-                    <td className="px-6 py-4 text-brand-muted">{domain.forwardingUrl || "—"}</td>
-                    <td className="px-6 py-4 text-brand-secondary">
+                    <td className="px-6 py-5 text-sm text-brand-secondary">{domain.inboxCount}</td>
+                    <td className="px-6 py-5 text-sm text-brand-muted">{domain.forwardingUrl || "—"}</td>
+                    <td className="px-6 py-5 text-sm text-brand-secondary">
                       {domain.tags.length ? domain.tags.slice(0, 3).join(", ") : <span className="text-brand-muted">—</span>}
                     </td>
-                    <td className="px-6 py-4 text-brand-secondary">{domain.businessName || "—"}</td>
-                    <td className="px-6 py-4 text-brand-secondary">{getProductLabel(domain.order?.productType)}</td>
-                    <td className="px-6 py-4 font-mono text-[11px] text-brand-muted">
+                    <td className="px-6 py-5 text-sm text-brand-secondary">{domain.businessName || "—"}</td>
+                    <td className="px-6 py-5 text-sm text-brand-secondary">{getProductLabel(domain.order?.productType)}</td>
+                    <td className="px-6 py-5 font-mono text-xs text-brand-muted">
                       {domain.order?.id ? `${domain.order.id.slice(0, 8)}…` : "—"}
                     </td>
-                    <td className="px-6 py-4 text-brand-muted">{formatDate(domain.createdAt)}</td>
+                    <td className="px-6 py-5 text-sm text-brand-muted">{formatDate(domain.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>
