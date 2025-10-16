@@ -15,27 +15,27 @@ const ALL_STEPS = [
   {
     key: 'workspace',
     title: 'Workspace Basics',
-    caption: 'Context about your brand and access so we can configure your fleet confidently.',
+    caption: 'Tell us about your business and domain setup so we can configure your inboxes end-to-end.',
   },
   {
     key: 'registrar',
     title: 'Registrar Access',
-    caption: 'Grant registrar access so we can configure DNS and complete provisioning.',
+    caption: 'Give us your registrar credentials so we can set up your domains end to end.',
   },
   {
     key: 'personas',
     title: 'Personas & Tone',
-    caption: 'Define the humans behind the inboxes so signatures and copy feel authentic.',
+    caption: 'Add the sender details that will appear in your inboxes.',
   },
   {
     key: 'warmup',
     title: 'Warmup & Tools',
-    caption: 'Securely hand off ESP credentials so we can plug into your existing stack.',
+    caption: 'Connect your email sending platform securely.',
   },
   {
     key: 'review',
     title: 'Review & Confirm',
-    caption: 'Tag your fleet, leave notes, and confirm launch details before we provision.',
+    caption: 'Review and confirm your setup before finalizing.',
   },
 ] as const;
 
@@ -290,11 +290,11 @@ function OnboardingPage() {
         const errorData = await response.json().catch(() => ({}));
         
         if (response.status === 410) {
-          setError('Your checkout session has expired. Please start a new order.');
+          setError('Your session expired — restart checkout to continue.');
         } else if (response.status === 404) {
-          setError('Checkout session not found. Please start a new order.');
+          setError('Your session expired — restart checkout to continue.');
         } else if (response.status === 403) {
-          setError('This session does not belong to you. Please sign in with the correct account.');
+          setError('Your session expired — restart checkout to continue.');
         } else {
           setError(errorData.error || 'Failed to load payment information');
         }
@@ -552,11 +552,11 @@ const personaSummaryNames = personas
             <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-brand-muted-strong">
               Step {step} of {totalSteps}
             </span>
-            <span className="text-xs uppercase tracking-[0.25em] text-brand-muted-strong">Current focus: <span className="text-brand-primary font-semibold">{currentStepTitle}</span></span>
+            <span className="text-xs uppercase tracking-[0.25em] text-brand-muted-strong">You're on: <span className="text-brand-primary font-semibold">{currentStepTitle}</span></span>
           </div>
-          <h1 className="text-4xl font-bold text-brand-primary sm:text-5xl">Launch your inbox fleet</h1>
+          <h1 className="text-4xl font-bold text-brand-primary sm:text-5xl">Launch your inbox setup</h1>
           <p className="max-w-3xl text-lg text-brand-secondary leading-relaxed">
-            We'll use these details to provision inboxes, align forwarding, and plug into your warmup tooling. Everything auto-saves in this browser so you can come back any time.
+            We'll use these details to set up inboxes, domains, and your sending platform. Everything saves automatically.
           </p>
         </header>
 
@@ -646,7 +646,7 @@ const personaSummaryNames = personas
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">Monthly inbox volume</label>
-                  <p className="text-xs text-white/50">We recommend at least 10 inboxes per product to keep warmup smooth.</p>
+                  <p className="text-xs text-white/50">Recommended: minimum 10 inboxes per product for stable sending.</p>
                   <input
                     type="number"
                     min={10}
@@ -662,7 +662,7 @@ const personaSummaryNames = personas
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">Business or sender name</label>
-                  <p className="text-xs text-white/50">Appears in signatures and ownership records.</p>
+                  <p className="text-xs text-white/50">Used for internal order tracking purposes.</p>
                   <input
                     className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
                     placeholder="e.g. Acme Growth Studio"
@@ -676,7 +676,7 @@ const personaSummaryNames = personas
               {productType === 'PREWARMED' && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">Primary forwarding URL</label>
-                  <p className="text-xs text-white/50">Tell us where replies should land once this fleet is warmed and live.</p>
+                  <p className="text-xs text-white/50">Add the URL where your secondary domains should redirect — usually your main website.</p>
                   <input
                     className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
                     placeholder="https://yourbusiness.com"
@@ -690,7 +690,7 @@ const personaSummaryNames = personas
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-5">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-white">Domain plan</h3>
+                    <h3 className="text-lg font-semibold text-white">Domain setup</h3>
                     <p className="text-sm text-white/60">{domainPlanSummary}</p>
                   </div>
                   {domainSource && (
@@ -704,7 +704,7 @@ const personaSummaryNames = personas
                   <div className="space-y-5">
                     <div>
                       <label className="text-sm font-medium text-white">Domains we should use</label>
-                      <p className="text-xs text-white/50">One per line. We’ll confirm DNS access before provisioning.</p>
+                      <p className="text-xs text-white/50">Add the domains you'll use (one per line). We'll automatically configure SPF, DKIM, and DMARC records.</p>
                       <textarea
                         className="mt-2 h-28 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
                         placeholder="example1.com&#10;example2.io&#10;example3.net"
@@ -719,7 +719,7 @@ const personaSummaryNames = personas
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-white">Primary forwarding URL</label>
-                      <p className="text-xs text-white/50">Where should warm inboxes forward once live?</p>
+                      <p className="text-xs text-white/50">Add the URL your inbox domains should redirect to after setup.</p>
                       <input
                         className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
                         placeholder="https://yourbusiness.com"
@@ -732,7 +732,7 @@ const personaSummaryNames = personas
                 ) : isBuyForMeFlow ? (
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-white">Primary forwarding URL</label>
-                    <p className="text-xs text-white/50">Where should inboxes route once live? This can be a website, landing page, or shared mailbox.</p>
+                    <p className="text-xs text-white/50">Add the URL your inbox domains should redirect to after setup.</p>
                     <input
                       className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
                       placeholder="https://yourbusiness.com"
@@ -741,11 +741,7 @@ const personaSummaryNames = personas
                       required
                     />
                   </div>
-                ) : (
-                  <p className="text-sm text-white/55">
-                    Domain configuration is locked from checkout. Reach out to <a className="text-white underline" href="mailto:contact@inboxnavigator.com">contact@inboxnavigator.com</a> if you need to adjust it.
-                  </p>
-                )}
+                ) : null}
               </div>
             </div>
           )}
@@ -753,10 +749,9 @@ const personaSummaryNames = personas
           {currentStepKey === 'registrar' && (
             <div className="space-y-8">
               <div className="space-y-2">
-                <h2 className="text-2xl font-semibold text-white">Registrar access</h2>
+                <h2 className="text-2xl font-semibold text-white">Domain access</h2>
                 <p className="text-sm text-white/60">
-                  Share registrar credentials so our onboarding engineers can configure DNS and finalize delivery setup.
-                  We store this securely and purge it after provisioning.
+                  Give us your registrar credentials so we can set up your domains end to end. Credentials are encrypted and deleted after setup.
                 </p>
               </div>
 
@@ -794,7 +789,7 @@ const personaSummaryNames = personas
                 )}
 
                 <div className="rounded-xl border border-blue-400/30 bg-blue-500/10 p-4 text-sm text-blue-100">
-                  Please invite <span className="font-mono">team@inboxnavigator.com</span> as an admin to this registrar so we can configure DNS records.
+                  Invite <a className="font-mono text-blue-200 underline" href="mailto:team@inboxnavigator.com">team@inboxnavigator.com</a> as an admin to ensure zero disruption during setup.
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2">
@@ -846,9 +841,9 @@ const personaSummaryNames = personas
           {currentStepKey === 'personas' && (
             <div className="space-y-8">
               <div className="space-y-2">
-                <h2 className="text-2xl font-semibold text-white">Personas & tone</h2>
+                <h2 className="text-2xl font-semibold text-white">Sender setup</h2>
                 <p className="text-sm text-white/60">
-                  Share who is sending email so we can align signatures, avatar images, and copy. We can manage up to 20 personas per fleet.
+                  Add sender details that will appear in inboxes (name and image).
                 </p>
               </div>
 
@@ -939,9 +934,9 @@ const personaSummaryNames = personas
           {currentStepKey === 'warmup' && (
             <div className="space-y-8">
               <div className="space-y-2">
-                <h2 className="text-2xl font-semibold text-white">Connect your warmup tool</h2>
+                <h2 className="text-2xl font-semibold text-white">Connect your sending tool</h2>
                 <p className="text-sm text-white/60">
-                  We’ll plug directly into your sending or warmup provider to import settings and monitor reputation. Credentials are stored securely and audited.
+                  Connect your email sending platform so we can integrate settings automatically.
                 </p>
               </div>
 
@@ -956,7 +951,6 @@ const personaSummaryNames = personas
                     <option value="">Select warmup tool…</option>
                     <option>Smartlead</option>
                     <option>Instantly</option>
-                    <option>Plusvibe</option>
                     <option>EmailBison</option>
                     <option>Other</option>
                   </select>
@@ -1027,9 +1021,9 @@ const personaSummaryNames = personas
           {currentStepKey === 'review' && (
             <div className="space-y-8">
               <div className="space-y-2">
-                <h2 className="text-2xl font-semibold text-white">Review & confirm</h2>
+                <h2 className="text-2xl font-semibold text-white">Final check</h2>
                 <p className="text-sm text-white/60">
-                  Tag your fleet, leave any special instructions, and confirm the launch package. We’ll start provisioning as soon as you submit.
+                  Add internal tags, review your details, and confirm your order.
                 </p>
               </div>
 
@@ -1099,7 +1093,7 @@ const personaSummaryNames = personas
 
           {error && (
             <div className="mt-8 rounded-2xl border border-red-500/30 bg-red-600/10 p-5 text-sm text-red-100">
-              <p className="font-semibold">We couldn’t complete this step.</p>
+              <p className="font-semibold">Something went wrong. Try again or restart checkout.</p>
               <p className="mt-1 text-red-200">{error}</p>
               {(error.includes('expired') || error.includes('not found') || error.includes('does not belong')) && (
                 <div className="mt-4 flex flex-wrap gap-3">
@@ -1107,7 +1101,7 @@ const personaSummaryNames = personas
                     onClick={() => window.location.href = '/dashboard/products'}
                     className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-white/90"
                   >
-                    Start a new checkout
+                    Restart checkout
                   </button>
                   <button
                     onClick={() => setError(null)}
@@ -1131,7 +1125,7 @@ const personaSummaryNames = personas
               Back
             </Button>
             <div className="flex flex-col items-start gap-3 text-xs text-white/45 sm:items-end">
-              <span className="text-sm">{hasLoadedDraft ? 'Progress auto-saves to this browser.' : 'Restoring previous progress…'}</span>
+              <span className="text-sm">{hasLoadedDraft ? 'Changes save automatically.' : 'Restoring previous progress…'}</span>
               {step < totalSteps ? (
                 <Button
                   variant="primary"
@@ -1153,7 +1147,7 @@ const personaSummaryNames = personas
                   {loading && (
                     <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-black border-r-transparent" />
                   )}
-                  Complete Order
+                  Complete your Order
                 </Button>
               )}
             </div>
