@@ -22,11 +22,11 @@ export async function GET(
       },
     });
 
-    if (!order || !order.onboardingData || order.onboardingData.length === 0) {
+    if (!order || !order.onboardingData) {
       return NextResponse.json({ error: 'Order or onboarding data not found' }, { status: 404 });
     }
 
-    const storedPassword = order.onboardingData[0].registrarPassword;
+    const storedPassword = order.onboardingData.registrarPassword;
     
     if (!storedPassword) {
       return NextResponse.json({ error: 'No registrar password found' }, { status: 404 });

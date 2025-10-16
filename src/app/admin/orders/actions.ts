@@ -63,7 +63,7 @@ export async function markOrderAsFulfilledAction(
       return { success: false, error: "Order not found" };
     }
 
-    const onboarding = order.onboardingData?.[0] || order.onboardingData;
+    const onboarding = order.onboardingData;
     const isOwn = (onboarding?.domainSource ?? 'BUY_FOR_ME') === 'OWN';
 
     console.log("[FULFILLMENT] Order details:", {
@@ -261,7 +261,7 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
     include: { onboardingData: true }
   });
   
-  const businessName = order?.onboardingData?.[0]?.businessType || order?.businessName || '';
+  const businessName = order?.onboardingData?.businessType || order?.businessName || '';
   
   const updates = [];
   const creates = [];
@@ -329,7 +329,7 @@ async function processOwnDomainsCsv(db: typeof prisma, orderId: string, csvData:
       domain,
       status: 'LIVE' as const,
       inboxCount: 0, // Will be updated after inbox creation
-      forwardingUrl: order?.onboardingData?.[0]?.website || '',
+      forwardingUrl: order?.onboardingData?.website || '',
       tags: [],
       businessName,
       createdAt: new Date(),

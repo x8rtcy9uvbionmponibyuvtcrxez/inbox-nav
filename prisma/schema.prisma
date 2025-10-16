@@ -124,7 +124,6 @@ model PendingOrderInvite {
 }
 
 enum ProductType {
-  GOOGLE
   RESELLER
   EDU
   LEGACY
