@@ -36,22 +36,49 @@ export type SaveOnboardingInput = {
   sessionId?: string; // Stripe session ID for existing orders
 };
 
-// const PRODUCT_TYPES: ProductType[] = [
-//   ProductType.RESELLER,
-//   ProductType.EDU,
-//   ProductType.LEGACY,
-//   ProductType.PREWARMED,
-//   ProductType.AWS,
-//   ProductType.MICROSOFT,
-// ];
+const PRODUCT_ORDER: ProductType[] = [
+  ProductType.EDU,
+  ProductType.LEGACY,
+  ProductType.RESELLER,
+  ProductType.PREWARMED,
+  ProductType.AWS,
+  ProductType.MICROSOFT,
+];
+
+const PRODUCT_PRICE: Record<ProductType, number> = {
+  [ProductType.EDU]: 1.5,
+  [ProductType.LEGACY]: 2.5,
+  [ProductType.RESELLER]: 3,
+  [ProductType.PREWARMED]: 7,
+  [ProductType.AWS]: 1.25,
+  [ProductType.MICROSOFT]: 60,
+};
+
+const PRODUCT_MOQ: Record<ProductType, number> = {
+  [ProductType.AWS]: 20,
+  [ProductType.MICROSOFT]: 1,
+  [ProductType.EDU]: 10,
+  [ProductType.LEGACY]: 10,
+  [ProductType.RESELLER]: 10,
+  [ProductType.PREWARMED]: 10,
+};
+
+const DEFAULT_INBOXES_PER_DOMAIN: Record<ProductType, number> = {
+  [ProductType.MICROSOFT]: 50,
+  [ProductType.PREWARMED]: 3,
+  [ProductType.EDU]: 3,
+  [ProductType.LEGACY]: 3,
+  [ProductType.RESELLER]: 3,
+  [ProductType.AWS]: 3,
+};
+
+const isProductType = (value: string): value is ProductType =>
+  PRODUCT_ORDER.includes(value as ProductType);
 
 function coerceProductType(value?: string | null): ProductType {
   if (!value) return ProductType.EDU;
-  const upper = value.toUpperCase();
-  // Map legacy names → new enum
-  const normalized = upper === 'GOOGLE' ? 'RESELLER' : upper;
-  const candidate = normalized as keyof typeof ProductType;
-  return ProductType[candidate] || ProductType.EDU;
+  const normalized = value.toUpperCase() === 'GOOGLE' ? ProductType.RESELLER : value.toUpperCase();
+  return isProductType(normalized) ? normalized : ProductType.EDU;
 }
 
 export async function saveOnboardingAction(input: SaveOnboardingInput) {
