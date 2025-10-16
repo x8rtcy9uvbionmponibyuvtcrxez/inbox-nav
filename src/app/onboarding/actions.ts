@@ -127,28 +127,12 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
     const normalizedProductType = coerceProductType(input.productType);
 
-    // Step 2.5: Validate MOQ based on product type
-    const getMoq = (productType: ProductType) => {
-      if (productType === ProductType.AWS) return 20;
-      if (productType === ProductType.MICROSOFT) return 1;
-      return 10;
-    };
-    const moq = getMoq(normalizedProductType);
+    const moq = PRODUCT_MOQ[normalizedProductType] ?? 10;
     if (input.inboxCount < moq || input.inboxCount > 2000) {
       return { success: false, error: `Inbox count must be between ${moq} and 2000 for ${normalizedProductType}` };
     }
 
-    // Step 3: Calculate pricing (in cents)
-    const getPricePerInbox = (productType: ProductType) => {
-      if (productType === ProductType.RESELLER) return 3;
-      if (productType === ProductType.EDU) return 1.5;
-      if (productType === ProductType.LEGACY) return 2.5;
-      if (productType === ProductType.PREWARMED) return 7;
-      if (productType === ProductType.AWS) return 1.25;
-      if (productType === ProductType.MICROSOFT) return 60; // Per domain, not per inbox
-      return 3;
-    };
-    const pricePerInbox = getPricePerInbox(normalizedProductType);
+    const pricePerInbox = PRODUCT_PRICE[normalizedProductType] ?? 3;
     const totalAmountCents = input.inboxCount * pricePerInbox * 100; // Convert to cents
     console.log("[ACTION] 💰 Pricing calculation:", {
       productType: input.productType,
@@ -212,16 +196,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
             }
 
             const sessionProductTypeCanonical = coerceProductType(sessionProductType);
-            const getPricePerInbox = (productType: ProductType) => {
-              if (productType === ProductType.RESELLER) return 3;
-              if (productType === ProductType.EDU) return 1.5;
-              if (productType === ProductType.LEGACY) return 2.5;
-              if (productType === ProductType.PREWARMED) return 7;
-              if (productType === ProductType.AWS) return 1.25;
-              if (productType === ProductType.MICROSOFT) return 60;
-              return 3;
-            };
-            const productPrice = getPricePerInbox(sessionProductTypeCanonical);
+            const productPrice = PRODUCT_PRICE[sessionProductTypeCanonical] ?? 3;
             const sessionTotalAmountCents = sessionQuantity * productPrice * 100;
 
             const subscriptionId = typeof session.subscription === 'string'
@@ -240,10 +215,10 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
               data: {
                 id: crypto.randomUUID(),
                 clerkUserId: userId,
-                productType: sessionProductTypeCanonical as string, // Cast to string for production DB compatibility
+                productType: sessionProductTypeCanonical,
                 quantity: sessionQuantity,
                 totalAmount: sessionTotalAmountCents,
-                status: OrderStatus.PENDING, // Start as PENDING, admin will mark FULFILLED
+                status: OrderStatus.PENDING,
                 stripeSessionId: input.sessionId,
                 stripeCustomerId:
                   typeof session.customer === "string"
@@ -251,9 +226,8 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
                     : session.customer && "id" in session.customer
                       ? ((session.customer as { id?: string | null }).id ?? null)
                       : null,
-                stripeSubscriptionId: subscriptionId ?? undefined,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              } as any, // Cast entire object to bypass type checking for production DB compatibility
+                stripeSubscriptionId: subscriptionId ?? null,
+              },
             });
 
             // Notification happens via webhook instead to avoid bundling issues
@@ -429,7 +403,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         domainSource,
         totalInboxes: input.inboxCount,
         personas: personasLite,
-        providedDomains: domainSource === 'OWN' ? (sessionOwnDomains ?? (input.providedDomains ?? input.domainList ?? [])) : [],
+        providedDomains: domainSource === 'OWN' ? (sessionOwnDomains ?? (input.ownDomains ?? input.providedDomains ?? input.domainList ?? [])) : [],
         inboxesPerDomain: sessionInboxesPerDomain ?? input.inboxesPerDomain,
         businessName: input.businessName,
       });
@@ -446,8 +420,9 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         sessionDomainSource,
         inputDomainSource: input.domainSource,
         inputDomainStatus: input.domainStatus,
-        providedDomains: domainSource === 'OWN' ? (sessionOwnDomains ?? (input.providedDomains ?? input.domainList ?? [])) : [],
+        providedDomains: domainSource === 'OWN' ? (sessionOwnDomains ?? (input.ownDomains ?? input.providedDomains ?? input.domainList ?? [])) : [],
         sessionOwnDomains,
+        inputOwnDomains: input.ownDomains,
         inputProvidedDomains: input.providedDomains,
         inputDomainList: input.domainList,
       });
