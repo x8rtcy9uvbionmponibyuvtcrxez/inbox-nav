@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,6 +5,122 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Order {
+  id                   String               @id @default(cuid())
+  clerkUserId          String?              @map("clerk_user_id")
+  productType          ProductType          @map("product_type")
+  quantity             Int
+  totalAmount          Int
+  status               String               @default("PENDING")
+  stripeSessionId      String?              @map("stripe_session_id")
+  stripeCustomerId     String?              @map("stripe_customer_id")
+  stripeSubscriptionId String?              @map("stripe_subscription_id")
+  subscriptionStatus   String               @default("active") @map("subscription_status")
+  cancelledAt          DateTime?            @map("cancelled_at")
+  cancellationReason   String?              @map("cancellation_reason")
+  businessName         String?              @map("business_name")
+  externalId           String?              @unique @map("external_id")
+  createdAt            DateTime             @default(now()) @map("created_at")
+  updatedAt            DateTime             @updatedAt @map("updated_at")
+  domains              Domain[]
+  inboxes              Inbox[]
+  onboardingData       OnboardingData?
+  pendingInvites       PendingOrderInvite[]
+
+  @@map("orders")
+}
+
+model OnboardingData {
+  id                    String   @id @default(uuid())
+  orderId               String   @unique
+  clerkUserId           String
+  productType           String?  @map("product_type")
+  businessType          String?
+  industry              String?
+  companySize           String?
+  website               String?
+  domainPreferences     Json?
+  personas              Json?
+  espProvider           String?
+  specialRequirements   String?
+  stepCompleted         Int      @default(0)
+  isCompleted           Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  domainSource          String   @default("OWN") @map("domain_source")
+  inboxesPerDomain      Int      @default(3) @map("inboxes_per_domain")
+  providedDomains       String[] @default([]) @map("provided_domains")
+  calculatedDomainCount Int?     @map("calculated_domain_count")
+  domainRegistrar       String?  @map("domain_registrar")
+  registrarAdminEmail   String?  @map("registrar_admin_email")
+  registrarUsername     String?  @map("registrar_username")
+  registrarPassword     String?  @map("registrar_password")
+  order                 Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("onboarding_data")
+}
+
+model Inbox {
+  id               String    @id @default(cuid())
+  orderId          String    @map("order_id")
+  email            String    @unique
+  firstName        String?   @map("first_name")
+  lastName         String?   @map("last_name")
+  espPlatform      String    @map("esp_platform")
+  status           String    @default("PENDING")
+  tags             String[]  @default([])
+  businessName     String?   @map("business_name")
+  forwardingDomain String?   @map("forwarding_domain")
+  password         String?   @map("password")
+  fulfilledAt      DateTime? @map("fulfilled_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  personaName      String?   @map("persona_name")
+  order            Order     @relation(fields: [orderId], references: [id])
+
+  @@map("inboxes")
+}
+
+model Domain {
+  id            String    @id @default(cuid())
+  orderId       String    @map("order_id")
+  domain        String    @unique
+  status        String    @default("PENDING")
+  tags          String[]  @default([])
+  inboxCount    Int       @default(0) @map("inbox_count")
+  forwardingUrl String    @map("forwarding_url")
+  businessName  String?   @map("business_name")
+  fulfilledAt   DateTime? @map("fulfilled_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  order         Order     @relation(fields: [orderId], references: [id])
+
+  @@map("domains")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String   @map("actor_user_id")
+  action      String
+  details     Json
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
+
+model PendingOrderInvite {
+  id        String   @id @default(cuid())
+  email     String
+  orderId   String   @map("order_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([email, orderId])
+  @@index([email])
+  @@map("pending_order_invites")
 }
 
 enum ProductType {
@@ -23,136 +136,4 @@ enum OrderStatus {
   PENDING
   FULFILLED
   CANCELLED
-}
-
-model Order {
-  id                   String      @id @default(cuid())
-  clerkUserId          String?     @map("clerk_user_id") // Nullable for invited users
-  productType          String      @map("product_type")
-  quantity             Int
-  totalAmount          Int         // Store cents instead of dollars
-  status               String      @default("PENDING")
-  stripeSessionId      String?     @map("stripe_session_id")
-  stripeCustomerId     String?     @map("stripe_customer_id")
-  stripeSubscriptionId String?     @map("stripe_subscription_id")
-  subscriptionStatus   String      @default("active") @map("subscription_status")
-  cancelledAt          DateTime?   @map("cancelled_at")
-  cancellationReason   String?     @map("cancellation_reason")
-  businessName         String?     @map("business_name")
-  externalId           String?     @unique @map("external_id")
-  createdAt            DateTime    @default(now()) @map("created_at")
-  updatedAt            DateTime    @updatedAt @map("updated_at")
-  
-  // Relations
-  onboardingData   OnboardingData[]
-  inboxes          Inbox[]
-  domains          Domain[]
-  pendingInvites   PendingOrderInvite[]
-  
-  @@map("orders")
-}
-
-model OnboardingData {
-  id                   String   @id @default(uuid())
-  orderId              String   @unique
-  clerkUserId          String
-  productType          String?  @map("product_type")
-  businessType         String?
-  industry             String?
-  companySize          String?
-  website              String?
-  domainPreferences    Json?
-  personas             Json?
-  espProvider          String?
-  specialRequirements  String?
-  stepCompleted        Int      @default(0)
-  isCompleted          Boolean  @default(false)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-
-  // New fields for domain/inbox distribution
-  domainSource          String   @default("OWN") @map("domain_source")
-  inboxesPerDomain      Int      @default(3) @map("inboxes_per_domain")
-  providedDomains       String[] @default([]) @map("provided_domains")
-  calculatedDomainCount Int?     @map("calculated_domain_count")
-  
-  // Domain registrar credentials (for OWN domains)
-  domainRegistrar       String?  @map("domain_registrar")
-  registrarAdminEmail   String?  @map("registrar_admin_email")
-  registrarUsername     String?  @map("registrar_username")
-  registrarPassword     String?  @map("registrar_password")
-  
-  // Relations
-  order                Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
-  @@map("onboarding_data")
-}
-
-model Inbox {
-  id                String    @id @default(cuid())
-  orderId           String    @map("order_id")
-  order             Order     @relation(fields: [orderId], references: [id])
-  
-  // Core Fields
-  email             String    @unique
-  firstName         String?   @map("first_name")
-  lastName          String?   @map("last_name")
-  personaName       String?   @map("persona_name") // Full name for persona
-  espPlatform       String    @map("esp_platform") // Smartlead, Instantly, etc
-  status            String    @default("PENDING") // LIVE, DELETED, PENDING
-  tags              String[]  @default([])
-  businessName      String?   @map("business_name") // Made nullable for flexibility
-  forwardingDomain  String?   @map("forwarding_domain") // Can be null or "-"
-  password          String?   @map("password") // Encrypted at rest
-  
-  // Dates
-  fulfilledAt       DateTime? @map("fulfilled_at") // Set when admin marks as fulfilled
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-
-  @@map("inboxes")
-}
-
-model Domain {
-  id                String    @id @default(cuid())
-  orderId           String    @map("order_id")
-  order             Order     @relation(fields: [orderId], references: [id])
-  
-  // Core Fields
-  domain            String    @unique
-  status            String    @default("PENDING") // LIVE, DELETED, PENDING
-  tags              String[]  @default([])
-  inboxCount        Int       @default(0) @map("inbox_count")
-  forwardingUrl     String    @map("forwarding_url")
-  businessName      String?   @map("business_name") // Made nullable for flexibility
-  
-  // Dates
-  fulfilledAt       DateTime? @map("fulfilled_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-
-  @@map("domains")
-}
-
-model AuditLog {
-  id            String   @id @default(cuid())
-  actorUserId   String   @map("actor_user_id")
-  action        String
-  details       Json
-  createdAt     DateTime @default(now()) @map("created_at")
-
-  @@map("audit_logs")
-}
-
-model PendingOrderInvite {
-  id        String   @id @default(cuid())
-  email     String
-  orderId   String   @map("order_id")
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@index([email])
-  @@unique([email, orderId])
-  @@map("pending_order_invites")
 }

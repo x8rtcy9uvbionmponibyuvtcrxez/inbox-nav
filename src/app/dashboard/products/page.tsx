@@ -33,7 +33,7 @@ const tabs: Tab[] = [
     id: "google",
     label: "Google",
     emoji: "📧",
-    productIds: ["RESELLER", "EDU", "LEGACY"]
+    productIds: ["EDU", "LEGACY", "RESELLER"]
   },
   {
     id: "microsoft",
@@ -57,17 +57,6 @@ const tabs: Tab[] = [
 
 const products: Product[] = [
   {
-    id: "RESELLER",
-    name: "Reseller Inboxes",
-    price: 3,
-    description: "Standard cold email inboxes with Google Workspace",
-    features: ["Basic warmup", "Reliable delivery", "IMAP/SMTP access"],
-    icon: CheckIcon,
-    color: "blue",
-    priceId: "price_1SCFcnBTWWHTKTJvdwKiINPy",
-    tab: "google",
-  },
-  {
     id: "EDU",
     name: "Edu Inboxes",
     price: 1.5,
@@ -87,6 +76,17 @@ const products: Product[] = [
     icon: CheckIcon,
     color: "orange",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9", // TODO: Get actual LEGACY price ID
+    tab: "google",
+  },
+  {
+    id: "RESELLER",
+    name: "Reseller Inboxes",
+    price: 3,
+    description: "Standard cold email inboxes with Google Workspace",
+    features: ["Basic warmup", "Reliable delivery", "IMAP/SMTP access"],
+    icon: CheckIcon,
+    color: "blue",
+    priceId: "price_1SCFcnBTWWHTKTJvdwKiINPy",
     tab: "google",
   },
   {
@@ -136,17 +136,17 @@ const formatCurrency = (amountInDollars: number) =>
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("google");
   const [quantities, setQuantities] = useState<Record<ProductType, number>>({
-    RESELLER: 10,
     EDU: 10,
     LEGACY: 10,
+    RESELLER: 10,
     PREWARMED: 10,
     AWS: 20,
     MICROSOFT: 1,
   });
   const [loading, setLoading] = useState<Record<ProductType, boolean>>({
-    RESELLER: false,
     EDU: false,
     LEGACY: false,
+    RESELLER: false,
     PREWARMED: false,
     AWS: false,
     MICROSOFT: false,
@@ -282,8 +282,8 @@ export default function ProductsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex h-11 items-center gap-3 rounded-[12px] px-5 text-base font-medium transition-colors ${
                     isActive
-                      ? 'border border-[var(--border-medium)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]'
-                      : 'border border-transparent text-[var(--text-secondary)] hover:border-[var(--border-subtle)] hover:bg-[rgba(99,99,99,0.18)] hover:text-[var(--text-primary)]'
+                      ? 'border border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)]'
+                      : 'border border-transparent text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:bg-[rgba(254,254,254,0.08)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   <span className="text-lg">{tab.emoji}</span>

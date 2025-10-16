@@ -11,8 +11,8 @@ type DomainSource = "OWN" | "BUY_FOR_ME";
 type TLD = ".com" | ".info";
 
 function normalizeProductType(value: string | null): ProductType {
-  const v = (value || "RESELLER").toUpperCase();
-  return ["RESELLER", "EDU", "LEGACY", "PREWARMED", "AWS", "MICROSOFT"].includes(v) ? (v as ProductType) : "RESELLER";
+  const v = (value || "EDU").toUpperCase();
+  return ["EDU", "LEGACY", "RESELLER", "PREWARMED", "AWS", "MICROSOFT"].includes(v) ? (v as ProductType) : "EDU";
 }
 
 function getDefaultInboxesPerDomain(product: ProductType): number {
@@ -182,8 +182,8 @@ function ConfigurePageContent() {
                   <label
                     className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
                       domainSource === "BUY_FOR_ME"
-                        ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
-                        : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)]"
+                        ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.12)] text-[var(--text-primary)]"
+                        : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)] hover:bg-[rgba(254,254,254,0.06)]"
                     }`}
                   >
                     <input
@@ -197,7 +197,7 @@ function ConfigurePageContent() {
                   </label>
 
                   {domainSource === "BUY_FOR_ME" && (
-                    <div className="space-y-4 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-4 text-sm text-[var(--text-secondary)]">
+                    <div className="space-y-4 rounded-[12px] border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] p-4 text-sm text-[var(--text-primary)]">
                       <div className="flex flex-wrap items-center gap-4">
                         <label className="flex items-center gap-2">
                           <input
@@ -230,8 +230,8 @@ function ConfigurePageContent() {
                 <label
                   className={`flex cursor-pointer items-center gap-3 rounded-[12px] border px-4 py-3 text-sm transition-colors ${
                     domainSource === "OWN"
-                      ? "border-[var(--border-strong)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
-                      : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)]"
+                      ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.12)] text-[var(--text-primary)]"
+                      : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-medium)] hover:bg-[rgba(254,254,254,0.06)]"
                   }`}
                 >
                   <input
@@ -244,7 +244,7 @@ function ConfigurePageContent() {
                   <span className="flex-1">I have my own domains (no additional cost)</span>
                 </label>
                 {domainSource === "OWN" && (
-                  <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-4 text-xs text-[var(--text-muted)]">
+                  <div className="rounded-[12px] border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] p-4 text-xs text-[var(--text-muted)]">
                     You&apos;ll provide your domain list, forwarding URL, and registrar access during onboarding so we can configure DNS and launch quickly.
                   </div>
                 )}

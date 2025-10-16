@@ -166,97 +166,80 @@ export default async function AdminOrdersPage({
   const pending = orders.filter((o) => o.status.includes("PENDING")).length;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-32 -top-32 h-80 w-80 animate-pulse rounded-full bg-indigo-500/10 blur-3xl" />
-        <div className="absolute bottom-10 right-0 h-96 w-96 animate-[pulse_8s_ease-in-out_infinite] rounded-full bg-fuchsia-500/10 blur-3xl" />
-        <div className="absolute inset-x-0 top-1/3 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-6xl px-6 py-12">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <div className="app-shell space-y-12">
         <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/60">
-              Control Center
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+              Control center
             </span>
-            <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">Admin Orders Dashboard</h1>
-            <p className="mt-3 max-w-xl text-sm text-white/50">
-              Monitor incoming orders, fulfillment velocity, and subscription health at a glance. Tap into the filters
-              or search for a specific customer to dive deeper.
+            <h1 className="text-3xl font-semibold text-[var(--text-primary)]">Admin orders dashboard</h1>
+            <p className="max-w-xl text-sm text-[var(--text-secondary)]">
+              Monitor incoming orders, fulfillment velocity, and subscription health at a glance. Use the filters or search by customer to dive deeper.
             </p>
           </div>
           <div className="flex w-full max-w-sm flex-col gap-3 md:w-auto">
             <form
-              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 transition focus-within:border-indigo-400/60 focus-within:bg-white/[0.04]"
+              className="rounded-[14px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-3 text-sm text-[var(--text-secondary)] focus-within:border-[var(--border-medium)]"
               method="GET"
               action="/admin/orders"
             >
-              <div className="absolute -top-24 right-0 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl transition group-focus-within:bg-indigo-500/20" />
-              <div className="relative flex items-center gap-2 text-sm text-white/60">
-                <span className="text-white/40">Search</span>
-            <input
-                  className="flex-1 bg-transparent text-white placeholder-white/40 focus:outline-none"
+              <div className="flex items-center gap-3">
+                <span className="text-[var(--text-muted)]">Search</span>
+                <input
+                  className="flex-1 bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
                   placeholder="clerkUserId…"
-              name="q"
-              defaultValue={q}
-            />
-            <input type="hidden" name="status" value={currentStatus} />
-                <button className="rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 px-3 py-1 text-xs font-semibold text-white shadow-[0_10px_30px_-20px_rgba(129,140,248,0.8)] transition hover:scale-[1.02] hover:shadow-[0_12px_35px_-18px_rgba(168,85,247,0.7)]">
+                  name="q"
+                  defaultValue={q}
+                />
+                <input type="hidden" name="status" value={currentStatus} />
+                <button className="rounded-[10px] border border-[var(--border-medium)] px-3 py-1 text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--border-strong)]">
                   Go
-            </button>
+                </button>
               </div>
-          </form>
-        </div>
+            </form>
+          </div>
         </header>
 
-        <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: "Total Orders", value: orders.length.toString(), accent: "from-indigo-400/30 to-indigo-500/10" },
-            { label: "Pending Review", value: pending.toString(), accent: "from-amber-400/30 to-amber-500/10" },
-            { label: "Fulfilled Orders", value: fulfilled.toString(), accent: "from-emerald-400/30 to-emerald-500/10" },
-            { label: "Assets Under Mgmt", value: `${totalInboxes} inboxes · ${totalDomains} domains`, accent: "from-sky-400/30 to-sky-500/10" },
+            { label: "Total orders", value: orders.length.toString() },
+            { label: "Pending review", value: pending.toString() },
+            { label: "Fulfilled orders", value: fulfilled.toString() },
+            { label: "Assets under mgmt", value: `${totalInboxes} inboxes · ${totalDomains} domains` },
           ].map((card) => (
-            <div
-              key={card.label}
-              className={`relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br ${card.accent} p-[1px] shadow-[0_20px_60px_-45px_rgba(15,118,255,0.6)]`}
-            >
-              <div className="relative h-full w-full rounded-[calc(1.5rem-1px)] bg-slate-950/70 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/60">{card.label}</p>
-                <p className="mt-4 text-2xl font-semibold text-white">{card.value}</p>
-      </div>
-      </div>
+            <div key={card.label} className="surface-card space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                {card.label}
+              </p>
+              <p className="text-2xl font-semibold text-[var(--text-primary)]">{card.value}</p>
+            </div>
           ))}
         </section>
 
-        <section className="mt-12 flex flex-wrap gap-2">
+        <section className="flex flex-wrap gap-2">
           {STATUS_FILTERS.map((status) => {
             const isActive = currentStatus === status;
             return (
               <Link
                 key={status}
                 href={buildUrl(status, q)}
-                className={`group relative inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium uppercase tracking-wide transition ${
+                className={`inline-flex items-center gap-2 rounded-[10px] border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition-colors ${
                   isActive
-                    ? "border-indigo-400/60 bg-indigo-500/20 text-indigo-100 shadow-[0_12px_40px_-25px_rgba(129,140,248,0.9)]"
-                    : "border-white/10 bg-white/5 text-white/50 hover:border-white/30 hover:text-white/80"
+                    ? "border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)]"
+                    : "border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-[var(--border-medium)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full transition ${
-                    isActive ? "bg-indigo-300 shadow-[0_0_10px_rgba(129,140,248,0.9)]" : "bg-white/40 group-hover:bg-white/70"
-                  }`}
-                />
                 {status.replace(/_/g, " ")}
               </Link>
             );
           })}
         </section>
 
-        <section className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)] backdrop-blur">
-          <div className="relative overflow-x-auto">
-            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-            <table className="min-w-full divide-y divide-white/10 text-sm text-white/80">
-              <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/50">
+        <section className="overflow-hidden rounded-[18px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-[var(--border-subtle)] text-sm text-[var(--text-secondary)]">
+              <thead className="bg-[rgba(254,254,254,0.05)] text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">
                 <tr>
                   <th className="px-6 py-4 text-left">Order</th>
                   <th className="px-6 py-4 text-left">Customer</th>
@@ -269,10 +252,10 @@ export default async function AdminOrdersPage({
                   <th className="px-6 py-4 text-left">Created</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-[var(--border-subtle)]">
                 {orders.length === 0 && (
                 <tr>
-                    <td colSpan={10} className="px-6 py-10 text-center text-sm text-white/40">
+                    <td colSpan={10} className="px-6 py-10 text-center text-sm text-[var(--text-muted)]">
                       No orders found for this filter. Adjust the scope to broaden your view.
                     </td>
                 </tr>
@@ -322,63 +305,63 @@ export default async function AdminOrdersPage({
                   return (
                     <tr
                       key={order.id}
-                      className={`transition hover:bg-white/6 ${isCancelled ? "opacity-60" : ""}`}
+                      className={`transition hover:bg-[rgba(254,254,254,0.04)] ${isCancelled ? "opacity-60" : ""}`}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <span className="font-mono text-xs text-indigo-200">{order.id.slice(0, 10)}…</span>
+                          <span className="font-mono text-xs text-[var(--text-muted)]">{order.id.slice(0, 10)}…</span>
                           <Link
                             href={`/admin/orders/${order.id}`}
-                            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/70 transition hover:border-white/40 hover:text-white"
+                            className="inline-flex items-center gap-2 rounded-[10px] border border-[var(--border-subtle)] bg-[rgba(254,254,254,0.06)] px-3 py-1 text-xs font-medium text-[var(--text-primary)]/80 transition hover:border-[var(--border-medium)] hover:text-[var(--text-primary)]"
                           >
                             View
                           </Link>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-white/70">
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">
                         <div className="flex flex-col">
                           <span
                             className={
                               primaryCustomer === "—" || primaryCustomer.startsWith("ID: ")
-                                ? "text-white/50"
-                                : "font-medium text-white/80"
+                                ? "text-[var(--text-muted)]"
+                                : "font-medium text-[var(--text-primary)]"
                             }
                           >
                             {primaryCustomer}
                           </span>
                           {otherCustomerDetails.map((detail) => (
-                            <span key={detail} className="text-xs text-white/45">
+                            <span key={detail} className="text-xs text-[var(--text-muted)]">
                               {detail}
                             </span>
                           ))}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-white/70">{order.productType}</td>
-                      <td className="px-6 py-4 text-white/70">{order.quantity}</td>
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">{order.productType}</td>
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">{order.quantity}</td>
                       <td className="px-6 py-4">
                         <StatusBadge status={order.status} />
                       </td>
-                      <td className="px-6 py-4 text-white/60">
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">
                         <div className="space-y-1">
                           <p>{hasSubscription ? (isCancelled ? "Cancelled" : "Active") : "—"}</p>
                           {hasSubscription && !isCancelled ? (
-                            <p className="font-mono text-[11px] text-white/40">{order.stripeSubscriptionId?.slice(0, 14)}…</p>
+                            <p className="font-mono text-[11px] text-[var(--text-muted)]">{order.stripeSubscriptionId?.slice(0, 14)}…</p>
                           ) : null}
                           {isCancelled && order.cancelledAt ? (
-                            <p className="text-xs text-rose-300">Ended {formatDate(order.cancelledAt)}</p>
+                            <p className="text-xs text-[var(--text-muted)]">Ended {formatDate(order.cancelledAt)}</p>
                           ) : null}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-white/70">
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">
                         <div className="flex flex-col">
-                          <span className="font-medium text-white/80">{inboxDisplayCount}</span>
+                          <span className="font-medium text-[var(--text-primary)]">{inboxDisplayCount}</span>
                           {inboxSecondary ? (
-                            <span className="text-xs text-white/45">{inboxSecondary}</span>
+                            <span className="text-xs text-[var(--text-muted)]">{inboxSecondary}</span>
                           ) : null}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-white/70">{domainTotal}</td>
-                      <td className="px-6 py-4 text-white/50">{formatDate(order.createdAt)}</td>
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">{domainTotal}</td>
+                      <td className="px-6 py-4 text-[var(--text-muted)]">{formatDate(order.createdAt)}</td>
                     </tr>
                   );
                 })}

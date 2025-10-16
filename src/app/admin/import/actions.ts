@@ -74,7 +74,7 @@ export async function validateCSVAction(csvData: CSVRow[]): Promise<ValidationRe
       }
       
       // Validate product_type
-      const validProductTypes = ['RESELLER', 'EDU', 'LEGACY', 'PREWARMED', 'AWS', 'MICROSOFT'];
+      const validProductTypes = ['EDU', 'LEGACY', 'RESELLER', 'PREWARMED', 'AWS', 'MICROSOFT'];
       if (!row.product_type || !validProductTypes.includes(row.product_type.toUpperCase())) {
         rowErrors.push(`Row ${rowNum}: product_type must be one of: ${validProductTypes.join(', ')}`);
       }

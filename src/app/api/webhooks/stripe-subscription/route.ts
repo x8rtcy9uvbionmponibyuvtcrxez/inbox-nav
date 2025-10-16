@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import type Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { notifySubscriptionCancelled } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
   const headersList = await headers()
@@ -52,6 +53,9 @@ export async function POST(request: NextRequest) {
         console.log(`[Stripe Webhook] Found order: ${order.id}, updating status to CANCELLED`)
 
         const now = new Date()
+        let inboxCount = 0;
+        let domainCount = 0;
+        
         await prisma.$transaction(async (tx) => {
           await tx.order.update({
             where: { id: order.id },
@@ -72,10 +76,45 @@ export async function POST(request: NextRequest) {
             data: { status: 'DELETED' } 
           })
 
-          console.log(`[Stripe Webhook] Updated ${inboxUpdateResult.count} inboxes and ${domainUpdateResult.count} domains to DELETED`)
+          inboxCount = inboxUpdateResult.count;
+          domainCount = domainUpdateResult.count;
+
+          console.log(`[Stripe Webhook] Updated ${inboxCount} inboxes and ${domainCount} domains to DELETED`)
         })
 
         console.log(`[Stripe Webhook] Successfully processed subscription deletion for order: ${order.id}`)
+
+        // Send subscription cancelled notification
+        try {
+          const affectedCounts = {
+            inboxes: inboxCount,
+            domains: domainCount,
+          };
+
+          const orderData = {
+            id: order.id,
+            productType: order.productType,
+            quantity: order.quantity,
+            totalAmount: order.totalAmount,
+            clerkUserId: order.clerkUserId,
+            createdAt: order.createdAt,
+            businessName: order.businessName,
+          };
+
+          const subscriptionData = {
+            id: subscription.id,
+            status: subscription.status,
+            canceled_at: subscription.canceled_at,
+            cancel_reason: (subscription as any).cancel_reason,
+          };
+
+          await notifySubscriptionCancelled(orderData, subscriptionData, affectedCounts);
+          console.log('[NOTIFICATION] Subscription cancelled notification sent');
+        } catch (notificationError) {
+          console.error('[NOTIFICATION] Failed to send subscription cancelled notification:', notificationError);
+          // Don't fail the main flow if notification fails
+        }
+
         break
       }
       case 'customer.subscription.updated': {

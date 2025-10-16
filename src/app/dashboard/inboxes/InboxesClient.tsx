@@ -20,7 +20,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const STATUS_DISPLAY_ORDER = ["LIVE", "PENDING", "DELETED"];
-const PRODUCT_DISPLAY_ORDER = ["RESELLER", "EDU", "LEGACY", "PREWARMED", "AWS", "MICROSOFT"];
+const PRODUCT_DISPLAY_ORDER = ["EDU", "LEGACY", "RESELLER", "PREWARMED", "AWS", "MICROSOFT"];
 const ITEMS_PER_PAGE = 50;
 
 const PRODUCT_LABELS: Record<string, string> = {

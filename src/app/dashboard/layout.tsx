@@ -54,7 +54,7 @@ export default async function DashboardLayout({
       </aside>
 
       <main className="flex-1 overflow-y-auto bg-[var(--bg-primary)]">
-        <div className="px-6 py-8 md:px-10 lg:px-16 lg:py-12">{children}</div>
+        <div className="px-4 py-6 md:px-6 md:py-8 lg:px-8 lg:py-10">{children}</div>
       </main>
     </div>
   );

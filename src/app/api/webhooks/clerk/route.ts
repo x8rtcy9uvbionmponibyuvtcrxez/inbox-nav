@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 import type { WebhookEvent } from '@clerk/nextjs/server';
 import { handleUserSignup } from '@/lib/clerk-invites';
+import { notifyUserSignup } from '@/lib/notifications';
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,12 +51,33 @@ export async function POST(req: NextRequest) {
     console.log(`[WEBHOOK] Received event: ${eventType}`);
 
     if (eventType === 'user.created') {
-      const data = evt.data as { id: string; email_addresses?: Array<{ email_address: string }> };
+      const data = evt.data as { 
+        id: string; 
+        email_addresses?: Array<{ email_address: string }>;
+        first_name?: string;
+        last_name?: string;
+      };
       const emails = data.email_addresses?.map((addr) => addr.email_address).filter(Boolean) ?? [];
 
       console.log(`[WEBHOOK] User created: ${data.id}, emails:`, emails);
 
       await handleUserSignup(data.id, emails);
+
+      // Send user signup notification
+      try {
+        const userData = {
+          id: data.id,
+          email: emails[0] || 'Unknown',
+          firstName: data.first_name || undefined,
+          lastName: data.last_name || undefined,
+        };
+
+        await notifyUserSignup(userData);
+        console.log('[NOTIFICATION] User signup notification sent');
+      } catch (notificationError) {
+        console.error('[NOTIFICATION] Failed to send user signup notification:', notificationError);
+        // Don't fail the main flow if notification fails
+      }
     }
 
     return NextResponse.json({ success: true });

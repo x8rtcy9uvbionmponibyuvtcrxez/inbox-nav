@@ -1,12 +1,13 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { assertStripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
-import type { ProductType, OrderStatus } from '@prisma/client';
+import { ProductType, type OrderStatus } from '@prisma/client';
 import { protectSecret } from '@/lib/encryption';
 import crypto from "node:crypto";
+import { notifyOrderCreated } from '@/lib/notifications';
 
 export type SaveOnboardingInput = {
   inboxCount: number;
@@ -35,12 +36,12 @@ export type SaveOnboardingInput = {
   sessionId?: string; // Stripe session ID for existing orders
 };
 
-const PRODUCT_TYPES: ProductType[] = ['RESELLER', 'EDU', 'LEGACY', 'PREWARMED', 'AWS', 'MICROSOFT'];
+const PRODUCT_TYPES: ProductType[] = [ProductType.EDU, ProductType.LEGACY, ProductType.RESELLER, ProductType.PREWARMED, ProductType.AWS, ProductType.MICROSOFT];
 
 function coerceProductType(value?: string | null): ProductType {
-  if (!value) return 'RESELLER';
+  if (!value) return ProductType.EDU;
   const candidate = value.toUpperCase() as ProductType;
-  return PRODUCT_TYPES.includes(candidate) ? candidate : 'RESELLER';
+  return PRODUCT_TYPES.includes(candidate) ? candidate : ProductType.EDU;
 }
 
 export async function saveOnboardingAction(input: SaveOnboardingInput) {
@@ -91,8 +92,8 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
     // Step 2.5: Validate MOQ based on product type
     const getMoq = (productType: ProductType) => {
-      if (productType === 'AWS') return 20;
-      if (productType === 'MICROSOFT') return 1;
+      if (productType === ProductType.AWS) return 20;
+      if (productType === ProductType.MICROSOFT) return 1;
       return 10;
     };
     const moq = getMoq(normalizedProductType);
@@ -102,12 +103,12 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
     // Step 3: Calculate pricing (in cents)
     const getPricePerInbox = (productType: ProductType) => {
-      if (productType === 'RESELLER') return 3;
-      if (productType === 'EDU') return 1.5;
-      if (productType === 'LEGACY') return 2.5;
-      if (productType === 'PREWARMED') return 7;
-      if (productType === 'AWS') return 1.25;
-      if (productType === 'MICROSOFT') return 60; // Per domain, not per inbox
+      if (productType === ProductType.RESELLER) return 3;
+      if (productType === ProductType.EDU) return 1.5;
+      if (productType === ProductType.LEGACY) return 2.5;
+      if (productType === ProductType.PREWARMED) return 7;
+      if (productType === ProductType.AWS) return 1.25;
+      if (productType === ProductType.MICROSOFT) return 60; // Per domain, not per inbox
       return 3;
     };
     const pricePerInbox = getPricePerInbox(normalizedProductType);
@@ -171,12 +172,12 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
             const sessionProductTypeCanonical = coerceProductType(sessionProductType);
             const getPricePerInbox = (productType: ProductType) => {
-              if (productType === 'RESELLER') return 3;
-              if (productType === 'EDU') return 1.5;
-              if (productType === 'LEGACY') return 2.5;
-              if (productType === 'PREWARMED') return 7;
-              if (productType === 'AWS') return 1.25;
-              if (productType === 'MICROSOFT') return 60;
+              if (productType === ProductType.RESELLER) return 3;
+              if (productType === ProductType.EDU) return 1.5;
+              if (productType === ProductType.LEGACY) return 2.5;
+              if (productType === ProductType.PREWARMED) return 7;
+              if (productType === ProductType.AWS) return 1.25;
+              if (productType === ProductType.MICROSOFT) return 60;
               return 3;
             };
             const productPrice = getPricePerInbox(sessionProductTypeCanonical);
@@ -212,6 +213,35 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
                 stripeSubscriptionId: subscriptionId ?? undefined,
               },
             });
+
+            // Send order created notification
+            try {
+              const user = await currentUser();
+              if (user) {
+                const userData = {
+                  id: user.id,
+                  email: user.emailAddresses?.[0]?.emailAddress || 'Unknown',
+                  firstName: user.firstName || undefined,
+                  lastName: user.lastName || undefined,
+                };
+                
+                const orderData = {
+                  id: order.id,
+                  productType: order.productType,
+                  quantity: order.quantity,
+                  totalAmount: order.totalAmount,
+                  clerkUserId: order.clerkUserId,
+                  createdAt: order.createdAt,
+                  businessName: input.businessName,
+                };
+
+                await notifyOrderCreated(orderData, userData);
+                console.log('[NOTIFICATION] Order created notification sent');
+              }
+            } catch (notificationError) {
+              console.error('[NOTIFICATION] Failed to send order created notification:', notificationError);
+              // Don't fail the main flow if notification fails
+            }
 
             // Extract domain configuration from session metadata
             try {
@@ -314,7 +344,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         stepCompleted: 4,
         isCompleted: true,
         domainSource: sessionDomainSource ?? (input.domainSource ?? (input.domainStatus === 'own' ? 'OWN' : 'BUY_FOR_ME')),
-        inboxesPerDomain: sessionInboxesPerDomain ?? (input.inboxesPerDomain ?? (orderProductType === 'RESELLER' || orderProductType === 'EDU' || orderProductType === 'LEGACY' || orderProductType === 'AWS' ? 3 : orderProductType === 'PREWARMED' ? 3 : 50)),
+        inboxesPerDomain: sessionInboxesPerDomain ?? (input.inboxesPerDomain ?? (orderProductType === ProductType.RESELLER || orderProductType === ProductType.EDU || orderProductType === ProductType.LEGACY || orderProductType === ProductType.AWS ? 3 : orderProductType === ProductType.PREWARMED ? 3 : 50)),
         providedDomains: (input.domainSource === 'OWN' || input.domainStatus === 'own')
           ? input.ownDomains ?? input.providedDomains ?? input.domainList ?? []
           : sessionDomainSource === 'OWN'
@@ -364,7 +394,7 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
       const personasLite = (input.personas || []).map(p => ({ firstName: p.firstName, lastName: p.lastName }));
 
       const distribution = distributeInboxes({
-        productType,
+        productType: productType as 'RESELLER' | 'EDU' | 'LEGACY' | 'PREWARMED' | 'AWS' | 'MICROSOFT',
         domainSource,
         totalInboxes: input.inboxCount,
         personas: personasLite,
