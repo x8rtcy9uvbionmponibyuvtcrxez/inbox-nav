@@ -199,10 +199,18 @@ function OnboardingPage() {
 
   // Block back navigation after onboarding completion
   useEffect(() => {
-    // Check if onboarding was already completed and redirect
+    // If there's a session_id, clear the completed flag to allow new onboarding
+    const sessionId = searchParams.get('session_id');
+    if (sessionId && typeof window !== 'undefined') {
+      window.localStorage.removeItem('onboarding-completed');
+      console.log('[ONBOARDING] New session detected, cleared completion flag');
+    }
+
+    // Check if onboarding was already completed and redirect (only if no session_id)
     const hasCompletedOnboarding = typeof window !== 'undefined' && 
       window.localStorage.getItem('onboarding-completed');
-    if (hasCompletedOnboarding) {
+    if (hasCompletedOnboarding && !sessionId) {
+      console.log('[ONBOARDING] Already completed, redirecting to dashboard');
       router.push('/dashboard');
       return;
     }
@@ -223,7 +231,7 @@ function OnboardingPage() {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [router]);
+  }, [router, searchParams]);
 
   // Read URL parameters on component mount
   useEffect(() => {
