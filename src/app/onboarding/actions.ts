@@ -163,6 +163,10 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
           try {
             const stripe = assertStripe();
+            if (!stripe) {
+              console.error("[ACTION] ❌ Stripe not configured");
+              throw new Error("Stripe is not configured. Please contact support.");
+            }
             const session = await stripe.checkout.sessions.retrieve(input.sessionId, { expand: ['subscription'] });
             console.log("[ACTION] ✅ Stripe session retrieved:", {
               id: session.id,
