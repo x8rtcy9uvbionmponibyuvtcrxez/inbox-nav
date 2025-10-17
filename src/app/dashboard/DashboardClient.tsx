@@ -7,6 +7,7 @@ import OrderDetailsModal from "./OrderDetailsModal";
 import { OrderSkeleton, StatsSkeleton } from "@/components/skeletons";
 import type { Prisma } from "@prisma/client";
 import { Button } from "@/components/ui/Button";
+import IntercomHelpButton from "@/components/IntercomHelpButton";
 
 type OrderWithRelations = Prisma.OnboardingDataGetPayload<{
   include: {
@@ -181,12 +182,10 @@ export default function DashboardClient({
               Launch Inbox
             </Link>
           </Button>
-          <Button asChild variant="outline" size="md" className="gap-2">
-            <a href="mailto:contact@inboxnavigator.com">
-              <EnvelopeIcon className="h-4 w-4" />
-              Get Support
-            </a>
-          </Button>
+          <IntercomHelpButton variant="outline" size="md">
+            <EnvelopeIcon className="h-4 w-4" />
+            Get Support
+          </IntercomHelpButton>
         </div>
       </div>
     );
@@ -214,12 +213,10 @@ export default function DashboardClient({
               Create Inbox
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
-            <a href="mailto:contact@inboxnavigator.com">
-              <EnvelopeIcon className="h-5 w-5" />
-              Contact Support
-            </a>
-          </Button>
+          <IntercomHelpButton variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
+            <EnvelopeIcon className="h-5 w-5" />
+            Contact Support
+          </IntercomHelpButton>
         </div>
       </div>
 
