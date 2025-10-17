@@ -22,12 +22,18 @@ model Order {
   cancellationReason   String?              @map("cancellation_reason")
   businessName         String?              @map("business_name")
   externalId           String?              @unique @map("external_id")
+  activeInboxCount     Int                  @default(0) @map("active_inbox_count")
+  originalQuantity     Int?                 @map("original_quantity")
+  stripeInvoiceId      String?              @map("stripe_invoice_id")
+  nextBillingDate      DateTime?            @map("next_billing_date")
   createdAt            DateTime             @default(now()) @map("created_at")
   updatedAt            DateTime             @updatedAt @map("updated_at")
   domains              Domain[]
   inboxes              Inbox[]
   onboardingData       OnboardingData?
   pendingInvites       PendingOrderInvite[]
+  billingEvents        BillingEvent[]
+  notifications        Notification[]
 
   @@map("orders")
 }
@@ -75,6 +81,9 @@ model Inbox {
   forwardingDomain String?     @map("forwarding_domain")
   password         String?     @map("password")
   fulfilledAt      DateTime?   @map("fulfilled_at")
+  cancelledAt      DateTime?   @map("cancelled_at")
+  cancelReason     String?     @map("cancel_reason")
+  isActive         Boolean     @default(true) @map("is_active")
   createdAt        DateTime    @default(now()) @map("created_at")
   updatedAt        DateTime    @updatedAt @map("updated_at")
   personaName      String?     @map("persona_name")
@@ -121,6 +130,36 @@ model PendingOrderInvite {
   @@unique([email, orderId])
   @@index([email])
   @@map("pending_order_invites")
+}
+
+model BillingEvent {
+  id          String   @id @default(cuid())
+  orderId     String   @map("order_id")
+  eventType   String   @map("event_type") // payment_succeeded, partial_cancel, etc.
+  amount      Int?     // Amount in cents
+  description String?
+  metadata    Json?    // Additional event data
+  createdAt   DateTime @default(now()) @map("created_at")
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("billing_events")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  orderId     String?  @map("order_id")
+  clerkUserId String   @map("clerk_user_id")
+  type        String   // ORDER_RECEIVED, ORDER_FULFILLED, etc.
+  title       String
+  message     String
+  actionUrl   String?  @map("action_url")
+  isRead      Boolean  @default(false) @map("is_read")
+  createdAt   DateTime @default(now()) @map("created_at")
+  order       Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([clerkUserId])
+  @@index([isRead])
+  @@map("notifications")
 }
 
 enum ProductType {

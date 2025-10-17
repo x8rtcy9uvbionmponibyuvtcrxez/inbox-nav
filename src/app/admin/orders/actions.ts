@@ -6,6 +6,8 @@ import { prisma } from '@/lib/prisma';
 import { DomainStatus, InboxStatus } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { invalidateCache } from '@/lib/redis';
+import { notifyOrderFulfilled } from '@/lib/notifications';
+import { createNotification } from '@/lib/notification-helpers';
 
 export type CSVRow = Record<string, string>;
 
@@ -226,6 +228,58 @@ export async function markOrderAsFulfilledAction(
     });
 
     console.log("[FULFILLMENT] ✅ Order fulfilled successfully");
+    
+    // Send fulfillment notifications
+    try {
+      if (order.clerkUserId) {
+        // Get updated order with inbox count
+        const updatedOrder = await prisma.order.findUnique({
+          where: { id: orderId },
+          include: {
+            inboxes: {
+              where: { isActive: true },
+            },
+          },
+        });
+
+        const inboxCount = updatedOrder?.inboxes?.length || 0;
+
+        // Send email notification
+        await notifyOrderFulfilled(
+          {
+            id: order.id,
+            productType: order.productType,
+            quantity: order.quantity,
+            totalAmount: order.totalAmount,
+            clerkUserId: order.clerkUserId,
+            createdAt: order.createdAt,
+            businessName: order.businessName,
+          },
+          {
+            id: order.clerkUserId,
+            email: 'user@example.com', // Will be filled by notification function
+            firstName: undefined,
+            lastName: undefined,
+          },
+          inboxCount
+        );
+
+        // Create in-app notification
+        await createNotification({
+          clerkUserId: order.clerkUserId,
+          type: 'ORDER_FULFILLED',
+          title: 'Inboxes Ready!',
+          message: `Your ${inboxCount} inboxes are now ready to use. Access them in your dashboard.`,
+          orderId: order.id,
+          actionUrl: '/dashboard/inboxes',
+        });
+
+        console.log("[FULFILLMENT] ✅ Notifications sent");
+      }
+    } catch (notificationError) {
+      console.error("[FULFILLMENT] Failed to send notifications:", notificationError);
+      // Don't fail the main flow if notification fails
+    }
     
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath('/admin/orders');

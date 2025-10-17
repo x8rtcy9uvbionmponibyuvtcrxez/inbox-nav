@@ -227,6 +227,28 @@ export default function DashboardClient({
         <SummaryCard label="Monthly total" value={formatCurrency(totalMonthlySpend)} icon={CurrencyDollarIcon} accent={cardAccent.revenue} />
       </div>
 
+      {/* Quick Actions */}
+      <div className="flex flex-wrap gap-3">
+        <Button asChild variant="outline" size="sm">
+          <Link href="/dashboard/billing">
+            <CurrencyDollarIcon className="h-4 w-4" />
+            View Billing
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/dashboard/inboxes">
+            <InboxIcon className="h-4 w-4" />
+            Manage Inboxes
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/dashboard/domains">
+            <GlobeAltIcon className="h-4 w-4" />
+            Manage Domains
+          </Link>
+        </Button>
+      </div>
+
       {fetchError ? (
         <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
           We had trouble syncing the latest data. The view below may be stale. Refresh the page or reach out if this persists.

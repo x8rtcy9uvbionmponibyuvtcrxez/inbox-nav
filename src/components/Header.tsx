@@ -3,6 +3,7 @@
 import { SignInButton, SignUpButton, SignedOut, SignedIn } from "@clerk/nextjs";
 import { Button } from "@/components/ui/Button";
 import IntercomLauncher from "@/components/IntercomLauncher";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 export default function Header() {
   return (
@@ -23,6 +24,7 @@ export default function Header() {
       </SignedOut>
       <SignedIn>
         <div className="flex items-center gap-4">
+          <NotificationCenter />
           <IntercomLauncher>
             <Button variant="ghost" size="sm" className="flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

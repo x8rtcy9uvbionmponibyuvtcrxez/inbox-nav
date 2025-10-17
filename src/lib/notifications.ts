@@ -1,4 +1,8 @@
 import { Resend } from 'resend';
+import { formatOrderReceivedEmail } from './email-templates/order-received';
+import { formatOrderFulfilledEmail } from './email-templates/order-fulfilled';
+import { formatSubscriptionCancelledEmail } from './email-templates/subscription-cancelled';
+import { formatPartialCancellationEmail } from './email-templates/partial-cancellation';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -10,6 +14,8 @@ interface OrderData {
   clerkUserId: string | null;
   createdAt: Date;
   businessName?: string | null;
+  cancelledAt?: Date | null;
+  cancellationReason?: string | null;
 }
 
 interface UserData {
@@ -553,4 +559,36 @@ export async function notifySubscriptionCancelled(order: OrderData, subscription
   // Send email notification
   const emailData = formatSubscriptionCancelledEmailNotification(order, subscription, affectedCounts);
   await sendEmailNotification(notificationEmail, emailData.subject, emailData.html);
+}
+
+/**
+ * Send order received notification to customer
+ */
+export async function notifyOrderReceived(order: OrderData, user: UserData) {
+  const emailData = formatOrderReceivedEmail(order, user);
+  await sendEmailNotification(user.email, emailData.subject, emailData.html);
+}
+
+/**
+ * Send order fulfilled notification to customer
+ */
+export async function notifyOrderFulfilled(order: OrderData, user: UserData, inboxCount: number) {
+  const emailData = formatOrderFulfilledEmail(order, user, inboxCount);
+  await sendEmailNotification(user.email, emailData.subject, emailData.html);
+}
+
+/**
+ * Send full subscription cancellation notification to customer
+ */
+export async function notifyFullCancellation(order: OrderData, user: UserData) {
+  const emailData = formatSubscriptionCancelledEmail(order, user);
+  await sendEmailNotification(user.email, emailData.subject, emailData.html);
+}
+
+/**
+ * Send partial cancellation notification to customer
+ */
+export async function notifyPartialCancellation(order: OrderData, user: UserData, cancelledInboxes: string[], remainingCount: number, newMonthlyCost: number) {
+  const emailData = formatPartialCancellationEmail(order, user, cancelledInboxes, remainingCount, newMonthlyCost);
+  await sendEmailNotification(user.email, emailData.subject, emailData.html);
 }

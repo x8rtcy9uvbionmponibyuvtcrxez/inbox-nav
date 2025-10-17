@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
+import { notifyFullCancellation } from '@/lib/notifications'
+import { createNotification, createBillingEvent } from '@/lib/notification-helpers'
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,6 +50,54 @@ export async function POST(request: NextRequest) {
       // We don't delete inboxes/domains until Stripe confirms via webhook
       // This happens once the subscription actually ends.
     })
+
+    // Send cancellation notifications
+    try {
+      // Send email notification
+      await notifyFullCancellation(
+        {
+          id: order.id,
+          productType: order.productType,
+          quantity: order.quantity,
+          totalAmount: order.totalAmount,
+          clerkUserId: order.clerkUserId,
+          createdAt: order.createdAt,
+          businessName: order.businessName,
+          cancelledAt: new Date(),
+          cancellationReason: reason || 'User initiated cancellation',
+        },
+        {
+          id: userId,
+          email: 'user@example.com', // Will be filled by notification function
+          firstName: undefined,
+          lastName: undefined,
+        }
+      );
+
+      // Create in-app notification
+      await createNotification({
+        clerkUserId: userId,
+        type: 'SUBSCRIPTION_CANCELLED',
+        title: 'Subscription Cancelled',
+        message: 'Your subscription has been cancelled. You can continue using your inboxes until the end of your billing period.',
+        orderId: order.id,
+        actionUrl: '/dashboard/billing',
+      });
+
+      // Create billing event
+      await createBillingEvent(
+        order.id,
+        'subscription_cancelled',
+        undefined,
+        'Subscription cancelled by user',
+        { reason: reason || 'User initiated cancellation' }
+      );
+
+      console.log('[Cancel] Notifications sent');
+    } catch (notificationError) {
+      console.error('[Cancel] Failed to send notifications:', notificationError);
+      // Don't fail the main flow if notification fails
+    }
 
     return NextResponse.json({ success: true, message: 'Subscription cancelled successfully', stripeError })
   } catch (error) {

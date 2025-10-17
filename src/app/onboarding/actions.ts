@@ -9,7 +9,8 @@ import type { Prisma } from '@prisma/client';
 import { protectSecret } from '@/lib/encryption';
 import * as crypto from "node:crypto";
 // Notifications are optional; dynamically import when needed to avoid bundling
-import { notifyOrderCreated } from '@/lib/notifications';
+import { notifyOrderCreated, notifyOrderReceived } from '@/lib/notifications';
+import { createNotification } from '@/lib/notification-helpers';
 
 export type SaveOnboardingInput = {
   inboxCount: number;
@@ -251,10 +252,25 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
                 businessName: input.businessName || null,
               };
 
+              // Send admin notification
               await notifyOrderCreated(orderData, userData);
-              console.log('[ACTION] Order creation notification sent');
+              
+              // Send customer notification
+              await notifyOrderReceived(orderData, userData);
+              
+              // Create in-app notification
+              await createNotification({
+                clerkUserId: userId,
+                type: 'ORDER_RECEIVED',
+                title: 'Order Received',
+                message: `We've received your order for ${sessionQuantity} ${sessionProductTypeCanonical} inboxes. Our team is processing it now.`,
+                orderId: order.id,
+                actionUrl: '/dashboard',
+              });
+              
+              console.log('[ACTION] Order creation notifications sent');
             } catch (notificationError) {
-              console.error('[ACTION] Failed to send order creation notification:', notificationError);
+              console.error('[ACTION] Failed to send order creation notifications:', notificationError);
               // Don't fail the main flow if notification fails
             }
 

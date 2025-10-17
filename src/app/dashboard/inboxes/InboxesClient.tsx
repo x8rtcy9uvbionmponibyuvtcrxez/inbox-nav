@@ -805,20 +805,14 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
               </th>
               <th scope="col" className="px-6 py-3 text-left">Email</th>
               <th scope="col" className="px-6 py-3 text-left">Status</th>
-              <th scope="col" className="px-6 py-3 text-left">Persona</th>
               <th scope="col" className="px-6 py-3 text-left">Tags</th>
               <th scope="col" className="px-6 py-3 text-left">Business</th>
-              <th scope="col" className="px-6 py-3 text-left">Domain</th>
               <th scope="col" className="px-6 py-3 text-left">Password</th>
-              <th scope="col" className="px-6 py-3 text-left">Product</th>
-              <th scope="col" className="px-6 py-3 text-left">ESP</th>
-              <th scope="col" className="px-6 py-3 text-left">Order</th>
               <th scope="col" className="px-6 py-3 text-left">Created</th>
             </tr>
           </thead>
               <tbody className="divide-y divide-white/5">
                 {paginatedInboxes.map((inbox) => {
-                  const domain = parseInboxDomain(inbox);
                   return (
                     <tr key={inbox.id} className="transition hover:bg-white/[0.04]">
                       <td className="px-6 py-4">
@@ -833,19 +827,12 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
                       <td className="px-6 py-4">
                         <StatusPill status={inbox.status} order={inbox.order} />
                       </td>
-                      <td className="px-6 py-4 text-brand-secondary">{[inbox.firstName, inbox.lastName].filter(Boolean).join(' ') || '—'}</td>
                       <td className="px-6 py-4 text-brand-secondary">
                         {inbox.tags.length ? inbox.tags.slice(0, 3).join(", ") : <span className="text-brand-muted">—</span>}
                       </td>
                       <td className="px-6 py-4 text-brand-secondary">{inbox.businessName || "—"}</td>
-                      <td className="px-6 py-4 text-brand-muted">{domain || "—"}</td>
                       <td className="px-6 py-4 font-mono text-xs text-brand-secondary">
                         {inbox.password ? inbox.password : "—"}
-                      </td>
-                      <td className="px-6 py-4 text-brand-secondary">{getProductLabel(inbox.order?.productType)}</td>
-                      <td className="px-6 py-4 text-brand-muted">{inbox.espPlatform || "—"}</td>
-                      <td className="px-6 py-4 font-mono text-[11px] text-brand-muted">
-                        {inbox.order?.id ? `${inbox.order.id.slice(0, 8)}…` : "—"}
                       </td>
                       <td className="px-6 py-4 text-brand-muted">{formatDate(inbox.createdAt)}</td>
                     </tr>

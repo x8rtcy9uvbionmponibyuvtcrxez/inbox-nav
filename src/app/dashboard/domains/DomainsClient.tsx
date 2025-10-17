@@ -765,8 +765,6 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                   <th scope="col" className="px-6 py-3 text-left">Forwarding URL</th>
                   <th scope="col" className="px-6 py-3 text-left">Tags</th>
                   <th scope="col" className="px-6 py-3 text-left">Business</th>
-                  <th scope="col" className="px-6 py-3 text-left">Product</th>
-                  <th scope="col" className="px-6 py-3 text-left">Order</th>
                   <th scope="col" className="px-6 py-3 text-left">Created</th>
                 </tr>
               </thead>
@@ -791,10 +789,6 @@ function DomainsClient({ domains, error, isLoading = false }: Props) {
                       {domain.tags.length ? domain.tags.slice(0, 3).join(", ") : <span className="text-brand-muted">—</span>}
                     </td>
                     <td className="px-6 py-4 text-brand-secondary">{domain.businessName || "—"}</td>
-                    <td className="px-6 py-4 text-brand-secondary">{getProductLabel(domain.order?.productType)}</td>
-                    <td className="px-6 py-4 font-mono text-[11px] text-brand-muted">
-                      {domain.order?.id ? `${domain.order.id.slice(0, 8)}…` : "—"}
-                    </td>
                     <td className="px-6 py-4 text-brand-muted">{formatDate(domain.createdAt)}</td>
                   </tr>
                 ))}
