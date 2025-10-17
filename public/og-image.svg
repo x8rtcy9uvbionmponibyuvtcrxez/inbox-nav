@@ -1,0 +1,52 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#000000"/>
+  
+  <!-- Gradient overlay -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0.1" />
+    </linearGradient>
+    
+    <!-- Logo gradient for the circle icon -->
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff6b9d" />
+      <stop offset="50%" style="stop-color:#ff8e53" />
+      <stop offset="100%" style="stop-color:#9c88ff" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#gradient)"/>
+  
+  <!-- Main content area -->
+  <rect x="80" y="80" width="1040" height="470" fill="#1a1a1a" rx="20" stroke="#404040" stroke-width="2"/>
+  
+  <!-- Large INBOX NAVIGATOR text -->
+  <text x="600" y="280" font-family="serif" font-size="96" font-weight="bold" fill="white" text-anchor="middle">
+    INBOX NAVIGATOR
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="350" font-family="Arial, sans-serif" font-size="28" fill="#a0a0a0" text-anchor="middle">
+    Email Inbox Management Platform
+  </text>
+  
+  <!-- Description -->
+  <text x="600" y="400" font-family="Arial, sans-serif" font-size="22" fill="#d0d0d0" text-anchor="middle">
+    Manage your email inbox fleet with automated setup,
+  </text>
+  <text x="600" y="430" font-family="Arial, sans-serif" font-size="22" fill="#d0d0d0" text-anchor="middle">
+    domain management, and comprehensive analytics.
+  </text>
+  
+  <!-- URL -->
+  <text x="600" y="490" font-family="Arial, sans-serif" font-size="20" fill="#2563eb" text-anchor="middle">
+    app.inboxnavigator.com
+  </text>
+  
+  <!-- Decorative elements -->
+  <circle cx="1000" cy="150" r="4" fill="#ff6b9d" opacity="0.6"/>
+  <circle cx="1050" cy="200" r="3" fill="#ff8e53" opacity="0.6"/>
+  <circle cx="980" cy="250" r="5" fill="#9c88ff" opacity="0.6"/>
+  <circle cx="1020" cy="300" r="3" fill="#2563eb" opacity="0.6"/>
+</svg>

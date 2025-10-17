@@ -230,10 +230,10 @@ export default function ProductsPage() {
               Plans
             </span>
             <h1>
-              Pick the inbox runway that matches your outreach ambitions.
+              The fast lane to scale
             </h1>
             <p className="text-lg text-[var(--text-secondary)]">
-              Every fleet ships with warming, deliverability monitoring, and human support. Scale campaigns with confidence—whether you need a handful of senders or an entire squadron.
+              verified inboxes, clear pricing, real support.
             </p>
             <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
               <span>⚡ Instant provisioning</span>

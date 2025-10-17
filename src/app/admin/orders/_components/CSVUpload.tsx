@@ -25,6 +25,7 @@ export default function CSVUpload({
 }) {
   const [error, setError] = useState<string | null>(null);
   const [rowsPreview, setRowsPreview] = useState<CSVRow[] | null>(null);
+  const [totalRows, setTotalRows] = useState<number>(0);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [isValidating, setIsValidating] = useState(false);
 
@@ -76,6 +77,7 @@ export default function CSVUpload({
   const handleFile = async (file: File | null) => {
     setError(null);
     setRowsPreview(null);
+    setTotalRows(0);
     setValidationErrors([]);
     if (!file) return;
 
@@ -116,6 +118,7 @@ export default function CSVUpload({
       }
       
       setValidationErrors(allErrors);
+      setTotalRows(rows.length);
       setRowsPreview(rows.slice(0, 5));
       
       if (allErrors.length === 0) {
@@ -173,7 +176,7 @@ export default function CSVUpload({
       )}
       
       {rowsPreview && validationErrors.length === 0 && (
-        <div className="text-xs text-green-400">✓ Valid CSV with {rowsPreview.length} rows (showing up to 5)</div>
+        <div className="text-xs text-green-400">✓ Valid CSV with {totalRows} rows (showing up to 5)</div>
       )}
     </div>
   );

@@ -89,7 +89,7 @@ function formatDate(value: Date | string) {
 }
 
 function calculateAverageAge(inboxList: InboxRecord[]): number {
-  if (!inboxList.length) return 0;
+  if (!inboxList.length) return 1; // Default to 1 day when no inboxes
   const now = Date.now();
   const totalDays = inboxList.reduce((sum, inbox) => {
     const createdAt = inbox.createdAt ? new Date(inbox.createdAt).getTime() : now;
@@ -97,7 +97,8 @@ function calculateAverageAge(inboxList: InboxRecord[]): number {
     return sum + diff / (1000 * 60 * 60 * 24);
   }, 0);
   const average = totalDays / inboxList.length;
-  return Number.isFinite(average) ? average : 0;
+  // Round to nearest whole number to avoid decimals
+  return Number.isFinite(average) ? Math.round(average) : 1;
 }
 
 function downloadCsv(rows: string[][], filename: string) {
@@ -576,12 +577,12 @@ function InboxesClient({ inboxes, error, isLoading = false }: Props) {
           <p className="mt-3 text-3xl font-semibold text-brand-primary">{inboxCount}</p>
         </div>
         <div className="surface-card px-6 py-5">
-          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Domains represented</p>
+          <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Total Domains</p>
           <p className="mt-3 text-3xl font-semibold text-brand-primary">{uniqueDomains.size}</p>
         </div>
         <div className="surface-card px-6 py-5">
           <p className="text-brand-muted-strong text-xs uppercase tracking-[0.3em]">Average inbox age</p>
-          <p className="mt-3 text-3xl font-semibold text-brand-primary">{averageAge.toFixed(1)} days</p>
+          <p className="mt-3 text-3xl font-semibold text-brand-primary">{averageAge} days</p>
         </div>
       </div>
 

@@ -9,6 +9,7 @@ import type { Prisma } from '@prisma/client';
 import { protectSecret } from '@/lib/encryption';
 import * as crypto from "node:crypto";
 // Notifications are optional; dynamically import when needed to avoid bundling
+import { notifyOrderCreated } from '@/lib/notifications';
 
 export type SaveOnboardingInput = {
   inboxCount: number;
@@ -231,8 +232,31 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
               },
             });
 
-            // Notification happens via webhook instead to avoid bundling issues
-            console.log('[ACTION] Order created, notifications handled by webhooks');
+            // Send order creation notification
+            try {
+              const userData = {
+                id: userId,
+                email: 'user@example.com', // We don't have user email in this context
+                firstName: undefined,
+                lastName: undefined,
+              };
+
+              const orderData = {
+                id: order.id,
+                productType: sessionProductTypeCanonical,
+                quantity: sessionQuantity,
+                totalAmount: sessionTotalAmountCents,
+                clerkUserId: userId,
+                createdAt: order.createdAt,
+                businessName: input.businessName || null,
+              };
+
+              await notifyOrderCreated(orderData, userData);
+              console.log('[ACTION] Order creation notification sent');
+            } catch (notificationError) {
+              console.error('[ACTION] Failed to send order creation notification:', notificationError);
+              // Don't fail the main flow if notification fails
+            }
 
             // Extract domain configuration from session metadata
             try {

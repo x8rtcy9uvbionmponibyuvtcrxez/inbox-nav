@@ -103,8 +103,8 @@
   }
 
   ::selection {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    background: #3b82f6;
+    color: white;
   }
 }
 

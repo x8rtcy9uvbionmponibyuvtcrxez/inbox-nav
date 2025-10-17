@@ -627,9 +627,9 @@ const personaSummaryNames = personas
                 >
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.28em] opacity-70">{sessionData ? 'Checkout locked' : 'Selected plan'}</p>
+                      <p className="text-xs uppercase tracking-[0.28em] opacity-70">{sessionData ? 'Payment successful! 🎉' : 'Selected plan'}</p>
                       <p className="mt-1 text-lg font-semibold">{productDisplayName}</p>
-                      <p className="text-sm opacity-80">{inboxCount} inboxes / month</p>
+                      <p className="text-sm opacity-80">{inboxCount} Inboxes/Month</p>
                     </div>
                     {sessionData && (
                       <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-emerald-100">
@@ -638,7 +638,7 @@ const personaSummaryNames = personas
                     )}
                   </div>
                   <p className="mt-3 text-xs text-white/75">
-                    Need to change quantity or product? Visit <span className="font-medium">Dashboard → Products</span> to start a new checkout.
+                    Your payment has been successful, complete your 5 minute onboarding process and we&apos;ll get your inboxes cooking.
                   </p>
                 </div>
               )}
@@ -1081,12 +1081,6 @@ const personaSummaryNames = personas
                     </div>
                   ))}
                 </div>
-                {specialRequirements && (
-                  <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-                    <span className="font-semibold">Special instructions: </span>
-                    {specialRequirements}
-                  </div>
-                )}
               </div>
             </div>
           )}

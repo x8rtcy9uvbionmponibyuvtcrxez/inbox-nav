@@ -30,8 +30,43 @@ export const metadata: Metadata = {
     ],
     shortcut: '/favicon.ico',
     apple: [
-      { url: '/favicon.ico', sizes: '180x180', type: 'image/x-icon' }
+      { url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' }
     ],
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://app.inboxnavigator.com',
+    siteName: 'Inbox Navigator',
+    title: 'Inbox Navigator - Email Inbox Management Platform',
+    description: 'Manage your email inbox fleet with automated setup, domain management, and comprehensive analytics.',
+    images: [
+      {
+        url: '/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Inbox Navigator - Email Inbox Management Platform',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@inboxnavigator',
+    creator: '@inboxnavigator',
+    title: 'Inbox Navigator - Email Inbox Management Platform',
+    description: 'Manage your email inbox fleet with automated setup, domain management, and comprehensive analytics.',
+    images: ['/og-image.svg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 }
 
@@ -43,7 +78,7 @@ export default function RootLayout({
   return (
     <ClerkProvider
       signInFallbackRedirectUrl="/dashboard"
-      afterSignUpUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
     >
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>

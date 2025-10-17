@@ -1,0 +1,22 @@
+<svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="appleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff6b9d" />
+      <stop offset="50%" style="stop-color:#ff8e53" />
+      <stop offset="100%" style="stop-color:#9c88ff" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="180" height="180" fill="url(#appleGradient)" rx="20"/>
+  
+  <!-- Letter "I" -->
+  <rect x="70" y="50" width="10" height="80" fill="white"/>
+  
+  <!-- Letter "N" -->
+  <rect x="90" y="50" width="10" height="80" fill="white"/>
+  <rect x="100" y="50" width="10" height="20" fill="white"/>
+  <rect x="110" y="70" width="10" height="20" fill="white"/>
+  <rect x="120" y="90" width="10" height="20" fill="white"/>
+  <rect x="130" y="110" width="10" height="20" fill="white"/>
+</svg>

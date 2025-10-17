@@ -65,7 +65,7 @@ export async function sendEmailNotification(to: string, subject: string, html: s
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Inbox Navigator <notifications@inboxnavigator.com>',
+      from: 'Inbox Navigator <onboarding@resend.dev>',
       to: [to, 'kunal@inboxnavigator.com'],
       subject,
       html,
@@ -508,7 +508,7 @@ export async function notifyOrderCreated(order: OrderData, user: UserData) {
   const notificationEmail = process.env.NOTIFICATION_EMAIL || 'team@inboxnavigator.com';
   
   // Send Slack notification
-  const slackWebhook = process.env.SLACK_WEBHOOK_ORDERS;
+  const slackWebhook = process.env.SLACK_WEBHOOK_NEW_ORDER;
   if (slackWebhook) {
     const slackPayload = formatOrderCreatedSlackNotification(order, user);
     await sendSlackNotification(slackWebhook, slackPayload);
@@ -526,7 +526,7 @@ export async function notifyUserSignup(user: UserData) {
   const notificationEmail = process.env.NOTIFICATION_EMAIL || 'team@inboxnavigator.com';
   
   // Send Slack notification
-  const slackWebhook = process.env.SLACK_WEBHOOK_SIGNUPS;
+  const slackWebhook = process.env.SLACK_WEBHOOK_NEW_SIGNUP;
   if (slackWebhook) {
     const slackPayload = formatUserSignupSlackNotification(user);
     await sendSlackNotification(slackWebhook, slackPayload);
@@ -544,7 +544,7 @@ export async function notifySubscriptionCancelled(order: OrderData, subscription
   const notificationEmail = process.env.NOTIFICATION_EMAIL || 'team@inboxnavigator.com';
   
   // Send Slack notification
-  const slackWebhook = process.env.SLACK_WEBHOOK_CANCELLATIONS;
+  const slackWebhook = process.env.SLACK_WEBHOOK_CANCELLATION;
   if (slackWebhook) {
     const slackPayload = formatSubscriptionCancelledSlackNotification(order, subscription, affectedCounts);
     await sendSlackNotification(slackWebhook, slackPayload);
