@@ -4,7 +4,7 @@ import { useIntercom } from '@/hooks/useIntercom';
 import { Button } from '@/components/ui/Button';
 
 interface IntercomHelpButtonProps {
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   children?: React.ReactNode;

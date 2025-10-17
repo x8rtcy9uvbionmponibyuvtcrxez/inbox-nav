@@ -9,17 +9,12 @@ interface IntercomLauncherProps {
 }
 
 export default function IntercomLauncher({ className = "", children }: IntercomLauncherProps) {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible] = useState(true);
 
   const handleIntercomClick = () => {
     if (typeof window !== 'undefined') {
-      Intercom('show');
-    }
-  };
-
-  const handleIntercomHide = () => {
-    if (typeof window !== 'undefined') {
-      Intercom('hide');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (Intercom as any)('show');
     }
   };
 

@@ -27,7 +27,8 @@ export default function IntercomProvider({ children }: IntercomProviderProps) {
   useEffect(() => {
     // Update user information when user data is loaded
     if (isLoaded && user && process.env.NEXT_PUBLIC_INTERCOM_APP_ID) {
-      Intercom('update', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (Intercom as any)('update', {
         user_id: user.id,
         email: user.primaryEmailAddress?.emailAddress,
         name: user.fullName || `${user.firstName} ${user.lastName}`.trim(),
