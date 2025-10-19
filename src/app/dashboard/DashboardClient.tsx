@@ -160,32 +160,104 @@ export default function DashboardClient({
 
   if (!orders.length) {
     return (
-      <div className="flex min-h-[70vh] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5/10 px-10 py-16 text-center backdrop-blur-xl">
-        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
-          <SparklesIcon className="h-8 w-8 text-brand-primary" />
+      <div className="space-y-8 text-brand-primary">
+        {/* Hero Section */}
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex-1 max-w-2xl">
+            <p className="text-base text-brand-secondary mb-2">
+              {hasVisited ? `Welcome back, ${displayName}.` : "Welcome to Inbox Navigator"}
+            </p>
+            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-brand-primary mb-4">
+              {hasVisited ? 'Your control center for every inbox.' : "Let's launch your inbox fleet."}
+            </h1>
+            <p className="text-lg text-brand-secondary leading-relaxed">
+              No orders yet — spin up your first inbox by placing your first order and finishing onboarding in less than 5 minutes.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-stretch lg:min-w-[200px]">
+            <Button asChild variant="primary" size="lg" className="gap-3 shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)] hover:shadow-[0_15px_40px_-15px_rgba(255,255,255,0.9)] transition-all duration-200">
+              <Link href="/dashboard/products">
+                <SparklesIcon className="h-5 w-5" />
+                Place your first order
+              </Link>
+            </Button>
+          </div>
         </div>
-        <h2 className="text-2xl font-semibold text-brand-primary">Welcome to Inbox Navigator</h2>
-        <p className="mt-3 max-w-md text-base text-brand-secondary">
-          {fetchError
-            ? "We hit a snag loading your workspace. Refresh or drop us a note and we&rsquo;ll take a look immediately."
-            : "No orders yet — spin up your first inbox and get sending in minutes."}
-        </p>
+
+        {/* Stats Cards */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <SummaryCard label="Live inboxes" value="0" icon={InboxIcon} accent={cardAccent.inboxes} />
+          <SummaryCard label="Managed domains" value="0" icon={GlobeAltIcon} accent={cardAccent.domains} />
+          <SummaryCard label="Monthly total" value="$0" icon={CurrencyDollarIcon} accent={cardAccent.revenue} />
+        </div>
+
         {fetchError ? (
-          <p className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300">
-            {fetchError}
-          </p>
+          <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            We had trouble syncing the latest data. The view below may be stale. Refresh the page or reach out if this persists.
+          </div>
         ) : null}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Button asChild variant="primary" size="md" className="gap-2">
-            <Link href="/dashboard/products">
-              <ShoppingCartIcon className="h-4 w-4" />
-              Launch Inbox
-            </Link>
-          </Button>
-          <IntercomHelpButton variant="outline" size="md">
-            <EnvelopeIcon className="h-4 w-4" />
-            Get Support
-          </IntercomHelpButton>
+
+        {/* Order History Section */}
+        <div className="rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_80px_-60px_rgba(7,7,7,0.9)] backdrop-blur-xl">
+          <div className="border-b border-white/5 px-6 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-brand-primary">Recent Orders</h2>
+                <p className="mt-1 text-sm text-brand-secondary">Monitor fulfillment and account activity in real time.</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="flex min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/5/10 px-6 py-12 text-center">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
+                <SparklesIcon className="h-6 w-6 text-brand-secondary" />
+              </div>
+              <h3 className="text-lg font-semibold text-brand-primary">No orders yet</h3>
+              <p className="mt-2 text-sm text-brand-secondary">Your order history will appear here once you place your first order.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Inboxes Section */}
+        <div className="rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_80px_-60px_rgba(7,7,7,0.9)] backdrop-blur-xl">
+          <div className="border-b border-white/5 px-6 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-brand-primary">Inbox Inventory</h2>
+                <p className="mt-1 text-sm text-brand-secondary">Manage your email inboxes and forwarding settings.</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="flex min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/5/10 px-6 py-12 text-center">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
+                <InboxIcon className="h-6 w-6 text-brand-secondary" />
+              </div>
+              <h3 className="text-lg font-semibold text-brand-primary">No inboxes yet</h3>
+              <p className="mt-2 text-sm text-brand-secondary">Your inboxes will appear here once your orders are fulfilled.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Domains Section */}
+        <div className="rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_80px_-60px_rgba(7,7,7,0.9)] backdrop-blur-xl">
+          <div className="border-b border-white/5 px-6 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-brand-primary">Domain Management</h2>
+                <p className="mt-1 text-sm text-brand-secondary">Track and manage your email domains.</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="flex min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/5/10 px-6 py-12 text-center">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
+                <GlobeAltIcon className="h-6 w-6 text-brand-secondary" />
+              </div>
+              <h3 className="text-lg font-semibold text-brand-primary">No domains yet</h3>
+              <p className="mt-2 text-sm text-brand-secondary">Your domains will appear here once your orders are fulfilled.</p>
+            </div>
+          </div>
         </div>
       </div>
     );
