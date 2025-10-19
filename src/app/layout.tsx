@@ -75,6 +75,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Force rebuild to clear cache
   return (
     <ClerkProvider
       signInFallbackRedirectUrl="/dashboard"
