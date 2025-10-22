@@ -8,16 +8,7 @@ interface LoadingSpinnerProps {
   className?: string;
 }
 
-const spinnerVariants = {
-  animate: {
-    rotate: 360,
-    transition: {
-      duration: 1,
-      repeat: Infinity,
-      ease: 'linear',
-    },
-  },
-};
+// Removed complex variants to avoid TypeScript issues
 
 const sizeClasses = {
   sm: 'w-4 h-4',
@@ -32,8 +23,8 @@ export default function LoadingSpinner({
 }: LoadingSpinnerProps) {
   return (
     <motion.div
-      variants={spinnerVariants}
-      animate="animate"
+      animate={{ rotate: 360 }}
+      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
       className={`${sizeClasses[size]} ${className}`}
     >
       <svg
