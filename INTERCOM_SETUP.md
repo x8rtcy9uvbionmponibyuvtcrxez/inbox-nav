@@ -143,3 +143,5 @@ hide_default_launcher: true
 - Intercom widget styles are controlled by Intercom dashboard
 - Custom launcher styles can be modified in components
 - Use browser dev tools to inspect and override styles if needed
+
+
