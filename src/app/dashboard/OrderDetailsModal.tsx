@@ -224,6 +224,10 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
     return null;
   }
 
+  // Debug: Log the full order structure
+  console.log('Full order structure:', order);
+  console.log('Order.order:', order.order);
+
   const inboxCount = orderData?.inboxes && orderData.inboxes.length > 0
     ? orderData.inboxes.length
     : (orderData?.quantity ?? 0);

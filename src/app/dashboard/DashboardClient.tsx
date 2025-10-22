@@ -138,6 +138,9 @@ export default function DashboardClient({
   }, []);
 
   const handleOpenOrderDetails = useCallback((order: OrderWithRelations) => {
+    console.log('Opening order details for:', order);
+    console.log('Order.order:', order.order);
+    console.log('Stripe subscription ID:', order.order?.stripeSubscriptionId);
     setSelectedOrder(order);
     setIsModalOpen(true);
   }, []);
