@@ -7,6 +7,11 @@ interface PerformanceMetrics {
   renderTime: number;
   memoryUsage: number;
   cacheHitRate: number;
+  lcp: number; // Largest Contentful Paint
+  fid: number; // First Input Delay
+  cls: number; // Cumulative Layout Shift
+  fcp: number; // First Contentful Paint
+  ttfb: number; // Time to First Byte
 }
 
 export function PerformanceMonitor() {
@@ -20,6 +25,17 @@ export function PerformanceMonitor() {
     const measurePerformance = () => {
       const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
       const loadTime = navigation.loadEventEnd - navigation.loadEventStart;
+      
+      // Measure Core Web Vitals
+      const paintEntries = performance.getEntriesByType('paint');
+      const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0;
+      
+      // LCP measurement
+      const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
+      const lcp = lcpEntries[lcpEntries.length - 1]?.startTime || 0;
+      
+      // TTFB
+      const ttfb = navigation.responseStart - navigation.requestStart;
       
       // Measure render time
       const renderStart = performance.now();
@@ -35,6 +51,11 @@ export function PerformanceMonitor() {
           renderTime,
           memoryUsage,
           cacheHitRate: 0.85, // Mock cache hit rate
+          lcp,
+          fid: 0, // FID requires user interaction
+          cls: 0, // CLS requires layout shift measurement
+          fcp,
+          ttfb,
         });
       });
     };
@@ -68,6 +89,11 @@ export function PerformanceMonitor() {
         <div className="absolute bottom-12 right-0 bg-gray-900 text-white p-4 rounded-lg shadow-lg min-w-64">
           <h3 className="text-sm font-bold mb-2">Performance Metrics</h3>
           <div className="space-y-1 text-xs">
+            <div className="font-semibold text-green-400">Core Web Vitals:</div>
+            <div>LCP: {metrics.lcp.toFixed(0)}ms <span className="text-gray-400">(target: &lt;2500ms)</span></div>
+            <div>FCP: {metrics.fcp.toFixed(0)}ms <span className="text-gray-400">(target: &lt;1800ms)</span></div>
+            <div>TTFB: {metrics.ttfb.toFixed(0)}ms <span className="text-gray-400">(target: &lt;600ms)</span></div>
+            <div className="font-semibold text-blue-400 mt-2">Performance:</div>
             <div>Load Time: {metrics.loadTime.toFixed(2)}ms</div>
             <div>Render Time: {metrics.renderTime.toFixed(2)}ms</div>
             <div>Memory: {metrics.memoryUsage.toFixed(2)}MB</div>

@@ -4,14 +4,14 @@ import { useEffect } from 'react';
 
 export default function ServiceWorkerRegistration() {
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       navigator.serviceWorker
-        .register('/sw-cache.js')
+        .register('/sw.js')
         .then((registration) => {
-          console.log('Service Worker registered successfully:', registration);
+          console.log('SW registered: ', registration);
         })
-        .catch((error) => {
-          console.log('Service Worker registration failed:', error);
+        .catch((registrationError) => {
+          console.log('SW registration failed: ', registrationError);
         });
     }
   }, []);

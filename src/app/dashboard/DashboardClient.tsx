@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { EnvelopeIcon, SparklesIcon, InboxIcon, GlobeAltIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import OrderDetailsModal from "./OrderDetailsModal";
@@ -70,7 +70,7 @@ function toTitle(value: string | null | undefined) {
   return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function SummaryCard({
+const SummaryCard = memo(function SummaryCard({
   label,
   value,
   icon: Icon,
@@ -96,7 +96,7 @@ function SummaryCard({
       </div>
     </div>
   );
-}
+});
 
 function StatusBadge({ status }: { status: string }) {
   const style = statusStyles[status] ?? statusStyles.DEFAULT;
@@ -133,10 +133,21 @@ export default function DashboardClient({
     }
   }, []);
 
-  const handleOpenOrderDetails = (order: OrderWithRelations) => {
+  const handleOpenOrderDetails = useCallback((order: OrderWithRelations) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
-  };
+  }, []);
+
+  // Memoize expensive calculations
+  const cardAccent = useMemo(() => ({
+    inboxes: "from-blue-500/20 via-blue-600/20 to-blue-700/20 border-blue-500/30",
+    domains: "from-green-500/20 via-green-600/20 to-green-700/20 border-green-500/30",
+    revenue: "from-purple-500/20 via-purple-600/20 to-purple-700/20 border-purple-500/30",
+  }), []);
+
+  const recentOrders = useMemo(() => 
+    orders.slice(0, 5), [orders]
+  );
 
   if (isLoading) {
     return (
@@ -317,7 +328,7 @@ export default function DashboardClient({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-brand-primary">Recent Orders</h2>
-              <p className="mt-1 text-sm text-brand-secondary">Monitor fulfillment and account activity in real time.</p>
+              <p className="mt-1 text-sm font-medium text-brand-secondary">Monitor fulfillment and account activity in real time.</p>
             </div>
             <div className="text-xs text-brand-muted">
               {orders.length} {orders.length === 1 ? 'order' : 'orders'}
@@ -390,7 +401,12 @@ export default function DashboardClient({
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <Button size="sm" variant="secondary" onClick={() => handleOpenOrderDetails(record)} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleOpenOrderDetails(record)}
+                        className="transition-opacity duration-200"
+                      >
                         View Details
                       </Button>
                     </td>

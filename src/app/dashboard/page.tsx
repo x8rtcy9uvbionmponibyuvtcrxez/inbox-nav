@@ -28,43 +28,79 @@ export default async function Dashboard() {
 
   let orders: OrderWithRelations[] = [];
   let fetchError: string | null = null;
+  let totalInboxes = 0;
+  let totalDomains = 0;
+  let totalMonthlySpend = 0;
 
   try {
-    orders = await prisma.onboardingData.findMany({
-      where: { clerkUserId: user.id },
-      include: {
-        order: {
-          include: {
-            inboxes: true,
-            domains: true,
-          },
+    // Optimized query with parallel data fetching
+    const [ordersData, inboxCount, domainCount, totalSpend] = await Promise.all([
+      prisma.onboardingData.findMany({
+        where: { clerkUserId: user.id },
+        select: {
+          id: true,
+          createdAt: true,
+          order: {
+            select: {
+              id: true,
+              productType: true,
+              quantity: true,
+              totalAmount: true,
+              createdAt: true,
+              inboxes: {
+                select: { id: true }
+              },
+              domains: {
+                select: { domain: true }
+              }
+            }
+          }
         },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        orderBy: { createdAt: "desc" },
+        take: 10, // Limit to recent orders for dashboard
+      }),
+      // Get total inbox count efficiently
+      prisma.onboardingData.aggregate({
+        where: { clerkUserId: user.id },
+        _sum: {
+          order: {
+            quantity: true
+          }
+        }
+      }),
+      // Get unique domain count
+      prisma.domain.findMany({
+        where: {
+          order: {
+            onboardingData: {
+              clerkUserId: user.id
+            }
+          }
+        },
+        select: { domain: true },
+        distinct: ['domain']
+      }),
+      // Get total spend
+      prisma.onboardingData.aggregate({
+        where: { clerkUserId: user.id },
+        _sum: {
+          order: {
+            totalAmount: true
+          }
+        }
+      })
+    ]);
+
+    orders = ordersData;
+    // Use optimized data from parallel queries
+    totalInboxes = inboxCount._sum.order?.quantity || 0;
+    totalDomains = domainCount.length;
+    totalMonthlySpend = totalSpend._sum.order?.totalAmount || 0;
   } catch (error) {
     console.error("[Dashboard] Failed to load orders", error);
     fetchError = error instanceof Error ? error.message : "Unknown error occurred";
     orders = [];
   }
-
-  const totalInboxes = orders.reduce((sum, record) => {
-    const order = record.order;
-    if (!order) return sum;
-    if (order.inboxes?.length) return sum + order.inboxes.length;
-    return sum + (order.quantity ?? 0);
-  }, 0);
-
-  const domainSet = new Set<string>();
-  orders.forEach((record) => {
-    record.order?.domains?.forEach((domain) => domainSet.add(domain.domain));
-  });
-  const totalDomains = domainSet.size;
-
-  const totalMonthlySpend = orders.reduce((sum, record) => {
-    const amount = record.order?.totalAmount ?? 0;
-    return sum + amount;
-  }, 0);
 
   const displayName =
     (user.firstName && user.firstName.trim()) ||

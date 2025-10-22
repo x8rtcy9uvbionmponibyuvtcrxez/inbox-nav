@@ -1,15 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, lazy, Suspense, memo, useCallback } from "react";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
 import PageTransition from "@/components/animations/PageTransition";
 import FadeIn from "@/components/animations/FadeIn";
 import LoadingSpinner from "@/components/animations/LoadingSpinner";
 
+// Lazy load heavy components
+const VirtualizedTable = lazy(() => import("@/components/VirtualizedTable"));
+
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 
 type TabId = "google" | "microsoft" | "prewarmed" | "smtp";
+
+interface PricingTier {
+  minQty: number;
+  maxQty: number | null;
+  price: number;
+}
 
 interface Product {
   id: ProductType;
@@ -21,6 +30,7 @@ interface Product {
   color: string;
   priceId: string;
   tab: TabId;
+  pricingTiers?: PricingTier[];
 }
 
 interface Tab {
@@ -35,7 +45,7 @@ const tabs: Tab[] = [
     id: "google",
     label: "Google",
     emoji: "📧",
-    productIds: ["LEGACY", "RESELLER"]
+    productIds: ["EDU", "LEGACY", "RESELLER"]
   },
   {
     id: "microsoft",
@@ -67,6 +77,12 @@ const products: Product[] = [
     color: "green",
     priceId: "price_1SIoynBRlmSshMl5kKycrio6",
     tab: "google",
+    pricingTiers: [
+      { minQty: 1, maxQty: 250, price: 1.50 },
+      { minQty: 250, maxQty: 500, price: 1.40 },
+      { minQty: 500, maxQty: 1000, price: 1.25 },
+      { minQty: 1000, maxQty: null, price: 1.00 },
+    ],
   },
   {
     id: "LEGACY",
@@ -77,6 +93,12 @@ const products: Product[] = [
     color: "orange",
     priceId: "price_1RW8EkBRlmSshMl5LIGqjcHw",
     tab: "google",
+    pricingTiers: [
+      { minQty: 1, maxQty: 100, price: 2.50 },
+      { minQty: 100, maxQty: 250, price: 2.25 },
+      { minQty: 250, maxQty: 500, price: 2.15 },
+      { minQty: 500, maxQty: null, price: 2.00 },
+    ],
   },
   {
     id: "RESELLER",
@@ -87,6 +109,12 @@ const products: Product[] = [
     color: "blue",
     priceId: "price_1SIoyCBRlmSshMl5OSvRIr36",
     tab: "google",
+    pricingTiers: [
+      { minQty: 1, maxQty: 250, price: 3.00 },
+      { minQty: 250, maxQty: 500, price: 2.90 },
+      { minQty: 500, maxQty: 1000, price: 2.70 },
+      { minQty: 1000, maxQty: null, price: 2.50 },
+    ],
   },
          {
            id: "PREWARMED",
@@ -367,11 +395,48 @@ export default function ProductsPage() {
                               <LoadingSpinner size="sm" color="white" />
                             ) : (
                               <>
-                                Start setup
+                                BUY NOW
                                 <ArrowRightIcon className="h-4 w-4" />
                               </>
                             )}
                           </Button>
+                        </div>
+                      )}
+
+                      {product.pricingTiers && (
+                        <div className="mt-4 border-t border-[var(--border-subtle)] pt-4">
+                          <div className="p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]">
+                            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)] mb-3">
+                              Volume Pricing
+                            </p>
+                            <div className="space-y-2">
+                              {product.pricingTiers.map((tier, idx) => {
+                                const rangeText = tier.maxQty 
+                                  ? `${tier.minQty}-${tier.maxQty}` 
+                                  : `${tier.minQty}+`;
+                                const savingsPerUnit = product.price - tier.price;
+                                
+                                return (
+                                  <div 
+                                    key={idx} 
+                                    className="flex items-center justify-between text-sm p-2 rounded hover:bg-[var(--bg-secondary)] transition-colors"
+                                  >
+                                    <span className="text-[var(--text-secondary)]">{rangeText} inboxes</span>
+                                    <div className="flex items-center gap-3">
+                                      <span className="font-semibold text-[var(--text-primary)]">
+                                        ${tier.price.toFixed(2)}/inbox
+                                      </span>
+                                      {savingsPerUnit > 0 && (
+                                        <span className="text-xs text-green-400 font-medium">
+                                          Save ${savingsPerUnit.toFixed(2)}/inbox
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>

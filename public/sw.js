@@ -1,13 +1,12 @@
-// Service Worker for Inbox Navigator
-const CACHE_NAME = 'inbox-navigator-v1';
+const CACHE_NAME = 'inbox-nav-v1';
 const urlsToCache = [
   '/',
   '/dashboard',
+  '/dashboard/products',
   '/dashboard/inboxes',
   '/dashboard/domains',
-  '/dashboard/products',
-  '/static/js/bundle.js',
-  '/static/css/main.css'
+  '/_next/static/css/',
+  '/_next/static/js/',
 ];
 
 // Install event - cache resources
@@ -15,24 +14,19 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// Fetch event - serve from cache when offline
+// Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
         // Return cached version or fetch from network
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
+        return response || fetch(event.request);
+      })
   );
 });
 
@@ -43,7 +37,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
