@@ -20,7 +20,7 @@ export function LazyWrapper({
 }
 
 // Lazy load heavy components
-export const LazyOrderDetailsModal = lazy(() => import('./OrderDetailsModal'));
+export const LazyOrderDetailsModal = lazy(() => import('../app/dashboard/OrderDetailsModal'));
 export const LazyInboxesClient = lazy(() => import('../app/dashboard/inboxes/InboxesClient'));
 export const LazyDomainsClient = lazy(() => import('../app/dashboard/domains/DomainsClient'));
 export const LazyProductsPage = lazy(() => import('../app/dashboard/products/page'));
