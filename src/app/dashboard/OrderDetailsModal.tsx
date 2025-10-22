@@ -10,29 +10,45 @@ import {
   ChevronDownIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import type { Prisma } from "@prisma/client";
-
-type CustomerOrder = Prisma.OrderGetPayload<{
-  include: {
-    inboxes: true;
-    domains: true;
-  };
-}> & {
+type CustomerOrder = {
+  id: string;
+  productType: string;
+  quantity: number;
+  totalAmount: number;
+  createdAt: Date;
+  status?: string;
+  subscriptionStatus?: string;
+  stripeSubscriptionId?: string;
   cancelledAt?: Date | null;
   cancellationReason?: string | null;
-  subscriptionStatus?: string;
+  inboxes: { id: string; email?: string; forwardingDomain?: string }[];
+  domains: { id: string; domain: string; forwardingUrl?: string }[];
 };
 
-type OrderWithRelations = Prisma.OnboardingDataGetPayload<{
-  include: {
-    order: {
-      include: {
-        inboxes: true;
-        domains: true;
-      };
-    };
+type OrderWithRelations = {
+  id: string;
+  createdAt: Date;
+  businessType?: string;
+  website?: string;
+  personas?: string[];
+  specialRequirements?: string;
+  domainPreferences?: string;
+  domainSource?: string;
+  providedDomains?: string[];
+  calculatedDomainCount?: number;
+  inboxesPerDomain?: number;
+  order: {
+    id: string;
+    productType: string;
+    quantity: number;
+    totalAmount: number;
+    createdAt: Date;
+    status?: string;
+    subscriptionStatus?: string;
+    inboxes: { id: string; email?: string; forwardingDomain?: string }[];
+    domains: { id: string; domain: string; forwardingUrl?: string }[];
   };
-}>;
+};
 
 type OrderDetailsModalProps = {
   order: OrderWithRelations;
@@ -241,7 +257,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
     const rows: string[][] = [
       ["Field", "Value"],
       ["Order ID", orderData.id],
-      ["Status", orderData.status],
+      ["Status", orderData.status || "Unknown"],
       ["Product", orderData.productType],
       ["Quantity", String(orderData.quantity ?? inboxCount)],
       ["Total Amount (cents)", String(orderData.totalAmount ?? totalCost)],

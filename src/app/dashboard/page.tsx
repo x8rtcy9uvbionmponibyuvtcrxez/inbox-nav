@@ -1,19 +1,25 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
 import DashboardClient from "./DashboardClient";
 import PageTransition from "@/components/animations/PageTransition";
 
-type OrderWithRelations = Prisma.OnboardingDataGetPayload<{
-  include: {
-    order: {
-      include: {
-        inboxes: true;
-        domains: true;
-      };
-    };
+type OrderWithRelations = {
+  id: string;
+  createdAt: Date;
+  businessType?: string;
+  website?: string;
+  order: {
+    id: string;
+    productType: string;
+    quantity: number;
+    totalAmount: number;
+    createdAt: Date;
+    status?: string;
+    subscriptionStatus?: string;
+    inboxes: { id: string; forwardingDomain?: string }[];
+    domains: { id: string; domain: string; forwardingUrl?: string }[];
   };
-}>;
+};
 
 export default async function Dashboard() {
   const user = await currentUser();
@@ -50,9 +56,9 @@ export default async function Dashboard() {
               inboxes: {
                 select: { id: true }
               },
-              domains: {
-                select: { domain: true }
-              }
+                     domains: {
+                       select: { id: true, domain: true }
+                     }
             }
           }
         },
@@ -60,12 +66,14 @@ export default async function Dashboard() {
         take: 10, // Limit to recent orders for dashboard
       }),
       // Get total inbox count efficiently
-      prisma.onboardingData.aggregate({
-        where: { clerkUserId: user.id },
-        _sum: {
-          order: {
-            quantity: true
+      prisma.order.aggregate({
+        where: {
+          onboardingData: {
+            clerkUserId: user.id
           }
+        },
+        _sum: {
+          quantity: true
         }
       }),
       // Get unique domain count
@@ -81,21 +89,23 @@ export default async function Dashboard() {
         distinct: ['domain']
       }),
       // Get total spend
-      prisma.onboardingData.aggregate({
-        where: { clerkUserId: user.id },
-        _sum: {
-          order: {
-            totalAmount: true
+      prisma.order.aggregate({
+        where: {
+          onboardingData: {
+            clerkUserId: user.id
           }
+        },
+        _sum: {
+          totalAmount: true
         }
       })
     ]);
 
     orders = ordersData;
     // Use optimized data from parallel queries
-    totalInboxes = inboxCount._sum.order?.quantity || 0;
+    totalInboxes = inboxCount._sum.quantity || 0;
     totalDomains = domainCount.length;
-    totalMonthlySpend = totalSpend._sum.order?.totalAmount || 0;
+    totalMonthlySpend = totalSpend._sum.totalAmount || 0;
   } catch (error) {
     console.error("[Dashboard] Failed to load orders", error);
     fetchError = error instanceof Error ? error.message : "Unknown error occurred";

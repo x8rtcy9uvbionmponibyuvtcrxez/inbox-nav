@@ -1,17 +1,23 @@
 "use client";
 
-import { useMemo, useState, lazy, Suspense, memo, useCallback } from "react";
+import { useMemo, useState, memo } from "react";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
 import PageTransition from "@/components/animations/PageTransition";
 import FadeIn from "@/components/animations/FadeIn";
 import LoadingSpinner from "@/components/animations/LoadingSpinner";
 
-// Lazy load heavy components
-const VirtualizedTable = lazy(() => import("@/components/VirtualizedTable"));
-
 // Memoized components for better performance
-const ProductCard = memo(function ProductCard({ product, quantity, onQuantityChange, onCheckout, loading, getMoq }: any) {
+interface ProductCardProps {
+  product: Product;
+  quantity: number;
+  onQuantityChange: (productId: ProductType, quantity: number) => void;
+  onCheckout: (productId: ProductType) => void;
+  loading: boolean;
+  getMoq: (productId: ProductType) => number;
+}
+
+const ProductCard = memo(function ProductCard({ product, quantity, onQuantityChange, onCheckout, loading, getMoq }: ProductCardProps) {
   const totalPrice = product.price * quantity;
   const isDisabled = loading || quantity < getMoq(product.id);
   
@@ -66,7 +72,7 @@ const ProductCard = memo(function ProductCard({ product, quantity, onQuantityCha
               Volume Pricing
             </p>
             <div className="space-y-2">
-              {product.pricingTiers.map((tier: any, idx: number) => {
+              {product.pricingTiers.map((tier: PricingTier, idx: number) => {
                 const rangeText = tier.maxQty 
                   ? `${tier.minQty}-${tier.maxQty}` 
                   : `${tier.minQty}+`;
@@ -263,12 +269,6 @@ const products: Product[] = [
          },
 ];
 
-const formatCurrency = (amountInDollars: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(amountInDollars);
 
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("google");
@@ -352,11 +352,6 @@ export default function ProductsPage() {
     }
   };
 
-  const getTotalPrice = (productId: ProductType) => {
-    const product = products.find(p => p.id === productId);
-    if (!product) return 0;
-    return product.price * quantities[productId];
-  };
 
   return (
     <PageTransition>

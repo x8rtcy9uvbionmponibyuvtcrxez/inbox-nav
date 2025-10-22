@@ -5,22 +5,28 @@ import Link from "next/link";
 import { EnvelopeIcon, SparklesIcon, InboxIcon, GlobeAltIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import OrderDetailsModal from "./OrderDetailsModal";
 import { OrderSkeleton, StatsSkeleton } from "@/components/skeletons";
-import type { Prisma } from "@prisma/client";
 import { Button } from "@/components/ui/Button";
 import FadeIn from "@/components/animations/FadeIn";
 import StaggeredList from "@/components/animations/StaggeredList";
 import IntercomLauncher from "@/components/IntercomLauncher";
 
-type OrderWithRelations = Prisma.OnboardingDataGetPayload<{
-  include: {
-    order: {
-      include: {
-        inboxes: true;
-        domains: true;
-      };
-    };
+type OrderWithRelations = {
+  id: string;
+  createdAt: Date;
+  businessType?: string;
+  website?: string;
+  order: {
+    id: string;
+    productType: string;
+    quantity: number;
+    totalAmount: number;
+    createdAt: Date;
+    status?: string;
+    subscriptionStatus?: string;
+    inboxes: { id: string; forwardingDomain?: string }[];
+    domains: { id: string; domain: string; forwardingUrl?: string }[];
   };
-}>;
+};
 
 type DashboardClientProps = {
   orders: OrderWithRelations[];
@@ -41,11 +47,6 @@ const statusStyles: Record<string, string> = {
   DEFAULT: "bg-white/10 text-brand-muted border border-white/10",
 };
 
-const cardAccent: Record<"inboxes" | "domains" | "revenue", string> = {
-  inboxes: "from-indigo-500/30 to-indigo-500/10 border-indigo-500/30",
-  domains: "from-cyan-500/20 to-sky-500/5 border-cyan-500/25",
-  revenue: "from-emerald-500/25 to-emerald-500/5 border-emerald-500/25",
-};
 
 function formatCurrency(amountInCents: number) {
   return new Intl.NumberFormat("en-US", {
@@ -145,9 +146,6 @@ export default function DashboardClient({
     revenue: "from-purple-500/20 via-purple-600/20 to-purple-700/20 border-purple-500/30",
   }), []);
 
-  const recentOrders = useMemo(() => 
-    orders.slice(0, 5), [orders]
-  );
 
   if (isLoading) {
     return (
@@ -299,12 +297,14 @@ export default function DashboardClient({
                 Create Inbox
               </Link>
             </Button>
-          <IntercomLauncher className="gap-3 hover:bg-white/5 transition-all duration-200">
-            <Button variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
-              <EnvelopeIcon className="h-5 w-5" />
-              Contact Support
-            </Button>
-          </IntercomLauncher>
+                   {process.env.NEXT_PUBLIC_INTERCOM_APP_ID && (
+                     <IntercomLauncher className="gap-3 hover:bg-white/5 transition-all duration-200">
+                       <Button variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
+                         <EnvelopeIcon className="h-5 w-5" />
+                         Contact Support
+                       </Button>
+                     </IntercomLauncher>
+                   )}
           </div>
         </div>
       </FadeIn>
