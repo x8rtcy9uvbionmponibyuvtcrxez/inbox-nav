@@ -15,20 +15,7 @@ interface AnimatedButtonProps {
 
 // Removed complex variants to avoid TypeScript issues
 
-const rippleVariants = {
-  initial: {
-    scale: 0,
-    opacity: 0.6,
-  },
-  animate: {
-    scale: 4,
-    opacity: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-};
+// Removed ripple variants to avoid TypeScript issues
 
 export default function AnimatedButton({
   children,
@@ -63,14 +50,6 @@ export default function AnimatedButton({
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
     >
       {children}
-      {!disabled && (
-        <motion.div
-          className="absolute inset-0 bg-white/20 rounded-[14px]"
-          variants={rippleVariants}
-          initial="initial"
-          whileTap="animate"
-        />
-      )}
     </motion.button>
   );
 }
