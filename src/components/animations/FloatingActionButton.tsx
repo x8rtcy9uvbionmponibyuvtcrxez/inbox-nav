@@ -17,33 +17,7 @@ const positionClasses = {
   'top-left': 'top-6 left-6',
 };
 
-const floatingVariants = {
-  initial: {
-    scale: 0,
-    opacity: 0,
-  },
-  animate: {
-    scale: 1,
-    opacity: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 260,
-      damping: 20,
-    },
-  },
-  hover: {
-    scale: 1.1,
-    transition: {
-      duration: 0.2,
-    },
-  },
-  tap: {
-    scale: 0.95,
-    transition: {
-      duration: 0.1,
-    },
-  },
-};
+// Removed complex variants to avoid TypeScript issues
 
 export default function FloatingActionButton({
   children,
@@ -54,11 +28,10 @@ export default function FloatingActionButton({
   return (
     <motion.button
       onClick={onClick}
-      variants={floatingVariants}
-      initial="initial"
-      animate="animate"
-      whileHover="hover"
-      whileTap="tap"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
       className={`fixed z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-lg border border-[var(--border-medium)] hover:shadow-xl transition-all duration-200 ${positionClasses[position]} ${className}`}
     >
       {children}
