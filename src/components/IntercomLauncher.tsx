@@ -9,6 +9,14 @@ interface IntercomLauncherProps {
 }
 
 export default function IntercomLauncher({ className = "", children }: IntercomLauncherProps) {
+  // Check if Intercom is available
+  const intercomAppId = process.env.NEXT_PUBLIC_INTERCOM_APP_ID;
+  
+  // If no Intercom app ID, don't render anything
+  if (!intercomAppId) {
+    return null;
+  }
+
   const { show } = useIntercom();
 
   const handleClick = () => {

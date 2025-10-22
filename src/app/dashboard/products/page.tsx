@@ -5,6 +5,7 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
 import PageTransition from "@/components/animations/PageTransition";
 import FadeIn from "@/components/animations/FadeIn";
+import LoadingSpinner from "@/components/animations/LoadingSpinner";
 
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 
@@ -87,17 +88,16 @@ const products: Product[] = [
     priceId: "price_1SIoyCBRlmSshMl5OSvRIr36",
     tab: "google",
   },
-  {
-    id: "PREWARMED",
-    name: "Prewarmed Inboxes",
-    price: 7,
-    description: "Prewarmed inboxes ready to send with FREE .COM domains",
-    features: ["Generic business domains", "Configure your sending name, profile picture, and forwarding domain", "Warmed up for at least 1 month", "Send up to 15 emails/day/inbox"],
-    badge: "Popular",
-    color: "green",
-    priceId: "price_1RSKvSBRlmSshMl5HORm2Mzs",
-    tab: "prewarmed",
-  },
+         {
+           id: "PREWARMED",
+           name: "Prewarmed Inboxes",
+           price: 7,
+           description: "Prewarmed inboxes ready to send with FREE .COM domains",
+           features: ["Generic business domains", "Configure your sending name, profile picture, and forwarding domain", "Warmed up for at least 1 month", "Send up to 15 emails/day/inbox"],
+           color: "green",
+           priceId: "price_1RSKvSBRlmSshMl5HORm2Mzs",
+           tab: "prewarmed",
+         },
   {
     id: "AWS",
     name: "AWS Inboxes",
@@ -108,17 +108,16 @@ const products: Product[] = [
     priceId: "price_1SIoxQBRlmSshMl5cPgeqUNj",
     tab: "smtp",
   },
-  {
-    id: "MICROSOFT",
-    name: "Microsoft Inboxes",
-    price: 60,
-    description: "Microsoft 365 enterprise inboxes based on Azure",
-    features: ["Isolated tenants", "50 users/domain", "Send up to 5 emails/day/inbox", "Same as Hypertide", "Performs better than regular Microsoft inboxes"],
-    badge: "Premium",
-    color: "purple",
-    priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
-    tab: "microsoft",
-  },
+         {
+           id: "MICROSOFT",
+           name: "Microsoft Inboxes",
+           price: 60,
+           description: "Microsoft 365 enterprise inboxes based on Azure",
+           features: ["Isolated tenants", "50 users/domain", "Send up to 5 emails/day/inbox", "Same as Hypertide", "Performs better than regular Microsoft inboxes"],
+           color: "purple",
+           priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
+           tab: "microsoft",
+         },
 ];
 
 const formatCurrency = (amountInDollars: number) =>
@@ -174,7 +173,7 @@ export default function ProductsPage() {
     return 10;
   };
 
-  const handleSelectPlan = async (productId: ProductType) => {
+  const handleCheckout = async (productId: ProductType) => {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
@@ -219,206 +218,231 @@ export default function ProductsPage() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-        <div className="app-shell space-y-16">
-        <FadeIn delay={0.1}>
-          <div className="flex flex-col gap-12 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl space-y-5">
-              <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                Plans
-              </span>
-              <h1>
-                The fast lane to scale
-              </h1>
-              <p className="text-lg text-[var(--text-secondary)]">
-                verified inboxes, clear pricing, real support.
-              </p>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
-                <span>⚡ Instant provisioning</span>
-                <span>• Reputation-safe warmup</span>
-                <span>• Concierge support included</span>
-              </div>
-            </div>
-
-          <div className="surface-card max-w-md space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-              Need a custom fleet?
-            </p>
-            <p className="text-base text-[var(--text-secondary)]">
-              Talk to us about tiered enterprise pricing and dedicated deliverability ops.
-            </p>
-            <a
-              href="https://calendly.com/inboxnavigator/demo"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)]"
-            >
-              Book a Call
-              <ArrowRightIcon className="h-4 w-4" />
-            </a>
-          </div>
-          </div>
-        </FadeIn>
-
-        {error && (
-          <div className="rounded-[16px] border border-[#ff8d8d]/40 bg-[#ff8d8d]/10 p-6 text-sm text-[#ffb0b0]">
-            <div className="flex items-center justify-between gap-4">
-              <p>{error}</p>
-              <button onClick={() => setError(null)} className="text-xs font-medium uppercase tracking-[0.08em] text-[#ffb0b0] hover:text-[#ffd1d1]">
-                Dismiss
-              </button>
-            </div>
-          </div>
-        )}
-
-        <nav className="border-b border-[var(--border-subtle)] pb-6">
-          <div className="flex flex-wrap justify-center gap-3">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex h-11 items-center gap-3 rounded-[12px] px-5 text-base font-medium transition-colors ${
-                    isActive
-                      ? 'border border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)]'
-                      : 'border border-transparent text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:bg-[rgba(254,254,254,0.08)] hover:text-[var(--text-primary)]'
-                  }`}
-                >
-                  <span className="text-lg">{tab.emoji}</span>
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-
-        <div
-          className={`grid gap-6 ${
-            filteredProducts.length === 1
-              ? 'grid-cols-1 max-w-lg mx-auto'
-              : filteredProducts.length === 2
-              ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto'
-              : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'
-          }`}
-        >
-          {filteredProducts.map((product) => {
-            const totalPrice = getTotalPrice(product.id);
-
-            return (
-              <div key={product.id} className="surface-card flex h-full flex-col gap-8">
-                <div className="flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
-                    <p className="text-3xl font-semibold text-[var(--text-primary)]">
-                      ${product.price}
-                      <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ inbox</span>
-                    </p>
+        <div className="app-shell">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-16">
+              <FadeIn delay={0.1}>
+                <div className="space-y-5">
+                  <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                    Products
+                  </span>
+                  <h1>
+                    Your one-stop shop for all your sending needs
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
+                    <span>⚡ Instant setup</span>
+                    <span>• 🛡️ SPF/DKIM/DMARC included</span>
+                    <span>• 🎯 Concierge support</span>
                   </div>
                 </div>
+              </FadeIn>
 
-                <div className="space-y-3">
-                  <h2 className="text-2xl font-semibold text-[var(--text-primary)]">{product.name}</h2>
-                  <p className="text-base text-[var(--text-secondary)]">{product.description}</p>
-                  {product.badge ? (
-                    <span className="inline-flex w-fit items-center rounded-[10px] border border-[var(--border-medium)] bg-[var(--bg-tertiary)] px-3 py-1 text-xs font-medium uppercase tracking-[0.08em] text-[var(--text-secondary)]">
-                      {product.badge}
-                    </span>
-                  ) : null}
-                </div>
-
-                <div className="space-y-3 text-base text-[var(--text-secondary)]">
-                  {product.features.map((feature) => (
-                    <div key={feature} className="flex items-center gap-3">
-                      <span className="text-[var(--text-primary)]/80">✓</span>
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                  {product.id === "MICROSOFT" && (
-                    <div className="flex items-center gap-3 text-[var(--text-primary)]">
-                      <span>⭐</span>
-                      <span>Elite reputation floor & dedicated SPF records</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                    {product.id === "MICROSOFT" ? "Domain count" : "Inbox count"}
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    placeholder={product.id === "AWS" ? "20" : product.id === "MICROSOFT" ? "1" : "10"}
-                    value={quantities[product.id]}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9]/g, "");
-                      const num = parseInt(raw, 10);
-                      handleQuantityChange(
-                        product.id,
-                        Number.isFinite(num)
-                          ? num
-                          : product.id === "AWS"
-                          ? 20
-                          : product.id === "MICROSOFT"
-                          ? 1
-                          : 10,
-                      );
-                    }}
-                    className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none"
-                  />
-                  {quantities[product.id] < getMoq(product.id) && (
-                    <p className="text-sm text-[var(--text-muted)]">
-                      Minimum order: {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-auto space-y-6">
-                  <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                    <span>Total monthly</span>
-                    <span className="text-xl font-semibold text-[var(--text-primary)]">
-                      {formatCurrency(totalPrice)}
-                    </span>
+              {error && (
+                <div className="rounded-[16px] border border-[#ff8d8d]/40 bg-[#ff8d8d]/10 p-6 text-sm text-[#ffb0b0]">
+                  <div className="flex items-center justify-between gap-4">
+                    <p>{error}</p>
+                    <button onClick={() => setError(null)} className="text-xs font-medium uppercase tracking-[0.08em] text-[#ffb0b0] hover:text-[#ffd1d1]">
+                      Dismiss
+                    </button>
                   </div>
-
-                  <Button
-                    variant="primary"
-                    className="w-full justify-center gap-2"
-                    disabled={loading[product.id] || quantities[product.id] < getMoq(product.id)}
-                    onClick={() => handleSelectPlan(product.id)}
-                  >
-                    {loading[product.id] ? (
-                      <>
-                        <svg className="h-4 w-4 animate-spin text-[var(--text-dark)]/70" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
-                        </svg>
-                        Processing
-                      </>
-                    ) : (
-                      <>
-                        Start setup
-                        <ArrowRightIcon className="h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              )}
 
-        {hasLargeQuantity ? (
-          <div className="surface-panel text-sm text-[var(--text-secondary)]">
-            <span>
-              Scaling beyond <strong>3,000 inboxes</strong>? Get bulk deals and priority support.
-            </span>
-            <a href="mailto:contact@inboxnavigator.com" className="ml-2 inline-flex items-center text-[var(--text-primary)] underline">
-              Reach out for enterprise pricing →
-            </a>
+              <nav className="border-b border-[var(--border-subtle)] pb-6">
+                <div className="flex flex-wrap gap-3">
+                  {tabs.map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex h-11 items-center gap-3 rounded-[12px] px-5 text-base font-medium transition-colors ${
+                          isActive
+                            ? 'border border-[var(--border-strong)] bg-[rgba(254,254,254,0.14)] text-[var(--text-primary)]'
+                            : 'border border-transparent text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:bg-[rgba(254,254,254,0.08)] hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        <span className="text-lg">{tab.emoji}</span>
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </nav>
+
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+                     {filteredProducts.map((product) => {
+                       const totalPrice = getTotalPrice(product.id);
+                       const isStaticCard = false;
+
+                       return (
+                         <div key={product.id} className="surface-card flex h-full flex-col gap-8">
+                           {(
+                             <div className="flex items-center justify-center">
+                               <div className="text-center">
+                                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
+                                 <p className="text-3xl font-semibold text-[var(--text-primary)]">
+                                   ${product.price}
+                                   <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ inbox</span>
+                                 </p>
+                               </div>
+                             </div>
+                           )}
+
+                      <div className="space-y-3">
+                        <h2 className="text-2xl font-semibold text-[var(--text-primary)]">{product.name}</h2>
+                        <p className="text-base text-[var(--text-secondary)]">{product.description}</p>
+                        {product.badge && (
+                          <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${product.badge === "Popular" ? "bg-green-500/20 text-green-300" : "bg-purple-500/20 text-purple-300"}`}>
+                            {product.badge}
+                          </span>
+                        )}
+                      </div>
+
+                             <div className="flex-1 flex flex-col">
+                               <div className="space-y-3 text-base text-[var(--text-secondary)]">
+                                 {product.features.map((feature) => (
+                                   <div key={feature} className="flex items-start gap-3">
+                                     <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5">
+                                       <span className="text-green-400 text-sm">✓</span>
+                                     </div>
+                                     <span className="leading-relaxed">{feature}</span>
+                                   </div>
+                                 ))}
+                               </div>
+
+                               {(
+                                 <div className="mt-auto space-y-3">
+                                   <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                                     {product.id === "MICROSOFT" ? "Domain count" : "Inbox count"}
+                                   </label>
+                                   <input
+                                     type="text"
+                                     inputMode="numeric"
+                                     pattern="[0-9]*"
+                                     placeholder={product.id === "AWS" ? "20" : product.id === "MICROSOFT" ? "1" : "10"}
+                                     value={quantities[product.id]}
+                                     onChange={(e) => {
+                                       const raw = e.target.value.replace(/[^0-9]/g, "");
+                                       const num = parseInt(raw, 10);
+                                       handleQuantityChange(
+                                         product.id,
+                                         Number.isFinite(num)
+                                           ? num
+                                           : product.id === "AWS"
+                                           ? 20
+                                           : product.id === "MICROSOFT"
+                                           ? 1
+                                           : 10,
+                                       );
+                                     }}
+                                     className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none"
+                                   />
+                                   {quantities[product.id] < getMoq(product.id) && (
+                                     <p className="text-sm text-[var(--text-muted)]">
+                                       Minimum order: {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
+                                     </p>
+                                   )}
+                                 </div>
+                               )}
+                             </div>
+
+                      {(
+                        <div className="mt-auto space-y-6">
+                          <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                            <span>Total monthly</span>
+                            <span className="text-2xl font-semibold text-[var(--text-primary)]">
+                              {formatCurrency(totalPrice)}
+                            </span>
+                          </div>
+
+                          <Button
+                            variant="primary"
+                            size="lg"
+                            onClick={() => handleCheckout(product.id)}
+                            disabled={loading[product.id] || quantities[product.id] < getMoq(product.id)}
+                            className="w-full"
+                          >
+                            {loading[product.id] ? (
+                              <LoadingSpinner size="sm" color="white" />
+                            ) : (
+                              <>
+                                Start setup
+                                <ArrowRightIcon className="h-4 w-4" />
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {hasLargeQuantity ? (
+                <div className="surface-panel text-sm text-[var(--text-secondary)]">
+                  <span>
+                    Scaling beyond <strong>3,000 inboxes</strong>? Get bulk deals and priority support.
+                  </span>
+                  <a href="mailto:contact@inboxnavigator.com" className="ml-2 inline-flex items-center text-[var(--text-primary)] underline">
+                    Reach out for enterprise pricing →
+                  </a>
+                </div>
+              ) : null}
+
+            </div>
+
+            {/* Right Column - Custom Fleet CTA + All plans include */}
+            <div className="lg:col-span-1 space-y-6">
+              <FadeIn delay={0.3}>
+                <div className="lg:sticky lg:top-8">
+                  <div className="surface-card space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                      Talk to Sales
+                    </p>
+                    <p className="text-base text-[var(--text-secondary)]">
+                      Scaling past 3,000 inboxes—or just want to chat?
+                    </p>
+                    <a
+                      href="https://calendly.com/inboxnavigator/demo"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)]"
+                    >
+                      Book a call →
+                    </a>
+                  </div>
+                </div>
+              </FadeIn>
+
+              {/* All plans include block on the right */}
+              <FadeIn delay={0.4}>
+                <div className="surface-card p-6 space-y-6">
+                  <h3 className="text-xl font-semibold text-[var(--text-primary)]">All plans include:</h3>
+                  <div className="space-y-4">
+                    {[
+                      "DNS setup (SDKIM, SPF, DMARC)",
+                      "Complete DFY service",
+                      "Integration with Instantly, Smartlead, Plusvibes and other platforms",
+                      "Bring your domains for free",
+                      "Profile picture setup",
+                      "US IP Only",
+                      "Priority Support",
+                      "95% inbox delivery rate",
+                    ].map((feature, idx) => (
+                      <div key={idx} className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5">
+                          <span className="text-green-400 text-sm">✓</span>
+                        </div>
+                        <span className="text-sm text-[var(--text-secondary)] leading-relaxed">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </FadeIn>
+            </div>
           </div>
-        ) : null}
         </div>
       </div>
     </PageTransition>

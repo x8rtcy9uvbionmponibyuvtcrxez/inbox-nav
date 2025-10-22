@@ -6,7 +6,6 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { PerformanceMonitor } from '@/components/PerformanceMonitor'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import IntercomProvider from '@/components/IntercomProvider'
-import IntercomLauncher from '@/components/IntercomLauncher'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import './globals.css'
 
@@ -86,15 +85,14 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
                  <IntercomProvider>
-                   <ErrorBoundary>
-                     {children}
-                   </ErrorBoundary>
-                   <Analytics />
-                   <SpeedInsights />
-                   <PerformanceMonitor />
-                   <IntercomLauncher />
-                   <ServiceWorkerRegistration />
-                 </IntercomProvider>
+                 <ErrorBoundary>
+                   {children}
+                 </ErrorBoundary>
+                 <Analytics />
+                 <SpeedInsights />
+                 <PerformanceMonitor />
+                 <ServiceWorkerRegistration />
+               </IntercomProvider>
         </body>
       </html>
     </ClerkProvider>
