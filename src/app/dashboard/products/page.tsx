@@ -373,26 +373,46 @@ export default function ProductsPage() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-        <div className="app-shell">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {/* Left Column - Main Content */}
-            <div className="lg:col-span-2 space-y-16">
-              <FadeIn delay={0.1}>
-                <div className="space-y-5">
-                  <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                    Products
-                  </span>
-                  <h1>
-                    Your one-stop shop for all your sending needs
-                  </h1>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
-                    <span>⚡ Instant setup</span>
-                    <span>• 🛡️ SPF/DKIM/DMARC included</span>
-                    <span>• 🎯 Concierge support</span>
-                  </div>
+        <div className="app-shell space-y-16">
+          {/* Hero + Sales CTA */}
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+            <FadeIn delay={0.1}>
+              <div className="space-y-5">
+                <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                  Products
+                </span>
+                <h1>Your one-stop shop for all your sending needs</h1>
+                <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
+                  <span>⚡ Instant setup</span>
+                  <span>• 🛡️ SPF/DKIM/DMARC included</span>
+                  <span>• 🎯 Concierge support</span>
                 </div>
-              </FadeIn>
+              </div>
+            </FadeIn>
 
+            <FadeIn delay={0.2}>
+              <div className="surface-card space-y-4 lg:sticky lg:top-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                  Talk to Sales
+                </p>
+                <p className="text-base text-[var(--text-secondary)]">
+                  Scaling past 3,000 inboxes—or just want to chat?
+                </p>
+                <a
+                  href="https://calendly.com/inboxnavigator/demo"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)]"
+                >
+                  Book a call →
+                </a>
+              </div>
+            </FadeIn>
+          </div>
+
+          {/* Product Grid + Benefits */}
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+            <div className="space-y-10">
               {error && (
                 <div className="rounded-[16px] border border-[#ff8d8d]/40 bg-[#ff8d8d]/10 p-6 text-sm text-[#ffb0b0]">
                   <div className="flex items-center justify-between gap-4">
@@ -427,17 +447,17 @@ export default function ProductsPage() {
               </nav>
 
               <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                     {filteredProducts.map((product) => (
-                       <ProductCard
-                         key={product.id}
-                         product={product}
-                         quantity={quantities[product.id]}
-                         onQuantityChange={handleQuantityChange}
-                         onCheckout={handleCheckout}
-                         loading={loading[product.id]}
-                         getMoq={getMoq}
-                       />
-                     ))}
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    quantity={quantities[product.id]}
+                    onQuantityChange={handleQuantityChange}
+                    onCheckout={handleCheckout}
+                    loading={loading[product.id]}
+                    getMoq={getMoq}
+                  />
+                ))}
               </div>
 
               {hasLargeQuantity ? (
@@ -450,58 +470,32 @@ export default function ProductsPage() {
                   </a>
                 </div>
               ) : null}
-
             </div>
 
-            {/* Right Column - Custom Fleet CTA + All plans include */}
-            <div className="lg:col-span-1 space-y-6">
-              <FadeIn delay={0.3}>
-                <div className="lg:sticky lg:top-8">
-                  <div className="surface-card space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                      Talk to Sales
-                    </p>
-                    <p className="text-base text-[var(--text-secondary)]">
-                      Scaling past 3,000 inboxes—or just want to chat?
-                    </p>
-                    <a
-                      href="https://calendly.com/inboxnavigator/demo"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)] hover:text-[var(--bg-white)]"
-                    >
-                      Book a call →
-                    </a>
-                  </div>
-                </div>
-              </FadeIn>
-
-              {/* All plans include block on the right */}
-              <FadeIn delay={0.4}>
-                <div className="surface-card p-6 space-y-6">
-                  <h3 className="text-xl font-semibold text-[var(--text-primary)]">All plans include:</h3>
-                  <div className="space-y-4">
-                    {[
-                      "DNS setup (SDKIM, SPF, DMARC)",
-                      "Complete DFY service",
-                      "Integration with Instantly, Smartlead, Plusvibes and other platforms",
-                      "Bring your domains for free",
-                      "Profile picture setup",
-                      "US IP Only",
-                      "Priority Support",
-                      "95% inbox delivery rate",
-                    ].map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5">
-                          <span className="text-green-400 text-sm">✓</span>
-                        </div>
-                        <span className="text-sm text-[var(--text-secondary)] leading-relaxed">{feature}</span>
+            <FadeIn delay={0.3}>
+              <div className="surface-card space-y-6 p-6 lg:sticky lg:top-[120px]">
+                <h3 className="text-xl font-semibold text-[var(--text-primary)]">All plans include:</h3>
+                <div className="space-y-4">
+                  {[
+                    "DNS setup (SDKIM, SPF, DMARC)",
+                    "Complete DFY service",
+                    "Integration with Instantly, Smartlead, Plusvibes and other platforms",
+                    "Bring your domains for free",
+                    "Profile picture setup",
+                    "US IP Only",
+                    "Priority Support",
+                    "95% inbox delivery rate",
+                  ].map((feature, idx) => (
+                    <div key={idx} className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5">
+                        <span className="text-green-400 text-sm">✓</span>
                       </div>
-                    ))}
-                  </div>
+                      <span className="text-sm text-[var(--text-secondary)] leading-relaxed">{feature}</span>
+                    </div>
+                  ))}
                 </div>
-              </FadeIn>
-            </div>
+              </div>
+            </FadeIn>
           </div>
         </div>
       </div>
