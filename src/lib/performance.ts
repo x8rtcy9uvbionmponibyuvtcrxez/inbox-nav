@@ -100,7 +100,7 @@ export class PerformanceMonitor {
     
     // Send to Vercel Analytics (if available)
     if (typeof window !== 'undefined' && (window as { va?: (event: string, data: unknown) => void }).va) {
-      (window as { va: (event: string, data: unknown) => void }).va('track', 'performance_metrics', metrics);
+      (window as { va: (event: string, data: unknown) => void }).va('track', 'performance_metrics');
     }
 
     // Send to custom analytics endpoint
