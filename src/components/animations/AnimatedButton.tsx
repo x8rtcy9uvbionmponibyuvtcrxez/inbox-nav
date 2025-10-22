@@ -13,25 +13,7 @@ interface AnimatedButtonProps {
   type?: 'button' | 'submit' | 'reset';
 }
 
-const buttonVariants = {
-  hover: {
-    scale: 1.05,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut",
-    },
-  },
-  tap: {
-    scale: 0.95,
-    transition: {
-      duration: 0.1,
-    },
-  },
-  disabled: {
-    scale: 1,
-    opacity: 0.6,
-  },
-};
+// Removed complex variants to avoid TypeScript issues
 
 const rippleVariants = {
   initial: {
@@ -76,9 +58,8 @@ export default function AnimatedButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      variants={buttonVariants}
-      whileHover={disabled ? "disabled" : "hover"}
-      whileTap={disabled ? "disabled" : "tap"}
+      whileHover={disabled ? {} : { scale: 1.05 }}
+      whileTap={disabled ? {} : { scale: 0.95 }}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
     >
       {children}
