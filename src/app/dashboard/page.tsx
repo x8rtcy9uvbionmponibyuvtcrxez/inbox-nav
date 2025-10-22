@@ -42,6 +42,8 @@ export default async function Dashboard() {
   let totalMonthlySpend = 0;
 
   try {
+    console.log('Dashboard query for user:', user.id);
+    
     // Optimized query with parallel data fetching
     const [ordersData, inboxCount, domainCount, totalSpend] = await Promise.all([
       prisma.onboardingData.findMany({
@@ -112,6 +114,14 @@ export default async function Dashboard() {
     ]);
 
     orders = ordersData;
+    console.log('Dashboard orders data:', ordersData.map(o => ({
+      id: o.id,
+      orderId: o.order.id,
+      status: o.order.status,
+      subscriptionStatus: o.order.subscriptionStatus,
+      stripeSubscriptionId: o.order.stripeSubscriptionId
+    })));
+    
     // Use optimized data from parallel queries
     totalInboxes = inboxCount._sum.quantity || 0;
     totalDomains = domainCount.length;
