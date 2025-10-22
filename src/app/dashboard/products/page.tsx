@@ -10,6 +10,121 @@ import LoadingSpinner from "@/components/animations/LoadingSpinner";
 // Lazy load heavy components
 const VirtualizedTable = lazy(() => import("@/components/VirtualizedTable"));
 
+// Memoized components for better performance
+const ProductCard = memo(function ProductCard({ product, quantity, onQuantityChange, onCheckout, loading, getMoq }: any) {
+  const totalPrice = product.price * quantity;
+  const isDisabled = loading || quantity < getMoq(product.id);
+  
+  return (
+    <div className="surface-card flex h-full flex-col gap-8">
+      <div className="flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
+          <p className="text-3xl font-semibold text-[var(--text-primary)]">
+            ${product.price}<span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ inbox</span>
+          </p>
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <h2 className="text-2xl font-semibold text-[var(--text-primary)]">{product.name}</h2>
+        <p className="text-base text-[var(--text-secondary)]">{product.description}</p>
+      </div>
+      
+      <div className="flex-1 flex flex-col">
+        <div className="space-y-3 text-base text-[var(--text-secondary)]">
+          {product.features.map((feature: string, idx: number) => (
+            <div key={idx} className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5">
+                <span className="text-green-400 text-sm">✓</span>
+              </div>
+              <span className="leading-relaxed">{feature}</span>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-auto space-y-3">
+          <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+            {product.id === 'MICROSOFT' ? 'Domain count' : 'Inbox count'}
+          </label>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder={getMoq(product.id).toString()}
+            value={quantity}
+            onChange={(e) => onQuantityChange(product.id, parseInt(e.target.value) || 0)}
+            className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none"
+          />
+        </div>
+      </div>
+      
+      {product.pricingTiers && (
+        <div className="mt-4 border-t border-[var(--border-subtle)] pt-4">
+          <div className="p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)] mb-3">
+              Volume Pricing
+            </p>
+            <div className="space-y-2">
+              {product.pricingTiers.map((tier: any, idx: number) => {
+                const rangeText = tier.maxQty 
+                  ? `${tier.minQty}-${tier.maxQty}` 
+                  : `${tier.minQty}+`;
+                const savingsPerUnit = product.price - tier.price;
+                
+                return (
+                  <div 
+                    key={idx} 
+                    className="flex items-center justify-between text-sm p-2 rounded hover:bg-[var(--bg-secondary)] transition-colors"
+                  >
+                    <span className="text-[var(--text-secondary)]">{rangeText} inboxes</span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-[var(--text-primary)]">
+                        ${tier.price.toFixed(2)}/inbox
+                      </span>
+                      {savingsPerUnit > 0 && (
+                        <span className="text-xs text-green-400 font-medium">
+                          Save ${savingsPerUnit.toFixed(2)}/inbox
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="mt-auto space-y-6">
+        <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+          <span>Total monthly</span>
+          <span className="text-2xl font-semibold text-[var(--text-primary)]">
+            ${totalPrice.toFixed(2)}
+          </span>
+        </div>
+
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={() => onCheckout(product.id)}
+          disabled={isDisabled}
+          className="w-full"
+        >
+          {loading ? (
+            <LoadingSpinner size="sm" color="white" />
+          ) : (
+            <>
+              BUY NOW
+              <ArrowRightIcon className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+});
+
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 
 type TabId = "google" | "microsoft" | "prewarmed" | "smtp";
@@ -300,148 +415,17 @@ export default function ProductsPage() {
               </nav>
 
               <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                     {filteredProducts.map((product) => {
-                       const totalPrice = getTotalPrice(product.id);
-
-                       return (
-                         <div key={product.id} className="surface-card flex h-full flex-col gap-8">
-                           {(
-                             <div className="flex items-center justify-center">
-                               <div className="text-center">
-                                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
-                                 <p className="text-3xl font-semibold text-[var(--text-primary)]">
-                                   ${product.price}
-                                   <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ inbox</span>
-                                 </p>
-                               </div>
-                             </div>
-                           )}
-
-                      <div className="space-y-3">
-                        <h2 className="text-2xl font-semibold text-[var(--text-primary)]">{product.name}</h2>
-                        <p className="text-base text-[var(--text-secondary)]">{product.description}</p>
-                        {product.badge && (
-                          <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${product.badge === "Popular" ? "bg-green-500/20 text-green-300" : "bg-purple-500/20 text-purple-300"}`}>
-                            {product.badge}
-                          </span>
-                        )}
-                      </div>
-
-                             <div className="flex-1 flex flex-col">
-                               <div className="space-y-3 text-base text-[var(--text-secondary)]">
-                                 {product.features.map((feature) => (
-                                   <div key={feature} className="flex items-start gap-3">
-                                     <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5">
-                                       <span className="text-green-400 text-sm">✓</span>
-                                     </div>
-                                     <span className="leading-relaxed">{feature}</span>
-                                   </div>
-                                 ))}
-                               </div>
-
-                               {(
-                                 <div className="mt-auto space-y-3">
-                                   <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                                     {product.id === "MICROSOFT" ? "Domain count" : "Inbox count"}
-                                   </label>
-                                   <input
-                                     type="text"
-                                     inputMode="numeric"
-                                     pattern="[0-9]*"
-                                     placeholder={product.id === "AWS" ? "20" : product.id === "MICROSOFT" ? "1" : "10"}
-                                     value={quantities[product.id]}
-                                     onChange={(e) => {
-                                       const raw = e.target.value.replace(/[^0-9]/g, "");
-                                       const num = parseInt(raw, 10);
-                                       handleQuantityChange(
-                                         product.id,
-                                         Number.isFinite(num)
-                                           ? num
-                                           : product.id === "AWS"
-                                           ? 20
-                                           : product.id === "MICROSOFT"
-                                           ? 1
-                                           : 10,
-                                       );
-                                     }}
-                                     className="w-full rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-medium)] focus:outline-none"
-                                   />
-                                   {quantities[product.id] < getMoq(product.id) && (
-                                     <p className="text-sm text-[var(--text-muted)]">
-                                       Minimum order: {getMoq(product.id)} inboxes for {product.name.toLowerCase()}.
-                                     </p>
-                                   )}
-                                 </div>
-                               )}
-                             </div>
-
-                      {(
-                        <div className="mt-auto space-y-6">
-                          <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                            <span>Total monthly</span>
-                            <span className="text-2xl font-semibold text-[var(--text-primary)]">
-                              {formatCurrency(totalPrice)}
-                            </span>
-                          </div>
-
-                          <Button
-                            variant="primary"
-                            size="lg"
-                            onClick={() => handleCheckout(product.id)}
-                            disabled={loading[product.id] || quantities[product.id] < getMoq(product.id)}
-                            className="w-full"
-                          >
-                            {loading[product.id] ? (
-                              <LoadingSpinner size="sm" color="white" />
-                            ) : (
-                              <>
-                                BUY NOW
-                                <ArrowRightIcon className="h-4 w-4" />
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      )}
-
-                      {product.pricingTiers && (
-                        <div className="mt-4 border-t border-[var(--border-subtle)] pt-4">
-                          <div className="p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]">
-                            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)] mb-3">
-                              Volume Pricing
-                            </p>
-                            <div className="space-y-2">
-                              {product.pricingTiers.map((tier, idx) => {
-                                const rangeText = tier.maxQty 
-                                  ? `${tier.minQty}-${tier.maxQty}` 
-                                  : `${tier.minQty}+`;
-                                const savingsPerUnit = product.price - tier.price;
-                                
-                                return (
-                                  <div 
-                                    key={idx} 
-                                    className="flex items-center justify-between text-sm p-2 rounded hover:bg-[var(--bg-secondary)] transition-colors"
-                                  >
-                                    <span className="text-[var(--text-secondary)]">{rangeText} inboxes</span>
-                                    <div className="flex items-center gap-3">
-                                      <span className="font-semibold text-[var(--text-primary)]">
-                                        ${tier.price.toFixed(2)}/inbox
-                                      </span>
-                                      {savingsPerUnit > 0 && (
-                                        <span className="text-xs text-green-400 font-medium">
-                                          Save ${savingsPerUnit.toFixed(2)}/inbox
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                     {filteredProducts.map((product) => (
+                       <ProductCard
+                         key={product.id}
+                         product={product}
+                         quantity={quantities[product.id]}
+                         onQuantityChange={handleQuantityChange}
+                         onCheckout={handleCheckout}
+                         loading={loading[product.id]}
+                         getMoq={getMoq}
+                       />
+                     ))}
               </div>
 
               {hasLargeQuantity ? (

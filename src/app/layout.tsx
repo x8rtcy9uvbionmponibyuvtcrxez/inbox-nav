@@ -13,17 +13,26 @@ const inter = Inter({
   variable: '--font-inter',
   display: 'swap',
   subsets: ['latin'],
+  preload: true,
+  fallback: ['system-ui', 'arial'],
 })
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  preload: true,
+  fallback: ['monospace'],
 })
 
 export const metadata: Metadata = {
   title: 'Inbox Navigator - Email Inbox Management Platform',
   description: 'Manage your email inbox fleet with automated setup, domain management, and comprehensive analytics.',
   manifest: '/site.webmanifest',
+  other: {
+    'preload': '/fonts/inter.woff2',
+    'preconnect': 'https://fonts.googleapis.com',
+    'dns-prefetch': 'https://fonts.gstatic.com',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
@@ -85,14 +94,15 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
                  <IntercomProvider>
-                 <ErrorBoundary>
-                   {children}
-                 </ErrorBoundary>
-                 <Analytics />
-                 <SpeedInsights />
-                 <PerformanceMonitor />
-                 <ServiceWorkerRegistration />
-               </IntercomProvider>
+                   <ErrorBoundary>
+                     {children}
+                   </ErrorBoundary>
+                   <Analytics />
+                   <SpeedInsights />
+                   <PerformanceMonitor />
+                   <IntercomLauncher />
+                   <ServiceWorkerRegistration />
+                 </IntercomProvider>
         </body>
       </html>
     </ClerkProvider>
