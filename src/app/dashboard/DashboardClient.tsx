@@ -21,7 +21,7 @@ type OrderWithRelations = {
     totalAmount: number;
     createdAt: Date;
     status?: string | null;
-    subscriptionStatus?: string | null;
+    subscriptionStatus: string;
     stripeSubscriptionId?: string | null;
     cancelledAt?: Date | null;
     cancellationReason?: string | null;

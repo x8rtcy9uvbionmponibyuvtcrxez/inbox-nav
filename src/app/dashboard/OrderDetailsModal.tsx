@@ -17,7 +17,7 @@ type CustomerOrder = {
   totalAmount: number;
   createdAt: Date;
   status?: string;
-  subscriptionStatus?: string;
+  subscriptionStatus: string;
   stripeSubscriptionId?: string;
   cancelledAt?: Date | null;
   cancellationReason?: string | null;
@@ -44,7 +44,7 @@ type OrderWithRelations = {
     totalAmount: number;
     createdAt: Date;
     status?: string | null;
-    subscriptionStatus?: string | null;
+    subscriptionStatus: string;
     stripeSubscriptionId?: string | null;
     cancelledAt?: Date | null;
     cancellationReason?: string | null;
