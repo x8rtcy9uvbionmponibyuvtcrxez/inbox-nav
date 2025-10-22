@@ -1,12 +1,12 @@
 "use client";
 
 import { memo } from 'react';
-import { Icon } from '@heroicons/react/24/outline';
+import type { ComponentType } from 'react';
 
 interface SummaryCardProps {
   label: string;
   value: string;
-  icon: Icon;
+  icon: ComponentType<{ className?: string }>;
   accent: {
     bg: string;
     text: string;
