@@ -1,8 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckIcon, StarIcon, ShieldCheckIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
+import PageTransition from "@/components/animations/PageTransition";
+import FadeIn from "@/components/animations/FadeIn";
+import StaggeredList from "@/components/animations/StaggeredList";
 
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 
@@ -15,7 +18,6 @@ interface Product {
   description: string;
   features: string[];
   badge?: string;
-  icon: React.ComponentType<{ className?: string }>;
   color: string;
   priceId: string;
   tab: TabId;
@@ -33,7 +35,7 @@ const tabs: Tab[] = [
     id: "google",
     label: "Google",
     emoji: "📧",
-    productIds: ["EDU", "LEGACY", "RESELLER"]
+    productIds: ["LEGACY", "RESELLER"]
   },
   {
     id: "microsoft",
@@ -62,7 +64,6 @@ const products: Product[] = [
     price: 1.5,
     description: "Cost-efficient Google inboxes designed for high-volume sending at the best price.",
     features: ["Lowest cost per inbox", "Built for large outbound volume", "Managed Google risk (isolation & spread)"],
-    icon: CheckIcon,
     color: "green",
     priceId: "price_1SIoynBRlmSshMl5kKycrio6",
     tab: "google",
@@ -73,7 +74,6 @@ const products: Product[] = [
     price: 2.5,
     description: "Balanced Google setup for teams that want reliability and predictable spend.",
     features: ["Best balance of cost + risk", "Very low chance of Google deactivations", "Ideal for steady, long-term outreach"],
-    icon: CheckIcon,
     color: "orange",
     priceId: "price_1RW8EkBRlmSshMl5LIGqjcHw",
     tab: "google",
@@ -84,7 +84,6 @@ const products: Product[] = [
     price: 3,
     description: "Higher-trust Google inboxes for programs that need extra stability.",
     features: ["Safer Google setup (more isolation)", "Great for high-stakes/managed accounts", "Full IMAP/SMTP access"],
-    icon: CheckIcon,
     color: "blue",
     priceId: "price_1SIoyCBRlmSshMl5OSvRIr36",
     tab: "google",
@@ -96,7 +95,6 @@ const products: Product[] = [
     description: "Ready-to-send inboxes with proven sender history.",
     features: ["Instant activation", "Strong reputation floor", "Zero ramp-up time"],
     badge: "Popular",
-    icon: StarIcon,
     color: "green",
     priceId: "price_1RSKvSBRlmSshMl5HORm2Mzs",
     tab: "prewarmed",
@@ -107,7 +105,6 @@ const products: Product[] = [
     price: 1.25,
     description: "AWS-backed inboxes for scalable, flexible infrastructure.",
     features: ["Built on AWS for scale", "Flexible integration options", "Stable, cloud-native setup"],
-    icon: CheckIcon,
     color: "yellow",
     priceId: "price_1SIoxQBRlmSshMl5cPgeqUNj",
     tab: "smtp",
@@ -119,7 +116,6 @@ const products: Product[] = [
     description: "Microsoft 365 enterprise inboxes with security and compliance built-in.",
     features: ["Enterprise-grade security & controls", "Dedicated SPF/DKIM setup per domain", "Priority support & SLAs"],
     badge: "Premium",
-    icon: ShieldCheckIcon,
     color: "purple",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
     tab: "microsoft",
@@ -222,25 +218,27 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      <div className="app-shell space-y-16">
-        <div className="flex flex-col gap-12 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl space-y-5">
-            <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-              Plans
-            </span>
-            <h1>
-              The fast lane to scale
-            </h1>
-            <p className="text-lg text-[var(--text-secondary)]">
-              verified inboxes, clear pricing, real support.
-            </p>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
-              <span>⚡ Instant provisioning</span>
-              <span>• Reputation-safe warmup</span>
-              <span>• Concierge support included</span>
+    <PageTransition>
+      <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+        <div className="app-shell space-y-16">
+        <FadeIn delay={0.1}>
+          <div className="flex flex-col gap-12 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl space-y-5">
+              <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                Plans
+              </span>
+              <h1>
+                The fast lane to scale
+              </h1>
+              <p className="text-lg text-[var(--text-secondary)]">
+                verified inboxes, clear pricing, real support.
+              </p>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
+                <span>⚡ Instant provisioning</span>
+                <span>• Reputation-safe warmup</span>
+                <span>• Concierge support included</span>
+              </div>
             </div>
-          </div>
 
           <div className="surface-card max-w-md space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
@@ -259,7 +257,8 @@ export default function ProductsPage() {
               <ArrowRightIcon className="h-4 w-4" />
             </a>
           </div>
-        </div>
+          </div>
+        </FadeIn>
 
         {error && (
           <div className="rounded-[16px] border border-[#ff8d8d]/40 bg-[#ff8d8d]/10 p-6 text-sm text-[#ffb0b0]">
@@ -308,11 +307,8 @@ export default function ProductsPage() {
 
             return (
               <div key={product.id} className="surface-card flex h-full flex-col gap-8">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-primary)]/80">
-                    <product.icon className="h-6 w-6" />
-                  </div>
-                  <div className="text-right">
+                <div className="flex items-center justify-center">
+                  <div className="text-center">
                     <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
                     <p className="text-3xl font-semibold text-[var(--text-primary)]">
                       ${product.price}
@@ -424,7 +420,8 @@ export default function ProductsPage() {
             </a>
           </div>
         ) : null}
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }

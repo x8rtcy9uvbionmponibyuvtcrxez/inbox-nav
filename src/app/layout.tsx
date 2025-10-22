@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { PerformanceMonitor } from '@/components/PerformanceMonitor'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import IntercomProvider from '@/components/IntercomProvider'
+import IntercomLauncher from '@/components/IntercomLauncher'
 import './globals.css'
 
 const inter = Inter({
@@ -90,6 +91,7 @@ export default function RootLayout({
             <Analytics />
             <SpeedInsights />
             <PerformanceMonitor />
+            <IntercomLauncher />
           </IntercomProvider>
         </body>
       </html>

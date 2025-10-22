@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import DashboardClient from "./DashboardClient";
+import PageTransition from "@/components/animations/PageTransition";
 
 type OrderWithRelations = Prisma.OnboardingDataGetPayload<{
   include: {
@@ -72,13 +73,15 @@ export default async function Dashboard() {
     "there";
 
   return (
-    <DashboardClient
-      orders={orders}
-      displayName={displayName}
-      totalInboxes={totalInboxes}
-      totalDomains={totalDomains}
-      totalMonthlySpend={totalMonthlySpend}
-      fetchError={fetchError}
-    />
+    <PageTransition>
+      <DashboardClient
+        orders={orders}
+        displayName={displayName}
+        totalInboxes={totalInboxes}
+        totalDomains={totalDomains}
+        totalMonthlySpend={totalMonthlySpend}
+        fetchError={fetchError}
+      />
+    </PageTransition>
   );
 }

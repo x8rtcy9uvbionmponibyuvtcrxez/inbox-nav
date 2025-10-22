@@ -1,6 +1,6 @@
 # Intercom Integration Setup
 
-This app includes a complete Intercom integration for customer support and chat functionality.
+This app includes a complete Intercom integration with Clerk authentication for customer support and chat functionality.
 
 ## Setup Instructions
 
@@ -30,51 +30,57 @@ Make sure to add the environment variable in your Vercel dashboard:
 
 ### Components
 
-- **IntercomProvider**: Automatically initializes Intercom and syncs user data
-- **IntercomLauncher**: Custom launcher button (appears in header for signed-in users)
-- **IntercomHelpButton**: Reusable help button component
-
-### Hooks
-
-- **useIntercom**: Custom hook with all Intercom methods:
-  - `show()` - Show the Intercom widget
-  - `hide()` - Hide the Intercom widget
-  - `showMessages()` - Show messages
-  - `showNewMessage(message?)` - Show new message form
-  - `update(data)` - Update user data
-  - `trackEvent(name, metadata)` - Track custom events
-  - `showArticle(id)` - Show specific article
-  - `showSpace(space)` - Show specific space
+- **IntercomProvider**: Automatically initializes Intercom and syncs user data from Clerk
+- **IntercomLauncher**: Floating launcher button (appears in bottom-right corner)
+- **IntercomBooter**: Internal component that handles user data synchronization
 
 ### User Data Sync
 
 The integration automatically syncs user data from Clerk:
-- User ID
-- Email address
-- Full name
-- Account creation date
+- **User ID**: Clerk user ID
+- **Email**: Primary email address
+- **Name**: Full name or first name fallback
+- **Created At**: Account creation timestamp
+- **Custom Attributes**:
+  - `clerkId`: Clerk user ID
+  - `username`: Clerk username or first name
+  - `firstName`: User's first name
+  - `lastName`: User's last name
+
+### Authentication Integration
+
+- **Logged-in users**: Show real name and email in Intercom
+- **Anonymous users**: Show random names (normal behavior)
+- **Auto-sync**: User data updates when logging in/out
+- **Loading states**: Waits for Clerk to finish loading before booting Intercom
 
 ## Usage Examples
 
-### Basic Help Button
+### Basic Launcher Button
 ```tsx
-import IntercomHelpButton from '@/components/IntercomHelpButton';
+import IntercomLauncher from '@/components/IntercomLauncher';
 
-<IntercomHelpButton variant="primary" size="md">
-  Need Help?
-</IntercomHelpButton>
+// Default floating button
+<IntercomLauncher />
+
+// Custom button
+<IntercomLauncher>
+  <button className="my-custom-button">
+    Need Help?
+  </button>
+</IntercomLauncher>
 ```
 
-### Custom Intercom Actions
+### Using Intercom Hooks
 ```tsx
-import { useIntercom } from '@/hooks/useIntercom';
+import { useIntercom } from 'react-use-intercom';
 
 function MyComponent() {
-  const { showNewMessage, trackEvent } = useIntercom();
+  const { show, hide, showMessages, trackEvent } = useIntercom();
 
   const handleSupport = () => {
     trackEvent('support_requested', { page: 'dashboard' });
-    showNewMessage('I need help with my inbox setup');
+    show();
   };
 
   return <button onClick={handleSupport}>Get Support</button>;
@@ -83,19 +89,20 @@ function MyComponent() {
 
 ### Track User Events
 ```tsx
-const { trackEvent } = useIntercom();
+import { useIntercom } from 'react-use-intercom';
 
-// Track when user creates an inbox
-trackEvent('inbox_created', { 
-  type: 'google', 
-  quantity: 5 
-});
+function MyComponent() {
+  const { trackEvent } = useIntercom();
 
-// Track feature usage
-trackEvent('feature_used', { 
-  feature: 'bulk_import',
-  success: true 
-});
+  const handleInboxCreated = () => {
+    trackEvent('inbox_created', { 
+      type: 'google', 
+      quantity: 5 
+    });
+  };
+
+  return <button onClick={handleInboxCreated}>Create Inbox</button>;
+}
 ```
 
 ## Customization
