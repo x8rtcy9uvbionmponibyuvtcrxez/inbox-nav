@@ -231,6 +231,17 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
   const isCancelled = orderData?.status === 'CANCELLED' || orderData?.subscriptionStatus === 'cancel_at_period_end';
   const hasSubscription = Boolean(orderData?.stripeSubscriptionId);
   const hasActiveSubscription = Boolean(hasSubscription && !isCancelled);
+  
+  // Debug logging
+  console.log('OrderDetailsModal Debug:', {
+    orderId: orderData?.id,
+    stripeSubscriptionId: orderData?.stripeSubscriptionId,
+    hasSubscription,
+    isCancelled,
+    hasActiveSubscription,
+    status: orderData?.status,
+    subscriptionStatus: orderData?.subscriptionStatus
+  });
   const subscriptionStatusLabel = hasSubscription ? (
     isCancelled ? (
       orderData?.subscriptionStatus === 'cancel_at_period_end' ? 'Cancelling at period end' : 'Cancelled'
@@ -580,7 +591,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
             </div>
           )}
           <div className="flex justify-end gap-3">
-          {hasSubscription && !isCancelled && (
+          {hasSubscription && (
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
@@ -619,10 +630,12 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
             >
               <button
                 type="submit"
-                disabled={isCancelling}
+                disabled={isCancelling || isCancelled}
                 className="inline-flex items-center rounded-full border border-red-500/30 bg-red-500/15 px-4 py-2 text-sm font-medium text-red-200 hover:border-red-500/50 hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isCancelling ? 'Cancelling...' : 'Cancel Subscription'}
+                {isCancelling ? 'Cancelling...' : 
+                 isCancelled ? 'Subscription Already Cancelled' : 
+                 'Cancel Subscription'}
               </button>
             </form>
           )}

@@ -18,17 +18,42 @@ interface ProductCardProps {
 }
 
 const ProductCard = memo(function ProductCard({ product, quantity, onQuantityChange, onCheckout, loading, getMoq }: ProductCardProps) {
-  const totalPrice = product.price * quantity;
+  // Calculate price based on volume tiers
+  const getVolumePrice = (qty: number) => {
+    if (!product.pricingTiers || product.pricingTiers.length === 0) {
+      return product.price;
+    }
+    
+    // Find the appropriate tier for the quantity
+    const tier = product.pricingTiers.find(tier => {
+      if (tier.maxQty === null) {
+        return qty >= tier.minQty;
+      }
+      return qty >= tier.minQty && qty <= tier.maxQty;
+    });
+    
+    return tier ? tier.price : product.price;
+  };
+  
+  const pricePerInbox = getVolumePrice(quantity);
+  const totalPrice = pricePerInbox * quantity;
   const isDisabled = loading || quantity < getMoq(product.id);
   
   return (
     <div className="surface-card flex h-full flex-col gap-8">
       <div className="flex items-center justify-center">
         <div className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Starting at</p>
-          <p className="text-3xl font-semibold text-[var(--text-primary)]">
-            ${product.price}<span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ inbox</span>
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+            {quantity > 0 ? 'Price per inbox' : 'Starting at'}
           </p>
+          <p className="text-3xl font-semibold text-[var(--text-primary)]">
+            ${pricePerInbox.toFixed(2)}<span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/ inbox</span>
+          </p>
+          {quantity > 0 && pricePerInbox < product.price && (
+            <p className="text-xs text-green-400 mt-1">
+              Save ${(product.price - pricePerInbox).toFixed(2)}/inbox with volume pricing
+            </p>
+          )}
         </div>
       </div>
       
