@@ -10,17 +10,7 @@ interface PulseProps {
   scale?: number;
 }
 
-const pulseVariants = {
-  animate: {
-    scale: [1, 1.05, 1],
-    opacity: [1, 0.8, 1],
-    transition: {
-      duration: 2,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  },
-};
+// Removed complex variants to avoid TypeScript issues
 
 export default function Pulse({ 
   children, 
@@ -29,12 +19,16 @@ export default function Pulse({
 }: PulseProps) {
   return (
     <motion.div
-      variants={pulseVariants}
-      animate="animate"
-      className={className}
-      style={{
-        animationDuration: `${duration}s`,
+      animate={{ 
+        scale: [1, 1.05, 1], 
+        opacity: [1, 0.8, 1] 
       }}
+      transition={{
+        duration: duration,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+      className={className}
     >
       {children}
     </motion.div>
