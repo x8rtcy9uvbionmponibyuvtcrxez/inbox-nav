@@ -687,36 +687,50 @@ const personaSummaryNames = personas
                 </div>
               )}
 
-              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-5">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Domain setup</h3>
-                    <p className="text-sm text-white/60">{domainPlanSummary}</p>
-                  </div>
-                  {domainSource && (
-                    <span className="inline-flex items-center rounded-full border border-white/15 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.25em] text-white/70">
-                      {domainSource === 'BUY_FOR_ME' ? 'We buy for you' : 'Using your domains'}
-                    </span>
-                  )}
-                </div>
-
-                {isOwnDomainFlow ? (
-                  <div className="space-y-5">
+              {productType !== 'PREWARMED' && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <label className="text-sm font-medium text-white">Domains we should use</label>
-                      <p className="text-xs text-white/50">Add the domains you&apos;ll use (one per line). We&apos;ll automatically configure SPF, DKIM, and DMARC records.</p>
-                      <textarea
-                        className="mt-2 h-28 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                        placeholder="example1.com&#10;example2.io&#10;example3.net"
-                        value={ownDomainsRaw}
-                        onChange={(e) => setOwnDomainsRaw(e.target.value)}
-                        required
-                      />
-                      <p className="mt-2 text-xs text-white/40">
-                        {ownDomainsRaw.split('\n').filter((d) => d.trim()).length} domain(s) listed
-                      </p>
+                      <h3 className="text-lg font-semibold text-white">Domain setup</h3>
+                      <p className="text-sm text-white/60">{domainPlanSummary}</p>
                     </div>
+                    {domainSource && (
+                      <span className="inline-flex items-center rounded-full border border-white/15 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.25em] text-white/70">
+                        {domainSource === 'BUY_FOR_ME' ? 'We buy for you' : 'Using your domains'}
+                      </span>
+                    )}
+                  </div>
 
+                  {isOwnDomainFlow ? (
+                    <div className="space-y-5">
+                      <div>
+                        <label className="text-sm font-medium text-white">Domains we should use</label>
+                        <p className="text-xs text-white/50">Add the domains you&apos;ll use (one per line). We&apos;ll automatically configure SPF, DKIM, and DMARC records.</p>
+                        <textarea
+                          className="mt-2 h-28 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                          placeholder="example1.com&#10;example2.io&#10;example3.net"
+                          value={ownDomainsRaw}
+                          onChange={(e) => setOwnDomainsRaw(e.target.value)}
+                          required
+                        />
+                        <p className="mt-2 text-xs text-white/40">
+                          {ownDomainsRaw.split('\n').filter((d) => d.trim()).length} domain(s) listed
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white">Primary forwarding URL</label>
+                        <p className="text-xs text-white/50">Add the URL your inbox domains should redirect to after setup.</p>
+                        <input
+                          className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
+                          placeholder="https://yourbusiness.com"
+                          value={primaryForwardUrl}
+                          onChange={(e) => setPrimaryForwardUrl(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+                  ) : isBuyForMeFlow ? (
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-white">Primary forwarding URL</label>
                       <p className="text-xs text-white/50">Add the URL your inbox domains should redirect to after setup.</p>
@@ -728,21 +742,9 @@ const personaSummaryNames = personas
                         required
                       />
                     </div>
-                  </div>
-                ) : isBuyForMeFlow ? (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white">Primary forwarding URL</label>
-                    <p className="text-xs text-white/50">Add the URL your inbox domains should redirect to after setup.</p>
-                    <input
-                      className="mt-2 w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-0"
-                      placeholder="https://yourbusiness.com"
-                      value={primaryForwardUrl}
-                      onChange={(e) => setPrimaryForwardUrl(e.target.value)}
-                      required
-                    />
-                  </div>
-                ) : null}
-              </div>
+                  ) : null}
+                </div>
+              )}
             </div>
           )}
 

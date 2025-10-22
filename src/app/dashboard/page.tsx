@@ -6,16 +6,16 @@ import PageTransition from "@/components/animations/PageTransition";
 type OrderWithRelations = {
   id: string;
   createdAt: Date;
-  businessType?: string;
-  website?: string;
+  businessType?: string | null;
+  website?: string | null;
   order: {
     id: string;
     productType: string;
     quantity: number;
     totalAmount: number;
     createdAt: Date;
-    status?: string;
-    subscriptionStatus?: string;
+    status?: string | null;
+    subscriptionStatus?: string | null;
     inboxes: { id: string; forwardingDomain?: string }[];
     domains: { id: string; domain: string; forwardingUrl?: string }[];
   };
@@ -46,6 +46,8 @@ export default async function Dashboard() {
         select: {
           id: true,
           createdAt: true,
+          businessType: true,
+          website: true,
           order: {
             select: {
               id: true,
@@ -53,12 +55,14 @@ export default async function Dashboard() {
               quantity: true,
               totalAmount: true,
               createdAt: true,
+              status: true,
+              subscriptionStatus: true,
               inboxes: {
                 select: { id: true }
               },
-                     domains: {
-                       select: { id: true, domain: true }
-                     }
+              domains: {
+                select: { id: true, domain: true }
+              }
             }
           }
         },

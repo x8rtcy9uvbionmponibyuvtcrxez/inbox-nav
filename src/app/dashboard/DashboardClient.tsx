@@ -13,16 +13,16 @@ import IntercomLauncher from "@/components/IntercomLauncher";
 type OrderWithRelations = {
   id: string;
   createdAt: Date;
-  businessType?: string;
-  website?: string;
+  businessType?: string | null;
+  website?: string | null;
   order: {
     id: string;
     productType: string;
     quantity: number;
     totalAmount: number;
     createdAt: Date;
-    status?: string;
-    subscriptionStatus?: string;
+    status?: string | null;
+    subscriptionStatus?: string | null;
     inboxes: { id: string; forwardingDomain?: string }[];
     domains: { id: string; domain: string; forwardingUrl?: string }[];
   };
@@ -396,7 +396,9 @@ export default function DashboardClient({
                         ) : order?.status ? (
                           <StatusBadge status={order.status} />
                         ) : (
-                          <span className="text-xs text-brand-muted">Unknown</span>
+                          <span className="rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                            Processing
+                          </span>
                         )}
                       </div>
                     </td>
