@@ -15,7 +15,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
     }
 
-    const order = await prisma.order.findFirst({ where: { id: orderId, clerkUserId: userId } })
+    const order = await prisma.order.findFirst({ 
+      where: { 
+        id: orderId,
+        onboardingData: {
+          clerkUserId: userId
+        }
+      } 
+    })
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }

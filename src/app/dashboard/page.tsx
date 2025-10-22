@@ -16,6 +16,9 @@ type OrderWithRelations = {
     createdAt: Date;
     status?: string | null;
     subscriptionStatus?: string | null;
+    stripeSubscriptionId?: string | null;
+    cancelledAt?: Date | null;
+    cancellationReason?: string | null;
     inboxes: { id: string; forwardingDomain?: string }[];
     domains: { id: string; domain: string; forwardingUrl?: string }[];
   };
@@ -57,6 +60,9 @@ export default async function Dashboard() {
               createdAt: true,
               status: true,
               subscriptionStatus: true,
+              stripeSubscriptionId: true,
+              cancelledAt: true,
+              cancellationReason: true,
               inboxes: {
                 select: { id: true }
               },

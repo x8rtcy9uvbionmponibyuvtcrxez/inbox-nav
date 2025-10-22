@@ -45,6 +45,9 @@ type OrderWithRelations = {
     createdAt: Date;
     status?: string;
     subscriptionStatus?: string;
+    stripeSubscriptionId?: string;
+    cancelledAt?: Date | null;
+    cancellationReason?: string | null;
     inboxes: { id: string; email?: string; forwardingDomain?: string }[];
     domains: { id: string; domain: string; forwardingUrl?: string }[];
   };
@@ -381,14 +384,12 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                 <span className="text-white/60">Subscription Status:</span>
                 <span className="text-white">{subscriptionStatusLabel}</span>
               </div>
-              {orderData?.stripeSubscriptionId && (
-                <div className="flex justify-between">
-                  <span className="text-white/60">Stripe Subscription:</span>
-                  <span className="font-mono text-xs text-white/80 break-all">
-                    {orderData.stripeSubscriptionId}
-                  </span>
-                </div>
-              )}
+              <div className="flex justify-between">
+                <span className="text-white/60">Stripe Subscription ID:</span>
+                <span className="font-mono text-xs text-white/80 break-all">
+                  {orderData?.stripeSubscriptionId || 'Not available'}
+                </span>
+              </div>
               {isCancelled && orderData?.cancelledAt && (
                 <div className="flex justify-between">
                   <span className="text-white/60">Cancelled On:</span>
@@ -579,7 +580,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
             </div>
           )}
           <div className="flex justify-end gap-3">
-          {hasActiveSubscription && (
+          {hasSubscription && !isCancelled && (
             <form
               onSubmit={async (e) => {
                 e.preventDefault();

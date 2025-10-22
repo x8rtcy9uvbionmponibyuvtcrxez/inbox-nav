@@ -23,6 +23,9 @@ type OrderWithRelations = {
     createdAt: Date;
     status?: string | null;
     subscriptionStatus?: string | null;
+    stripeSubscriptionId?: string | null;
+    cancelledAt?: Date | null;
+    cancellationReason?: string | null;
     inboxes: { id: string; forwardingDomain?: string }[];
     domains: { id: string; domain: string; forwardingUrl?: string }[];
   };
