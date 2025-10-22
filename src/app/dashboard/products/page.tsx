@@ -65,43 +65,6 @@ const ProductCard = memo(function ProductCard({ product, quantity, onQuantityCha
         </div>
       </div>
       
-      {product.pricingTiers && (
-        <div className="mt-4 border-t border-[var(--border-subtle)] pt-4">
-          <div className="p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)] mb-3">
-              Volume Pricing
-            </p>
-            <div className="space-y-2">
-              {product.pricingTiers.map((tier: PricingTier, idx: number) => {
-                const rangeText = tier.maxQty 
-                  ? `${tier.minQty}-${tier.maxQty}` 
-                  : `${tier.minQty}+`;
-                const savingsPerUnit = product.price - tier.price;
-                
-                return (
-                  <div 
-                    key={idx} 
-                    className="flex items-center justify-between text-sm p-2 rounded hover:bg-[var(--bg-secondary)] transition-colors"
-                  >
-                    <span className="text-[var(--text-secondary)]">{rangeText} inboxes</span>
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold text-[var(--text-primary)]">
-                        ${tier.price.toFixed(2)}/inbox
-                      </span>
-                      {savingsPerUnit > 0 && (
-                        <span className="text-xs text-green-400 font-medium">
-                          Save ${savingsPerUnit.toFixed(2)}/inbox
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-      
       <div className="mt-auto space-y-6">
         <div className="flex items-center justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
           <span>Total monthly</span>
@@ -127,6 +90,35 @@ const ProductCard = memo(function ProductCard({ product, quantity, onQuantityCha
           )}
         </Button>
       </div>
+
+      {product.pricingTiers && (
+        <div className="mt-4 border-t border-[var(--border-subtle)] pt-4">
+          <div className="p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)] mb-3">
+              Volume Pricing
+            </p>
+            <div className="space-y-2">
+              {product.pricingTiers.map((tier: PricingTier, idx: number) => {
+                const rangeText = tier.maxQty 
+                  ? `${tier.minQty}-${tier.maxQty}` 
+                  : `${tier.minQty}+`;
+                
+                return (
+                  <div 
+                    key={idx} 
+                    className="flex items-center justify-between text-sm p-2 rounded hover:bg-[var(--bg-secondary)] transition-colors"
+                  >
+                    <span className="text-[var(--text-secondary)]">{rangeText} inboxes</span>
+                    <span className="font-semibold text-[var(--text-primary)]">
+                      ${tier.price.toFixed(2)}/inbox
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
@@ -166,7 +158,7 @@ const tabs: Tab[] = [
     id: "google",
     label: "Google",
     emoji: "📧",
-    productIds: ["EDU", "LEGACY", "RESELLER"]
+    productIds: ["LEGACY", "RESELLER"]
   },
   {
     id: "microsoft",
