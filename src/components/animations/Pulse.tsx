@@ -25,8 +25,7 @@ const pulseVariants = {
 export default function Pulse({ 
   children, 
   className = "",
-  duration = 2,
-  scale = 1.05 
+  duration = 2
 }: PulseProps) {
   return (
     <motion.div

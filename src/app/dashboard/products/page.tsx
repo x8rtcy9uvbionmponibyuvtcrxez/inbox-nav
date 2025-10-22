@@ -5,7 +5,6 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
 import PageTransition from "@/components/animations/PageTransition";
 import FadeIn from "@/components/animations/FadeIn";
-import StaggeredList from "@/components/animations/StaggeredList";
 
 type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 
@@ -330,13 +329,13 @@ export default function ProductsPage() {
                 <div className="space-y-3 text-base text-[var(--text-secondary)]">
                   {product.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-3">
-                      <CheckIcon className="h-4 w-4 text-[var(--text-primary)]/80" />
+                      <span className="text-[var(--text-primary)]/80">✓</span>
                       <span>{feature}</span>
                     </div>
                   ))}
                   {product.id === "MICROSOFT" && (
                     <div className="flex items-center gap-3 text-[var(--text-primary)]">
-                      <StarIcon className="h-4 w-4" />
+                      <span>⭐</span>
                       <span>Elite reputation floor & dedicated SPF records</span>
                     </div>
                   )}

@@ -38,8 +38,7 @@ const itemVariants = {
 
 export default function StaggeredList({ 
   children, 
-  className = "",
-  staggerDelay = 0.1 
+  className = ""
 }: StaggeredListProps) {
   return (
     <motion.div
