@@ -19,22 +19,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
-  hidden: { 
-    opacity: 0, 
-    y: 20,
-    scale: 0.95,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  },
-};
+// Removed complex variants to avoid TypeScript issues
 
 export default function StaggeredList({ 
   children, 
@@ -51,14 +36,19 @@ export default function StaggeredList({
         children.map((child, index) => (
           <motion.div
             key={index}
-            variants={itemVariants}
-            custom={index}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
           >
             {child}
           </motion.div>
         ))
       ) : (
-        <motion.div variants={itemVariants}>
+        <motion.div 
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           {children}
         </motion.div>
       )}
