@@ -28,8 +28,8 @@ type CustomerOrder = {
 type OrderWithRelations = {
   id: string;
   createdAt: Date;
-  businessType?: string;
-  website?: string;
+  businessType?: string | null;
+  website?: string | null;
   personas?: string[];
   specialRequirements?: string;
   domainPreferences?: string;
@@ -43,9 +43,9 @@ type OrderWithRelations = {
     quantity: number;
     totalAmount: number;
     createdAt: Date;
-    status?: string;
-    subscriptionStatus?: string;
-    stripeSubscriptionId?: string;
+    status?: string | null;
+    subscriptionStatus?: string | null;
+    stripeSubscriptionId?: string | null;
     cancelledAt?: Date | null;
     cancellationReason?: string | null;
     inboxes: { id: string; email?: string; forwardingDomain?: string }[];
