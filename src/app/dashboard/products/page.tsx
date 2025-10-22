@@ -274,7 +274,6 @@ export default function ProductsPage() {
               <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
                      {filteredProducts.map((product) => {
                        const totalPrice = getTotalPrice(product.id);
-                       const isStaticCard = false;
 
                        return (
                          <div key={product.id} className="surface-card flex h-full flex-col gap-8">
