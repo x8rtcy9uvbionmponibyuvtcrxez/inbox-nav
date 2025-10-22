@@ -71,8 +71,8 @@ const products: Product[] = [
     id: "LEGACY",
     name: "Legacy Inboxes",
     price: 2.5,
-    description: "Balanced Google setup for teams that want reliability and predictable spend.",
-    features: ["Best balance of cost + risk", "Very low chance of Google deactivations", "Ideal for steady, long-term outreach"],
+    description: "Low cost Google inboxes for teams that want cost-effective inboxes",
+    features: ["Low risk of Google crackdown", "Send up to 15 emails/day/inbox", "US IP only"],
     color: "orange",
     priceId: "price_1RW8EkBRlmSshMl5LIGqjcHw",
     tab: "google",
@@ -81,8 +81,8 @@ const products: Product[] = [
     id: "RESELLER",
     name: "Reseller Inboxes",
     price: 3,
-    description: "Higher-trust Google inboxes for programs that need extra stability.",
-    features: ["Safer Google setup (more isolation)", "Great for high-stakes/managed accounts", "Full IMAP/SMTP access"],
+    description: "Safest Google inboxes — the recommended choice",
+    features: ["Zero risk of Google crackdown", "Full admin access", "1 domain/workspace", "US IP only", "Send up to 15 emails/day/inbox"],
     color: "blue",
     priceId: "price_1SIoyCBRlmSshMl5OSvRIr36",
     tab: "google",
@@ -91,8 +91,8 @@ const products: Product[] = [
     id: "PREWARMED",
     name: "Prewarmed Inboxes",
     price: 7,
-    description: "Ready-to-send inboxes with proven sender history.",
-    features: ["Instant activation", "Strong reputation floor", "Zero ramp-up time"],
+    description: "Prewarmed inboxes ready to send with FREE .COM domains",
+    features: ["Generic business domains", "Configure your sending name, profile picture, and forwarding domain", "Warmed up for at least 1 month", "Send up to 15 emails/day/inbox"],
     badge: "Popular",
     color: "green",
     priceId: "price_1RSKvSBRlmSshMl5HORm2Mzs",
@@ -102,8 +102,8 @@ const products: Product[] = [
     id: "AWS",
     name: "AWS Inboxes",
     price: 1.25,
-    description: "AWS-backed inboxes for scalable, flexible infrastructure.",
-    features: ["Built on AWS for scale", "Flexible integration options", "Stable, cloud-native setup"],
+    description: "AWS-based SMTP inboxes with isolated tenants and dedicated IPs",
+    features: ["Built on AWS — optimized for scale", "Dedicated IPs and isolated tenants", "Premium SMTP inboxes", "Send up to 15 emails/day/inbox"],
     color: "yellow",
     priceId: "price_1SIoxQBRlmSshMl5cPgeqUNj",
     tab: "smtp",
@@ -112,8 +112,8 @@ const products: Product[] = [
     id: "MICROSOFT",
     name: "Microsoft Inboxes",
     price: 60,
-    description: "Microsoft 365 enterprise inboxes with security and compliance built-in.",
-    features: ["Enterprise-grade security & controls", "Dedicated SPF/DKIM setup per domain", "Priority support & SLAs"],
+    description: "Microsoft 365 enterprise inboxes based on Azure",
+    features: ["Isolated tenants", "50 users/domain", "Send up to 5 emails/day/inbox", "Same as Hypertide", "Performs better than regular Microsoft inboxes"],
     badge: "Premium",
     color: "purple",
     priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
@@ -343,7 +343,7 @@ export default function ProductsPage() {
 
                 <div className="space-y-3">
                   <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                    Inbox count
+                    {product.id === "MICROSOFT" ? "Domain count" : "Inbox count"}
                   </label>
                   <input
                     type="text"
