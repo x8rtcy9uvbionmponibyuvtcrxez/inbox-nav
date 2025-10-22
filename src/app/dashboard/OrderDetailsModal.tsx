@@ -221,12 +221,15 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
 
   const orderData = (order.order ?? null) as CustomerOrder | null;
   if (!orderData) {
+    console.error('OrderData is null! Order structure:', order);
     return null;
   }
 
   // Debug: Log the full order structure
   console.log('Full order structure:', order);
   console.log('Order.order:', order.order);
+  console.log('Order.order type:', typeof order.order);
+  console.log('Order.order keys:', order.order ? Object.keys(order.order) : 'null');
 
   const inboxCount = orderData?.inboxes && orderData.inboxes.length > 0
     ? orderData.inboxes.length

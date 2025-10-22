@@ -8,7 +8,6 @@ import { OrderSkeleton, StatsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/Button";
 import FadeIn from "@/components/animations/FadeIn";
 import StaggeredList from "@/components/animations/StaggeredList";
-import IntercomLauncher from "@/components/IntercomLauncher";
 
 type OrderWithRelations = {
   id: string;
@@ -141,6 +140,8 @@ export default function DashboardClient({
     console.log('Opening order details for:', order);
     console.log('Order.order:', order.order);
     console.log('Stripe subscription ID:', order.order?.stripeSubscriptionId);
+    console.log('Order.order type:', typeof order.order);
+    console.log('Order.order keys:', order.order ? Object.keys(order.order) : 'null');
     setSelectedOrder(order);
     setIsModalOpen(true);
   }, []);
@@ -303,14 +304,10 @@ export default function DashboardClient({
                 Create Inbox
               </Link>
             </Button>
-                   {process.env.NEXT_PUBLIC_INTERCOM_APP_ID && (
-                     <IntercomLauncher className="gap-3 hover:bg-white/5 transition-all duration-200">
-                       <Button variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
-                         <EnvelopeIcon className="h-5 w-5" />
-                         Contact Support
-                       </Button>
-                     </IntercomLauncher>
-                   )}
+                   <Button variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
+                     <EnvelopeIcon className="h-5 w-5" />
+                     Contact Support
+                   </Button>
           </div>
         </div>
       </FadeIn>
