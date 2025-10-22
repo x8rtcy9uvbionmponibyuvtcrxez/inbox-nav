@@ -114,13 +114,16 @@ export default async function Dashboard() {
     ]);
 
     orders = ordersData;
-    console.log('Dashboard orders data:', ordersData.map(o => ({
-      id: o.id,
-      orderId: o.order.id,
-      status: o.order.status,
-      subscriptionStatus: o.order.subscriptionStatus,
-      stripeSubscriptionId: o.order.stripeSubscriptionId
-    })));
+           console.log('=== DASHBOARD SERVER DEBUG ===');
+           console.log('Dashboard orders data:', JSON.stringify(ordersData.map(o => ({
+             id: o.id,
+             orderId: o.order.id,
+             status: o.order.status,
+             subscriptionStatus: o.order.subscriptionStatus,
+             stripeSubscriptionId: o.order.stripeSubscriptionId,
+             businessType: o.businessType,
+             website: o.website
+           })), null, 2));
     
     // Use optimized data from parallel queries
     totalInboxes = inboxCount._sum.quantity || 0;
