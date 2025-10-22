@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import { memo, useMemo, useCallback, useState } from 'react';
 
 interface VirtualizedTableProps<T> {
   items: T[];
@@ -22,7 +22,6 @@ function VirtualizedTable<T>({
   emptyState,
 }: VirtualizedTableProps<T>) {
   const [scrollTop, setScrollTop] = useState(0);
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
 
   const visibleRange = useMemo(() => {
     const startIndex = Math.floor(scrollTop / rowHeight);
@@ -53,7 +52,7 @@ function VirtualizedTable<T>({
   }
 
   return (
-    <div className={`overflow-auto ${className}`} style={{ height: containerHeight }} ref={setContainerRef}>
+    <div className={`overflow-auto ${className}`} style={{ height: containerHeight }} onScroll={handleScroll}>
       {header}
       <div style={{ height: totalHeight, position: 'relative' }}>
         <div

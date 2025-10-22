@@ -97,8 +97,6 @@ export async function getDashboardData(userId: string) {
 
 // Cached version with Redis-like caching
 export async function getCachedDashboardData(userId: string) {
-  const cacheKey = `dashboard:${userId}`;
-  
   // In a real implementation, you'd check Redis here
   // For now, we'll use the optimized query
   return getDashboardData(userId);

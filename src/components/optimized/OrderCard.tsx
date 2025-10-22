@@ -1,7 +1,6 @@
 "use client";
 
 import { memo } from 'react';
-import Link from 'next/link';
 import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 import type { Prisma } from '@prisma/client';
 

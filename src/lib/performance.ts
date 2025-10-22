@@ -32,8 +32,10 @@ export class PerformanceMonitor {
       // FID Observer
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          this.metrics.fid = entry.processingStart - entry.startTime;
+        entries.forEach((entry: PerformanceEntry & { processingStart?: number }) => {
+          if (entry.processingStart) {
+            this.metrics.fid = entry.processingStart - entry.startTime;
+          }
         });
       });
       fidObserver.observe({ entryTypes: ['first-input'] });
@@ -43,8 +45,9 @@ export class PerformanceMonitor {
       let clsValue = 0;
       const clsObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (!(entry as any).hadRecentInput) {
-            clsValue += (entry as any).value;
+          const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number };
+          if (!layoutShiftEntry.hadRecentInput && layoutShiftEntry.value) {
+            clsValue += layoutShiftEntry.value;
           }
         }
         this.metrics.cls = clsValue;
@@ -82,8 +85,8 @@ export class PerformanceMonitor {
 
     // Memory usage
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
-      this.metrics.memoryUsage = memory.usedJSHeapSize / 1024 / 1024; // MB
+      const memory = (performance as { memory?: { usedJSHeapSize: number } }).memory;
+      this.metrics.memoryUsage = memory ? memory.usedJSHeapSize / 1024 / 1024 : 0; // MB
     }
   }
 
@@ -96,8 +99,8 @@ export class PerformanceMonitor {
     const metrics = this.getMetrics();
     
     // Send to Vercel Analytics (if available)
-    if (typeof window !== 'undefined' && (window as any).va) {
-      (window as any).va('track', 'performance_metrics', metrics);
+    if (typeof window !== 'undefined' && (window as { va?: (event: string, data: unknown) => void }).va) {
+      (window as { va: (event: string, data: unknown) => void }).va('track', 'performance_metrics', metrics);
     }
 
     // Send to custom analytics endpoint
