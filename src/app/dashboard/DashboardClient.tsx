@@ -236,47 +236,6 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* Inboxes Section */}
-        <div className="rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_80px_-60px_rgba(7,7,7,0.9)] backdrop-blur-xl">
-          <div className="border-b border-white/5 px-6 py-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-brand-primary">Inbox Inventory</h2>
-                <p className="mt-1 text-sm text-brand-secondary">Manage your email inboxes and forwarding settings.</p>
-              </div>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="flex min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/5/10 px-6 py-12 text-center">
-              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-                <InboxIcon className="h-6 w-6 text-brand-secondary" />
-              </div>
-              <h3 className="text-lg font-semibold text-brand-primary">No inboxes yet</h3>
-              <p className="mt-2 text-sm text-brand-secondary">Your inboxes will appear here once your orders are fulfilled.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Domains Section */}
-        <div className="rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_80px_-60px_rgba(7,7,7,0.9)] backdrop-blur-xl">
-          <div className="border-b border-white/5 px-6 py-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-brand-primary">Domain Management</h2>
-                <p className="mt-1 text-sm text-brand-secondary">Track and manage your email domains.</p>
-              </div>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="flex min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/5/10 px-6 py-12 text-center">
-              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-                <GlobeAltIcon className="h-6 w-6 text-brand-secondary" />
-              </div>
-              <h3 className="text-lg font-semibold text-brand-primary">No domains yet</h3>
-              <p className="mt-2 text-sm text-brand-secondary">Your domains will appear here once your orders are fulfilled.</p>
-            </div>
-          </div>
-        </div>
       </div>
     );
   }

@@ -22,7 +22,7 @@ export default async function DashboardLayout({
       <aside className="flex w-72 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
         <div className="border-b border-[var(--border-subtle)] px-6 py-6">
           <div className="flex items-center gap-3">
-            <UserButton afterSignOutUrl="/" />
+            <UserButton fallbackRedirectUrl="/" />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{displayName}</p>
               <p className="text-xs text-[var(--text-muted)]">Inbox Navigator</p>
