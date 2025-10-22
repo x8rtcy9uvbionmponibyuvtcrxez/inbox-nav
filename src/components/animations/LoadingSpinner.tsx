@@ -70,16 +70,7 @@ interface LoadingDotsProps {
   className?: string;
 }
 
-const dotVariants = {
-  animate: {
-    y: [0, -10, 0],
-    transition: {
-      duration: 0.6,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  },
-};
+// Removed complex variants to avoid TypeScript issues
 
 export function LoadingDots({ className = "" }: LoadingDotsProps) {
   return (
@@ -87,9 +78,11 @@ export function LoadingDots({ className = "" }: LoadingDotsProps) {
       {[0, 1, 2].map((index) => (
         <motion.div
           key={index}
-          variants={dotVariants}
-          animate="animate"
+          animate={{ y: [0, -10, 0] }}
           transition={{
+            duration: 0.6,
+            repeat: Infinity,
+            ease: "easeInOut",
             delay: index * 0.2,
           }}
           className="w-2 h-2 bg-current rounded-full"
