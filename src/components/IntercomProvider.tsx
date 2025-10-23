@@ -19,7 +19,9 @@ function IntercomBooter() {
     if (!isLoaded) return;
 
     // If user is logged in, boot Intercom with real user data
-    const baseConfig = {} as const;
+    const baseConfig = {
+      hideDefaultLauncher: false, // Let Intercom show its own launcher
+    } as const;
 
     if (user) {
       const userData = {
