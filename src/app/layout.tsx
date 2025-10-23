@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { PerformanceMonitor } from '@/components/PerformanceMonitor'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
+import IntercomProvider from '@/components/IntercomProvider'
 import './globals.css'
 
 const inter = Inter({
@@ -90,17 +91,19 @@ export default function RootLayout({
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
     >
-      <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
-          <Analytics />
-          <SpeedInsights />
-          <PerformanceMonitor />
-          <ServiceWorkerRegistration />
-        </body>
-      </html>
+      <IntercomProvider>
+        <html lang="en" suppressHydrationWarning>
+          <body className={`${inter.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+            <Analytics />
+            <SpeedInsights />
+            <PerformanceMonitor />
+            <ServiceWorkerRegistration />
+          </body>
+        </html>
+      </IntercomProvider>
     </ClerkProvider>
   )
 }
