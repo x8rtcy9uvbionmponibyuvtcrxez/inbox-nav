@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { IntercomProvider as Provider, useIntercom } from 'react-use-intercom';
 
@@ -12,12 +12,15 @@ interface IntercomProviderProps {
 function IntercomBooter() {
   const { user, isLoaded } = useUser();
   const { boot, update, shutdown } = useIntercom();
+  const hasBootedRef = useRef(false);
 
   useEffect(() => {
     // Wait for Clerk to finish loading
     if (!isLoaded) return;
 
     // If user is logged in, boot Intercom with real user data
+    const baseConfig = {} as const;
+
     if (user) {
       const userData = {
         userId: user.id,
@@ -30,43 +33,33 @@ function IntercomBooter() {
           firstName: user.firstName,
           lastName: user.lastName,
         },
-      };
+      } as const;
 
-      console.log('Booting Intercom with user data:', userData);
-      boot(userData);
+      if (!hasBootedRef.current) {
+        console.log('Booting Intercom with user data:', userData);
+        boot({ ...baseConfig, ...userData });
+        hasBootedRef.current = true;
+      } else {
+        console.log('Updating Intercom user data:', userData);
+        update({ ...baseConfig, ...userData });
+      }
     } else {
       // No user logged in, boot Intercom without user data
-      console.log('Booting Intercom without user data');
-      boot();
+      if (!hasBootedRef.current) {
+        console.log('Booting Intercom without user data');
+        boot(baseConfig);
+        hasBootedRef.current = true;
+      }
     }
 
     // Cleanup function
     return () => {
+      hasBootedRef.current = false;
       shutdown();
     };
-  }, [user, isLoaded, boot, shutdown]);
+  }, [user, isLoaded, boot, shutdown, update]);
 
   // Update user data when user changes
-  useEffect(() => {
-    if (!isLoaded || !user) return;
-
-    const userData = {
-      userId: user.id,
-      email: user.primaryEmailAddress?.emailAddress,
-      name: user.fullName || user.firstName || 'User',
-      createdAt: user.createdAt ? Math.floor(new Date(user.createdAt).getTime() / 1000) : undefined,
-      customAttributes: {
-        clerkId: user.id,
-        username: user.username || user.firstName || 'user',
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
-    };
-
-    console.log('Updating Intercom user data:', userData);
-    update(userData);
-  }, [user, isLoaded, update]);
-
   return null;
 }
 

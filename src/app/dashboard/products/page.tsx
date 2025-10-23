@@ -473,7 +473,7 @@ export default function ProductsPage() {
             </div>
 
             <FadeIn delay={0.3}>
-              <div className="surface-card space-y-6 p-6 lg:sticky lg:top-[120px]">
+              <div className="surface-card space-y-6 p-6 lg:sticky lg:top-0">
                 <h3 className="text-xl font-semibold text-[var(--text-primary)]">All plans include:</h3>
                 <div className="space-y-4">
                   {[
