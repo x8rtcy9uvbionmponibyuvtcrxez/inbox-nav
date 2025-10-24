@@ -21,8 +21,8 @@ type CustomerOrder = {
   stripeSubscriptionId?: string;
   cancelledAt?: Date | null;
   cancellationReason?: string | null;
-  inboxes: { id: string; email?: string; forwardingDomain?: string }[];
-  domains: { id: string; domain: string; forwardingUrl?: string }[];
+  inboxes: { id: string; email?: string; forwardingDomain?: string | null }[];
+  domains: { id: string; domain: string; forwardingUrl?: string | null }[];
 };
 
 type OrderWithRelations = {
@@ -48,8 +48,8 @@ type OrderWithRelations = {
     stripeSubscriptionId?: string | null;
     cancelledAt?: Date | null;
     cancellationReason?: string | null;
-    inboxes: { id: string; email?: string; forwardingDomain?: string }[];
-    domains: { id: string; domain: string; forwardingUrl?: string }[];
+    inboxes: { id: string; email?: string; forwardingDomain?: string | null }[];
+    domains: { id: string; domain: string; forwardingUrl?: string | null }[];
   };
 };
 
