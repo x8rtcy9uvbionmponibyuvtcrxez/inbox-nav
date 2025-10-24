@@ -33,11 +33,12 @@ export default function PerformanceDashboard({ showDetails = false }: Performanc
         } else if (entry.entryType === 'first-contentful-paint') {
           newMetrics.fcp = entry.startTime;
         } else if (entry.entryType === 'first-input') {
-          newMetrics.fid = (entry as any).processingStart - entry.startTime;
+          newMetrics.fid = (entry as PerformanceEventTiming).processingStart - entry.startTime;
         } else if (entry.entryType === 'layout-shift') {
-          newMetrics.cls = (entry as any).value;
+          newMetrics.cls = (entry as PerformanceEntry & { value: number }).value;
         } else if (entry.entryType === 'navigation') {
-          newMetrics.ttfb = (entry as any).responseStart - (entry as any).requestStart;
+          const navEntry = entry as PerformanceNavigationTiming;
+          newMetrics.ttfb = navEntry.responseStart - navEntry.requestStart;
         }
       });
 
@@ -53,7 +54,7 @@ export default function PerformanceDashboard({ showDetails = false }: Performanc
     // Observe all performance entry types
     try {
       observer.observe({ entryTypes: ['largest-contentful-paint', 'first-contentful-paint', 'first-input', 'layout-shift', 'navigation'] });
-    } catch (e) {
+    } catch {
       // Some browsers don't support all entry types
       console.warn('Performance monitoring not fully supported');
     }
