@@ -1,7 +1,22 @@
 "use client";
 
-import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+
+type MotionModule = typeof import('framer-motion');
+
+let cachedMotion: MotionModule | null = null;
+let loader: Promise<MotionModule> | null = null;
+
+async function loadMotion(): Promise<MotionModule> {
+  if (cachedMotion) return cachedMotion;
+  if (!loader) {
+    loader = import('framer-motion').then((mod) => {
+      cachedMotion = mod;
+      return mod;
+    });
+  }
+  return loader;
+}
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -31,8 +46,28 @@ const pageTransition = {
 };
 
 export default function PageTransition({ children, className = "" }: PageTransitionProps) {
+  const [motion, setMotion] = useState<MotionModule | null>(() => cachedMotion);
+
+  useEffect(() => {
+    if (!motion && typeof window !== 'undefined') {
+      let mounted = true;
+      loadMotion().then((mod) => {
+        if (mounted) setMotion(mod);
+      });
+      return () => {
+        mounted = false;
+      };
+    }
+  }, [motion]);
+
+  if (!motion) {
+    return <div className={className}>{children}</div>;
+  }
+
+  const MotionDiv = motion.motion.div;
+
   return (
-    <motion.div
+    <MotionDiv
       initial="initial"
       animate="in"
       exit="out"
@@ -41,6 +76,6 @@ export default function PageTransition({ children, className = "" }: PageTransit
       className={className}
     >
       {children}
-    </motion.div>
+    </MotionDiv>
   );
 }
