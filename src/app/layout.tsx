@@ -31,10 +31,8 @@ export const metadata: Metadata = {
   manifest: '/site.webmanifest',
   other: {
     'preload': '/fonts/inter.woff2',
-    'preconnect': 'https://fonts.googleapis.com',
+    'preconnect': 'https://fonts.googleapis.com,https://clerk.com,https://api.stripe.com',
     'dns-prefetch': 'https://fonts.gstatic.com',
-    'preconnect': 'https://clerk.com',
-    'preconnect': 'https://api.stripe.com',
   },
   icons: {
     icon: [
