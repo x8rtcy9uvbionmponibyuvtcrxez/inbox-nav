@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { getCachedData } from '@/lib/redis';
 import type { Prisma } from '@prisma/client';
 
 type OrderWithRelations = Prisma.OnboardingDataGetPayload<{
@@ -95,9 +96,13 @@ export async function getDashboardData(userId: string) {
   };
 }
 
-// Cached version with Redis-like caching
+// Cached version with Redis caching
 export async function getCachedDashboardData(userId: string) {
-  // In a real implementation, you'd check Redis here
-  // For now, we'll use the optimized query
-  return getDashboardData(userId);
+  const cacheKey = `dashboard:${userId}`;
+  
+  return await getCachedData(
+    cacheKey,
+    () => getDashboardData(userId),
+    300 // 5 minutes cache
+  );
 }

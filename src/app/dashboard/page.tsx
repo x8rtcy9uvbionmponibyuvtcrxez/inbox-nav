@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { getCachedDashboardData } from "@/lib/queries/optimized-dashboard";
 import DashboardClient from "./DashboardClient";
-import PageTransition from "@/components/animations/PageTransition";
 
 type OrderWithRelations = {
   id: string;
@@ -44,91 +43,13 @@ export default async function Dashboard() {
   try {
     console.log('Dashboard query for user:', user.id);
     
-    // Optimized query with parallel data fetching
-    const [ordersData, inboxCount, domainCount, totalSpend] = await Promise.all([
-      prisma.onboardingData.findMany({
-        where: { clerkUserId: user.id },
-        select: {
-          id: true,
-          createdAt: true,
-          businessType: true,
-          website: true,
-          order: {
-            select: {
-              id: true,
-              productType: true,
-              quantity: true,
-              totalAmount: true,
-              createdAt: true,
-              status: true,
-              subscriptionStatus: true,
-              stripeSubscriptionId: true,
-              cancelledAt: true,
-              cancellationReason: true,
-              inboxes: {
-                select: { id: true }
-              },
-              domains: {
-                select: { id: true, domain: true }
-              }
-            }
-          }
-        },
-        orderBy: { createdAt: "desc" },
-        take: 10, // Limit to recent orders for dashboard
-      }),
-      // Get total inbox count efficiently
-      prisma.order.aggregate({
-        where: {
-          onboardingData: {
-            clerkUserId: user.id
-          }
-        },
-        _sum: {
-          quantity: true
-        }
-      }),
-      // Get unique domain count
-      prisma.domain.findMany({
-        where: {
-          order: {
-            onboardingData: {
-              clerkUserId: user.id
-            }
-          }
-        },
-        select: { domain: true },
-        distinct: ['domain']
-      }),
-      // Get total spend
-      prisma.order.aggregate({
-        where: {
-          onboardingData: {
-            clerkUserId: user.id
-          }
-        },
-        _sum: {
-          totalAmount: true
-        }
-      })
-    ]);
+    // Use optimized query function with caching
+    const { orders: ordersData, totalInboxes: inboxCount, totalDomains: domainCount, totalMonthlySpend: totalSpend } = await getCachedDashboardData(user.id);
 
     orders = ordersData;
-           console.log('=== DASHBOARD SERVER DEBUG ===');
-           console.log('Dashboard orders data:', JSON.stringify(ordersData.map(o => ({
-             id: o.id,
-             orderId: o.order.id,
-             status: o.order.status,
-             subscriptionStatus: o.order.subscriptionStatus,
-             stripeSubscriptionId: o.order.stripeSubscriptionId,
-             businessType: o.businessType,
-             website: o.website
-           })), null, 2));
-    
-    // Use optimized data from parallel queries
-    totalInboxes = inboxCount._sum.quantity || 0;
-    totalDomains = domainCount.length;
-    totalMonthlySpend = totalSpend._sum.totalAmount || 0;
+    totalInboxes = inboxCount;
+    totalDomains = domainCount;
+    totalMonthlySpend = totalSpend;
   } catch (error) {
     console.error("[Dashboard] Failed to load orders", error);
     fetchError = error instanceof Error ? error.message : "Unknown error occurred";
@@ -142,15 +63,13 @@ export default async function Dashboard() {
     "there";
 
   return (
-    <PageTransition>
-      <DashboardClient
-        orders={orders}
-        displayName={displayName}
-        totalInboxes={totalInboxes}
-        totalDomains={totalDomains}
-        totalMonthlySpend={totalMonthlySpend}
-        fetchError={fetchError}
-      />
-    </PageTransition>
+    <DashboardClient
+      orders={orders}
+      displayName={displayName}
+      totalInboxes={totalInboxes}
+      totalDomains={totalDomains}
+      totalMonthlySpend={totalMonthlySpend}
+      fetchError={fetchError}
+    />
   );
 }

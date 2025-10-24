@@ -10,10 +10,8 @@ datasource db {
 model Order {
   id                   String               @id @default(cuid())
   clerkUserId          String?              @map("clerk_user_id")
-  productType          ProductType          @map("product_type")
   quantity             Int
   totalAmount          Int
-  status               OrderStatus          @default(PENDING)
   stripeSessionId      String?              @map("stripe_session_id")
   stripeCustomerId     String?              @map("stripe_customer_id")
   stripeSubscriptionId String?              @map("stripe_subscription_id")
@@ -24,8 +22,16 @@ model Order {
   externalId           String?              @unique @map("external_id")
   createdAt            DateTime             @default(now()) @map("created_at")
   updatedAt            DateTime             @updatedAt @map("updated_at")
+  productType          ProductType          @map("product_type")
+  status               OrderStatus          @default(PENDING)
+  active_inbox_count   Int                  @default(0)
+  next_billing_date    DateTime?
+  original_quantity    Int?
+  stripe_invoice_id    String?
+  billing_events       billing_events[]
   domains              Domain[]
   inboxes              Inbox[]
+  notifications        notifications[]
   onboardingData       OnboardingData?
   pendingInvites       PendingOrderInvite[]
 
@@ -33,10 +39,9 @@ model Order {
 }
 
 model OnboardingData {
-  id                    String     @id @default(uuid())
-  orderId               String     @unique
+  id                    String       @id @default(uuid())
+  orderId               String       @unique
   clerkUserId           String
-  productType           ProductType? @map("product_type")
   businessType          String?
   industry              String?
   companySize           String?
@@ -45,19 +50,20 @@ model OnboardingData {
   personas              Json?
   espProvider           String?
   specialRequirements   String?
-  stepCompleted         Int        @default(0)
-  isCompleted           Boolean    @default(false)
-  createdAt             DateTime   @default(now())
-  updatedAt             DateTime   @updatedAt
-  domainSource          String     @default("OWN") @map("domain_source")
-  inboxesPerDomain      Int        @default(3) @map("inboxes_per_domain")
-  providedDomains       String[]   @default([]) @map("provided_domains")
-  calculatedDomainCount Int?       @map("calculated_domain_count")
-  domainRegistrar       String?    @map("domain_registrar")
-  registrarAdminEmail   String?    @map("registrar_admin_email")
-  registrarUsername     String?    @map("registrar_username")
-  registrarPassword     String?    @map("registrar_password")
-  order                 Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  stepCompleted         Int          @default(0)
+  isCompleted           Boolean      @default(false)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  domainSource          String       @default("OWN") @map("domain_source")
+  inboxesPerDomain      Int          @default(3) @map("inboxes_per_domain")
+  providedDomains       String[]     @default([]) @map("provided_domains")
+  calculatedDomainCount Int?         @map("calculated_domain_count")
+  domainRegistrar       String?      @map("domain_registrar")
+  registrarAdminEmail   String?      @map("registrar_admin_email")
+  registrarUsername     String?      @map("registrar_username")
+  registrarPassword     String?      @map("registrar_password")
+  productType           ProductType? @map("product_type")
+  order                 Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("onboarding_data")
 }
@@ -69,7 +75,6 @@ model Inbox {
   firstName        String?     @map("first_name")
   lastName         String?     @map("last_name")
   espPlatform      String      @map("esp_platform")
-  status           InboxStatus @default(PENDING)
   tags             String[]    @default([])
   businessName     String?     @map("business_name")
   forwardingDomain String?     @map("forwarding_domain")
@@ -78,6 +83,10 @@ model Inbox {
   createdAt        DateTime    @default(now()) @map("created_at")
   updatedAt        DateTime    @updatedAt @map("updated_at")
   personaName      String?     @map("persona_name")
+  status           InboxStatus @default(PENDING)
+  cancel_reason    String?
+  cancelled_at     DateTime?
+  is_active        Boolean     @default(true)
   order            Order       @relation(fields: [orderId], references: [id])
 
   @@map("inboxes")
@@ -87,7 +96,6 @@ model Domain {
   id            String       @id @default(cuid())
   orderId       String       @map("order_id")
   domain        String       @unique
-  status        DomainStatus @default(PENDING)
   tags          String[]     @default([])
   inboxCount    Int          @default(0) @map("inbox_count")
   forwardingUrl String       @map("forwarding_url")
@@ -95,6 +103,7 @@ model Domain {
   fulfilledAt   DateTime?    @map("fulfilled_at")
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
+  status        DomainStatus @default(PENDING)
   order         Order        @relation(fields: [orderId], references: [id])
 
   @@map("domains")
@@ -123,6 +132,33 @@ model PendingOrderInvite {
   @@map("pending_order_invites")
 }
 
+model billing_events {
+  id          String   @id
+  order_id    String
+  event_type  String
+  amount      Int?
+  description String?
+  metadata    Json?
+  created_at  DateTime @default(now())
+  orders      Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+}
+
+model notifications {
+  id            String   @id
+  order_id      String?
+  clerk_user_id String
+  type          String
+  title         String
+  message       String
+  action_url    String?
+  is_read       Boolean  @default(false)
+  created_at    DateTime @default(now())
+  orders        Order?   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([clerk_user_id])
+  @@index([is_read])
+}
+
 enum ProductType {
   RESELLER
   EDU
@@ -134,10 +170,10 @@ enum ProductType {
 
 enum OrderStatus {
   PENDING
-  PAID
   FULFILLED
-  PENDING_DOMAIN_PURCHASE
   CANCELLED
+  PAID
+  PENDING_DOMAIN_PURCHASE
 }
 
 enum InboxStatus {

@@ -6,8 +6,6 @@ import { EnvelopeIcon, SparklesIcon, InboxIcon, GlobeAltIcon, CurrencyDollarIcon
 import OrderDetailsModal from "./OrderDetailsModal";
 import { OrderSkeleton, StatsSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/Button";
-import FadeIn from "@/components/animations/FadeIn";
-import StaggeredList from "@/components/animations/StaggeredList";
 
 type OrderWithRelations = {
   id: string;
@@ -243,40 +241,38 @@ export default function DashboardClient({
   return (
     <div className="space-y-8 text-brand-primary">
       {/* Hero Section */}
-      <FadeIn delay={0.1}>
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex-1 max-w-2xl">
-            <p className="text-base text-brand-secondary mb-2">
-              {hasVisited ? `Welcome back, ${displayName}.` : "Welcome to Inbox Nav — we're excited to have you here!"}
-            </p>
-            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-brand-primary mb-4">
-              {hasVisited ? 'Your control center for every inbox.' : "Let's launch your inbox fleet."}
-            </h1>
-            <p className="text-lg text-brand-secondary leading-relaxed">
-              Track orders, manage domains, and launch inboxes — all in one place.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-stretch lg:min-w-[200px]">
-            <Button asChild variant="primary" size="lg" className="gap-3 shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)] hover:shadow-[0_15px_40px_-15px_rgba(255,255,255,0.9)] transition-all duration-200">
-              <Link href="/dashboard/products">
-                <SparklesIcon className="h-5 w-5" />
-                Create Inbox
-              </Link>
-            </Button>
-                   <Button variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
-                     <EnvelopeIcon className="h-5 w-5" />
-                     Contact Support
-                   </Button>
-          </div>
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex-1 max-w-2xl">
+          <p className="text-base text-brand-secondary mb-2">
+            {hasVisited ? `Welcome back, ${displayName}.` : "Welcome to Inbox Nav — we're excited to have you here!"}
+          </p>
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-brand-primary mb-4">
+            {hasVisited ? 'Your control center for every inbox.' : "Let's launch your inbox fleet."}
+          </h1>
+          <p className="text-lg text-brand-secondary leading-relaxed">
+            Track orders, manage domains, and launch inboxes — all in one place.
+          </p>
         </div>
-      </FadeIn>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-stretch lg:min-w-[200px]">
+          <Button asChild variant="primary" size="lg" className="gap-3 shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)] hover:shadow-[0_15px_40px_-15px_rgba(255,255,255,0.9)] transition-all duration-200">
+            <Link href="/dashboard/products">
+              <SparklesIcon className="h-5 w-5" />
+              Create Inbox
+            </Link>
+          </Button>
+                 <Button variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
+                   <EnvelopeIcon className="h-5 w-5" />
+                   Contact Support
+                 </Button>
+        </div>
+      </div>
 
       {/* Stats Cards */}
-      <StaggeredList className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3">
         <SummaryCard label="Live inboxes" value={totalInboxes.toString()} icon={InboxIcon} accent={cardAccent.inboxes} />
         <SummaryCard label="Managed domains" value={totalDomains.toString()} icon={GlobeAltIcon} accent={cardAccent.domains} />
         <SummaryCard label="Monthly total" value={formatCurrency(totalMonthlySpend)} icon={CurrencyDollarIcon} accent={cardAccent.revenue} />
-      </StaggeredList>
+      </div>
 
       {fetchError ? (
         <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
