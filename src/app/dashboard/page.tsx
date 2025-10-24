@@ -18,8 +18,8 @@ type OrderWithRelations = {
     stripeSubscriptionId?: string | null;
     cancelledAt?: Date | null;
     cancellationReason?: string | null;
-    inboxes: { id: string; forwardingDomain?: string }[];
-    domains: { id: string; domain: string; forwardingUrl?: string }[];
+    inboxes: { id: string; forwardingDomain?: string | null }[];
+    domains: { id: string; domain: string; forwardingUrl?: string | null }[];
   };
 };
 
