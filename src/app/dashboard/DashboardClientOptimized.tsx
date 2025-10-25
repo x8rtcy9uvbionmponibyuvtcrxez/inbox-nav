@@ -44,7 +44,14 @@ export default function DashboardClientOptimized({ orders }: DashboardClientOpti
     const totalDomains = domains.length;
     const liveDomains = domains.filter(domain => domain.status === 'LIVE').length;
     
-    const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    // Only include active subscriptions in revenue calculation
+    const totalRevenue = orders
+      .filter(order => 
+        order.status !== 'CANCELLED' && 
+        order.subscriptionStatus !== 'cancelled' && 
+        order.subscriptionStatus !== 'cancel_at_period_end'
+      )
+      .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     
     return {
       totalOrders,

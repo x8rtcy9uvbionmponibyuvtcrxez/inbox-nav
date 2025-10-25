@@ -72,7 +72,7 @@ export async function getDashboardData(userId: string) {
       },
     }),
     
-    // Calculate monthly spend with aggregation
+    // Calculate monthly spend with aggregation - only active subscriptions
     prisma.order.aggregate({
       where: {
         onboardingData: {
@@ -80,6 +80,13 @@ export async function getDashboardData(userId: string) {
         },
         createdAt: {
           gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        },
+        // Only include active subscriptions, exclude cancelled ones
+        status: {
+          not: 'CANCELLED'
+        },
+        subscriptionStatus: {
+          notIn: ['cancelled', 'cancel_at_period_end']
         },
       },
       _sum: {
