@@ -225,15 +225,6 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
     return null;
   }
 
-  // Debug: Log the full order structure
-  console.log('=== ORDER DETAILS MODAL DEBUG ===');
-  console.log('Full order structure:', JSON.stringify(order, null, 2));
-  console.log('Order.order:', JSON.stringify(order.order, null, 2));
-  console.log('Order.order type:', typeof order.order);
-  console.log('Order.order keys:', order.order ? Object.keys(order.order) : 'null');
-  console.log('Raw stripeSubscriptionId:', order.order?.stripeSubscriptionId);
-  console.log('Raw subscriptionStatus:', order.order?.subscriptionStatus);
-  console.log('Raw status:', order.order?.status);
 
   const inboxCount = orderData?.inboxes && orderData.inboxes.length > 0
     ? orderData.inboxes.length

@@ -203,14 +203,12 @@ function OnboardingPage() {
     const sessionId = searchParams.get('session_id');
     if (sessionId && typeof window !== 'undefined') {
       window.localStorage.removeItem('onboarding-completed');
-      console.log('[ONBOARDING] New session detected, cleared completion flag');
     }
 
     // Check if onboarding was already completed and redirect (only if no session_id)
     const hasCompletedOnboarding = typeof window !== 'undefined' && 
       window.localStorage.getItem('onboarding-completed');
     if (hasCompletedOnboarding && !sessionId) {
-      console.log('[ONBOARDING] Already completed, redirecting to dashboard');
       router.push('/dashboard');
       return;
     }
@@ -256,13 +254,10 @@ function OnboardingPage() {
   }, [searchParams]);
 
   const fetchSessionData = async (sessionId: string) => {
-    console.log('[ONBOARDING] Fetching session...', { sessionId });
     setIsLoadingSession(true);
     try {
       const url = `/api/get-session?session_id=${sessionId}`;
-      console.log('[ONBOARDING] GET', url);
       const response = await fetch(url);
-      console.log('[ONBOARDING] Session fetch status:', response.status);
       const data = await response.json() as {
         sessionId: string;
         productType: string;

@@ -85,31 +85,11 @@ function coerceProductType(value?: string | null): ProductType {
 
 export async function saveOnboardingAction(input: SaveOnboardingInput) {
   try {
-    console.log("=== ONBOARDING ACTION STARTED ===");
-    console.log("Received parameters:", {
-      businessName: input.businessName,
-      inboxCount: input.inboxCount,
-      domainStatus: input.domainStatus,
-      forwardingUrl: input.primaryForwardUrl,
-      personaCount: input.personas.length,
-      warmupTool: input.warmupTool,
-      productType: input.productType,
-      quantity: input.inboxCount,
-      accountId: input.accountId,
-      password: input.password,
-      apiKey: input.apiKey,
-      hasInternalTags: input.internalTags?.length || 0,
-      hasEspTags: input.espTags?.length || 0,
-      specialRequirements: input.specialRequirements,
-    });
-    console.log('[ACTION] Flags:', { hasSessionId: Boolean(input.sessionId) });
 
     // Step 1: Verify Clerk authentication
     const { userId } = await auth();
-    console.log("[ACTION] 🔐 Clerk auth result - userId:", userId);
 
     if (!userId) {
-      console.error("❌ No userId from Clerk auth");
       return { success: false, error: "Authentication failed - no user ID" };
     }
 
@@ -123,7 +103,6 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     // MOQ validation will be done after product type is determined
 
     if (validationErrors.length > 0) {
-      console.error("❌ Validation errors:", validationErrors);
       return { success: false, error: `Validation failed: ${validationErrors.join(", ")}` };
     }
 
@@ -136,13 +115,6 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
     const pricePerInbox = PRODUCT_PRICE[normalizedProductType] ?? 3;
     const totalAmountCents = input.inboxCount * pricePerInbox * 100; // Convert to cents
-    console.log("[ACTION] 💰 Pricing calculation:", {
-      productType: input.productType,
-      pricePerInbox: pricePerInbox,
-      quantity: input.inboxCount,
-      totalAmountDollars: input.inboxCount * pricePerInbox,
-      totalAmountCents: totalAmountCents,
-    });
 
     // Stripe metadata-derived domain configuration (if available)
     let sessionDomainSource: 'OWN' | 'BUY_FOR_ME' | undefined;
@@ -156,9 +128,6 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     let order;
     try {
       if (input.sessionId) {
-        console.log("[ACTION] Step 1: Processing Stripe session:", input.sessionId);
-
-        console.log("[ACTION] Checking for existing order by stripeSessionId");
         const existingOrder = await prisma.order.findFirst({
           where: {
             stripeSessionId: input.sessionId,
@@ -167,24 +136,15 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         });
 
         if (existingOrder) {
-          console.log("[ACTION] ✅ Found existing order:", existingOrder.id);
           order = existingOrder;
         } else {
-          console.log("[ACTION] Order not found, fetching from Stripe...");
 
           try {
             const stripe = assertStripe();
             if (!stripe) {
-              console.error("[ACTION] ❌ Stripe not configured");
               throw new Error("Stripe is not configured. Please contact support.");
             }
             const session = await stripe.checkout.sessions.retrieve(input.sessionId, { expand: ['subscription'] });
-            console.log("[ACTION] ✅ Stripe session retrieved:", {
-              id: session.id,
-              paymentStatus: session.payment_status,
-              customer: session.customer,
-              metadata: session.metadata,
-            });
 
             if (session.metadata?.clerkUserId !== userId) {
               throw new Error("Session does not belong to current user");

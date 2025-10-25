@@ -37,14 +37,11 @@ export async function markOrderAsFulfilledAction(
   uniformPassword?: string
 ) {
   try {
-    console.log("[FULFILLMENT] Starting fulfillment process for order:", orderId);
-    
     // Step 1: Verify admin access
     const { userId } = await auth();
     const adminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
     
     if (!userId || !adminIds.includes(userId)) {
-      console.error("[FULFILLMENT] Unauthorized access attempt");
       return { success: false, error: "Unauthorized" };
     }
 
@@ -67,17 +64,8 @@ export async function markOrderAsFulfilledAction(
     const onboarding = order.onboardingData;
     const isOwn = (onboarding?.domainSource ?? 'BUY_FOR_ME') === 'OWN';
 
-    console.log("[FULFILLMENT] Order details:", {
-      orderId: order.id,
-      status: order.status,
-      productType: order.productType,
-      isOwn,
-      hasCsvData: Boolean(csvData && csvData.length > 0)
-    });
-
     // Step 3: Process CSV data if provided
     if (csvData && csvData.length > 0) {
-      console.log("[FULFILLMENT] Processing CSV data:", csvData.length, "rows");
       
       if (isOwn) {
         // OWN domains: Update existing inboxes with passwords
@@ -225,7 +213,6 @@ export async function markOrderAsFulfilledAction(
       });
     });
 
-    console.log("[FULFILLMENT] ✅ Order fulfilled successfully");
     
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath('/admin/orders');
@@ -245,7 +232,6 @@ export async function markOrderAsFulfilledAction(
     };
 
   } catch (error) {
-    console.error("[FULFILLMENT] Error:", error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "Unknown error occurred" 
