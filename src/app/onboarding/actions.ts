@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { assertStripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
@@ -199,11 +199,30 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
             // Send order creation notification
             try {
+              // Get user's actual email from Clerk
+              let userEmail = 'user@example.com'; // fallback
+              let userFirstName: string | undefined;
+              let userLastName: string | undefined;
+              
+              if (userId) {
+                try {
+                  const client = await clerkClient();
+                  const user = await client.users.getUser(userId);
+                  const primaryEmailId = user.primaryEmailAddressId;
+                  const primaryEmail = user.emailAddresses?.find((addr) => addr.id === primaryEmailId);
+                  userEmail = primaryEmail?.emailAddress ?? user.emailAddresses?.[0]?.emailAddress ?? 'user@example.com';
+                  userFirstName = user.firstName || undefined;
+                  userLastName = user.lastName || undefined;
+                } catch (clerkError) {
+                  console.warn('[ONBOARDING] Failed to fetch user email from Clerk:', clerkError);
+                }
+              }
+
               const userData = {
                 id: userId,
-                email: 'user@example.com', // We don't have user email in this context
-                firstName: undefined,
-                lastName: undefined,
+                email: userEmail,
+                firstName: userFirstName,
+                lastName: userLastName,
               };
 
               const orderData = {
