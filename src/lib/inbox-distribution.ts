@@ -65,14 +65,14 @@ export function distributeInboxes(input: DistributionInput): DistributionResult 
   // SCENARIO 1: BUY_FOR_ME - Don't create inboxes yet
   if (domainSource === 'BUY_FOR_ME') {
     const perDomain = getInboxesPerDomain(productType, inboxesPerDomain);
-    const domainsNeeded = Math.ceil(totalInboxes / perDomain);
+    const domainsNeeded = Math.floor(totalInboxes / perDomain) || 1; // Ensure at least 1 domain
     
     return {
       allocations: [],
       domainsNeeded,
       domainsUsed: [],
       shouldCreateInboxes: false,
-      message: `We'll purchase ${domainsNeeded} domains and set up ${totalInboxes} inboxes within 24-48 hours.`
+      message: `We'll purchase ${domainsNeeded} domains and distribute ${totalInboxes} inboxes across them within 24-48 hours.`
     };
   }
   
@@ -152,7 +152,7 @@ function distributeMultipleDomains(
   inboxesPerDomain: number
 ): DistributionResult {
   const allocations: InboxAllocation[] = [];
-  const domainsNeeded = Math.ceil(totalInboxes / inboxesPerDomain);
+  const domainsNeeded = Math.floor(totalInboxes / inboxesPerDomain) || 1; // Ensure at least 1 domain
   
   // Cycle through domains if needed
   const domainsToUse: string[] = [];
@@ -160,7 +160,7 @@ function distributeMultipleDomains(
     domainsToUse.push(domains[i % domains.length]);
   }
   
-  // Balanced distribution
+  // Balanced distribution - distribute extra inboxes among existing domains
   const basePerDomain = Math.floor(totalInboxes / domainsToUse.length);
   const remainder = totalInboxes % domainsToUse.length;
   
@@ -201,7 +201,7 @@ function distributeMultipleDomains(
     domainsNeeded: domainsToUse.length,
     domainsUsed: domainsToUse,
     shouldCreateInboxes: true,
-    message: `Created ${allocations.length} inboxes across ${domainsToUse.length} domains`
+    message: `Created ${allocations.length} inboxes distributed across ${domainsToUse.length} domains`
   };
 }
 

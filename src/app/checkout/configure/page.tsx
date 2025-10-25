@@ -61,7 +61,7 @@ function ConfigurePageContent() {
                      product === "LEGACY" ? Math.max(1, Math.min(3, inboxesPerDomain || 3)) :
                      product === "AWS" ? Math.max(1, Math.min(3, inboxesPerDomain || 3)) :
                      product === "MICROSOFT" ? 50 : 3;
-    return Math.max(1, Math.ceil(quantity / perDomain));
+    return Math.max(1, Math.floor(quantity / perDomain) || 1); // Use floor to distribute extra inboxes
   }, [inboxesPerDomain, product, quantity]);
 
   const totalInboxPrice = useMemo(() => quantity * getPricePerInbox(product), [quantity, product]);
