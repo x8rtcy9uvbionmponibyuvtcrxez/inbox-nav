@@ -221,19 +221,8 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
 
   const orderData = (order.order ?? null) as CustomerOrder | null;
   if (!orderData) {
-    console.error('OrderData is null! Order structure:', order);
     return null;
   }
-
-  // Debug: Log the full order structure
-  console.log('=== ORDER DETAILS MODAL DEBUG ===');
-  console.log('Full order structure:', JSON.stringify(order, null, 2));
-  console.log('Order.order:', JSON.stringify(order.order, null, 2));
-  console.log('Order.order type:', typeof order.order);
-  console.log('Order.order keys:', order.order ? Object.keys(order.order) : 'null');
-  console.log('Raw stripeSubscriptionId:', order.order?.stripeSubscriptionId);
-  console.log('Raw subscriptionStatus:', order.order?.subscriptionStatus);
-  console.log('Raw status:', order.order?.status);
 
   const inboxCount = orderData?.inboxes && orderData.inboxes.length > 0
     ? orderData.inboxes.length
@@ -242,17 +231,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
   const isCancelled = orderData?.status === 'CANCELLED' || orderData?.subscriptionStatus === 'cancel_at_period_end';
   const hasSubscription = Boolean(orderData?.stripeSubscriptionId);
   const hasActiveSubscription = Boolean(hasSubscription && !isCancelled);
-  
-  // Debug logging
-  console.log('OrderDetailsModal Debug:', {
-    orderId: orderData?.id,
-    stripeSubscriptionId: orderData?.stripeSubscriptionId,
-    hasSubscription,
-    isCancelled,
-    hasActiveSubscription,
-    status: orderData?.status,
-    subscriptionStatus: orderData?.subscriptionStatus
-  });
+
   const subscriptionStatusLabel = hasSubscription ? (
     isCancelled ? (
       orderData?.subscriptionStatus === 'cancel_at_period_end' ? 'Cancelling at period end' : 'Cancelled'
@@ -632,7 +611,6 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                     setCancelMessage(result.error || 'Failed to cancel subscription');
                   }
                 } catch (error) {
-                  console.error('Failed to cancel subscription:', error);
                   setCancelMessage('Failed to cancel subscription. Please try again.');
                 } finally {
                   setIsCancelling(false);

@@ -1,30 +1,41 @@
 import { createClient, RedisClientType } from 'redis';
+import { logger } from './logger';
 
 let redis: RedisClientType | null = null;
+let isConnecting = false;
+let isConnected = false;
 
 export function getRedisClient(): RedisClientType | null {
-  if (!redis && process.env.REDIS_URL) {
+  if (!redis && process.env.REDIS_URL && !isConnecting) {
+    isConnecting = true;
     try {
       redis = createClient({
         url: process.env.REDIS_URL,
       });
-      
+
       redis.on('error', (err) => {
-        console.error('Redis Client Error:', err);
+        logger.error('Redis Client Error:', err);
+        isConnected = false;
       });
-      
+
       redis.on('connect', () => {
-        console.log('Redis Client Connected');
+        logger.info('Redis Client Connected');
+        isConnected = true;
+        isConnecting = false;
       });
-      
+
       // Connect asynchronously
-      redis.connect().catch(console.error);
+      redis.connect().catch((err) => {
+        logger.error('Failed to connect to Redis:', err);
+        isConnecting = false;
+      });
     } catch (error) {
-      console.error('Failed to create Redis client:', error);
+      logger.error('Failed to create Redis client:', error);
+      isConnecting = false;
       return null;
     }
   }
-  
+
   return redis;
 }
 
@@ -55,7 +66,7 @@ export async function getCachedData<T>(
     
     return data;
   } catch (error) {
-    console.error('Redis cache error:', error);
+    logger.error('Redis cache error:', error);
     // Fallback to direct fetch
     return await fetcher();
   }
@@ -63,16 +74,33 @@ export async function getCachedData<T>(
 
 export async function invalidateCache(pattern: string): Promise<void> {
   const client = getRedisClient();
-  
+
   if (!client) return;
-  
+
   try {
-    const keys = await client.keys(pattern);
-    if (keys.length > 0) {
-      await client.del(keys);
+    // Use SCAN instead of KEYS to avoid blocking Redis
+    let cursor = 0;
+    const keysToDelete: string[] = [];
+
+    do {
+      const reply = await client.scan(cursor, {
+        MATCH: pattern,
+        COUNT: 100,
+      });
+
+      cursor = reply.cursor;
+
+      if (reply.keys.length > 0) {
+        keysToDelete.push(...reply.keys);
+      }
+    } while (cursor !== 0);
+
+    if (keysToDelete.length > 0) {
+      await client.del(keysToDelete);
+      logger.debug(`Invalidated ${keysToDelete.length} cache keys matching pattern: ${pattern}`);
     }
   } catch (error) {
-    console.error('Cache invalidation error:', error);
+    logger.error('Cache invalidation error:', error);
   }
 }
 
@@ -88,6 +116,6 @@ export async function setCacheData<T>(
   try {
     await client.setEx(key, ttlSeconds, JSON.stringify(data));
   } catch (error) {
-    console.error('Cache set error:', error);
+    logger.error('Cache set error:', error);
   }
 }

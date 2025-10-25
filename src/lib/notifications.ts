@@ -1,5 +1,7 @@
 import { Resend } from 'resend';
+import { logger } from './logger';
 
+const log = logger.prefixed('Notifications');
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 interface OrderData {
@@ -31,7 +33,7 @@ interface SubscriptionData {
  */
 export async function sendSlackNotification(webhookUrl: string, payload: object) {
   if (!webhookUrl) {
-    console.warn('[NOTIFICATION] Slack webhook URL not configured, skipping Slack notification');
+    log.warn('Slack webhook URL not configured, skipping Slack notification');
     return;
   }
 
@@ -48,9 +50,9 @@ export async function sendSlackNotification(webhookUrl: string, payload: object)
       throw new Error(`Slack webhook failed: ${response.status} ${response.statusText}`);
     }
 
-    console.log('[NOTIFICATION] Slack notification sent successfully');
+    log.info('Slack notification sent successfully');
   } catch (error) {
-    console.error('[NOTIFICATION] Failed to send Slack notification:', error);
+    log.error('Failed to send Slack notification:', error);
   }
 }
 
@@ -59,7 +61,7 @@ export async function sendSlackNotification(webhookUrl: string, payload: object)
  */
 export async function sendEmailNotification(to: string, subject: string, html: string) {
   if (!resend) {
-    console.warn('[NOTIFICATION] Resend API key not configured, skipping email notification');
+    log.warn('Resend API key not configured, skipping email notification');
     return;
   }
 
@@ -75,9 +77,9 @@ export async function sendEmailNotification(to: string, subject: string, html: s
       throw new Error(`Resend error: ${error.message}`);
     }
 
-    console.log('[NOTIFICATION] Email notification sent successfully:', data?.id);
+    log.info('Email notification sent successfully:', data?.id);
   } catch (error) {
-    console.error('[NOTIFICATION] Failed to send email notification:', error);
+    log.error('Failed to send email notification:', error);
   }
 }
 

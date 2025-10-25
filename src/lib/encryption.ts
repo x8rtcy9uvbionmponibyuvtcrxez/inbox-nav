@@ -1,25 +1,40 @@
 import crypto from 'node:crypto';
+import { logger } from './logger';
 
 const ALGORITHM = 'aes-256-gcm';
 const KEY_LENGTH = 32; // 256 bits
 const IV_LENGTH = 16; // 128 bits
 const TAG_LENGTH = 16; // 128 bits
+const PBKDF2_ITERATIONS = 100000;
+
+// Get encryption salt from environment
+function getEncryptionSalt(): string {
+  const salt = process.env.ENCRYPTION_SALT;
+
+  if (!salt) {
+    logger.warn('ENCRYPTION_SALT not set, using default. Set ENCRYPTION_SALT for production!');
+    return 'inbox-nav-default-salt-change-in-production';
+  }
+
+  return salt;
+}
 
 // Get encryption key from environment or generate one
 function getEncryptionKey(): Buffer {
   const keyString = process.env.ENCRYPTION_KEY;
-  
+
   if (!keyString) {
     throw new Error('ENCRYPTION_KEY environment variable is required');
   }
-  
+
   // If it's a hex string, decode it
   if (keyString.length === 64) {
     return Buffer.from(keyString, 'hex');
   }
-  
+
   // Otherwise, derive key from string using PBKDF2
-  return crypto.pbkdf2Sync(keyString, 'inbox-nav-salt', 100000, KEY_LENGTH, 'sha256');
+  const salt = getEncryptionSalt();
+  return crypto.pbkdf2Sync(keyString, salt, PBKDF2_ITERATIONS, KEY_LENGTH, 'sha256');
 }
 
 /**
@@ -64,8 +79,8 @@ export function decryptPassword(encrypted: string): string {
     
     return decryptedBuffer.toString('utf8');
   } catch (error) {
-    console.warn('Password decryption failed, returning original value:', error);
-    return encrypted; // Fallback to original content on failure
+    logger.error('Password decryption failed:', error);
+    throw new Error('Failed to decrypt password. Data may be corrupted or encrypted with a different key.');
   }
 }
 
@@ -90,8 +105,8 @@ export function protectSecret(value: string | null | undefined): string | null {
   try {
     return encryptPassword(value);
   } catch (error) {
-    console.error('Failed to encrypt secret, storing raw value instead:', error);
-    return value;
+    logger.error('CRITICAL: Failed to encrypt secret:', error);
+    throw new Error('Failed to encrypt sensitive data. Cannot proceed with storing unencrypted secrets.');
   }
 }
 
@@ -105,7 +120,7 @@ export function revealSecret(value: string | null | undefined): string | null {
   try {
     return decryptPassword(value);
   } catch (error) {
-    console.error('Failed to decrypt secret, returning stored value:', error);
-    return value;
+    logger.error('Failed to decrypt secret:', error);
+    throw new Error('Failed to decrypt sensitive data. Check ENCRYPTION_KEY and ENCRYPTION_SALT.');
   }
 }
