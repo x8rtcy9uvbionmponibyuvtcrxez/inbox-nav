@@ -4,11 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const metrics = await request.json();
     
-    // Log performance metrics (in production, you'd send to your analytics service)
-    console.log('Performance Metrics Received:', {
-      timestamp: new Date().toISOString(),
-      ...metrics,
-    });
+    // Performance metrics received (in production, send to analytics service)
 
     // Here you could send to external services like:
     // - Google Analytics

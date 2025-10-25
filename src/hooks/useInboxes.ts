@@ -42,7 +42,7 @@ export function useInboxes() {
       setInboxes(data);
     } catch (error) {
       console.error('Failed to fetch inboxes:', error);
-      setInboxesError(error instanceof Error ? error.message : 'Failed to fetch inboxes');
+      setInboxesError(error instanceof Error ? error.message : 'Unable to load inboxes. Please try again.');
     } finally {
       setInboxesLoading(false);
     }

@@ -74,6 +74,11 @@ const DEFAULT_INBOXES_PER_DOMAIN: Record<ProductType, number> = {
   [ProductType.AWS]: 3,
 };
 
+// Validation constants
+const MIN_INBOX_COUNT = 10;
+const MAX_INBOX_COUNT = 2000;
+const CENTS_PER_DOLLAR = 100;
+
 const isProductType = (value: string): value is ProductType =>
   PRODUCT_ORDER.includes(value as ProductType);
 
@@ -109,12 +114,12 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     const normalizedProductType = coerceProductType(input.productType);
 
     const moq = PRODUCT_MOQ[normalizedProductType] ?? 10;
-    if (input.inboxCount < moq || input.inboxCount > 2000) {
-      return { success: false, error: `Inbox count must be between ${moq} and 2000 for ${normalizedProductType}` };
+    if (input.inboxCount < moq || input.inboxCount > MAX_INBOX_COUNT) {
+      return { success: false, error: `Inbox count must be between ${moq} and ${MAX_INBOX_COUNT} for ${normalizedProductType}` };
     }
 
     const pricePerInbox = PRODUCT_PRICE[normalizedProductType] ?? 3;
-    const totalAmountCents = input.inboxCount * pricePerInbox * 100; // Convert to cents
+    const totalAmountCents = input.inboxCount * pricePerInbox * CENTS_PER_DOLLAR;
 
     // Stripe metadata-derived domain configuration (if available)
     let sessionDomainSource: 'OWN' | 'BUY_FOR_ME' | undefined;

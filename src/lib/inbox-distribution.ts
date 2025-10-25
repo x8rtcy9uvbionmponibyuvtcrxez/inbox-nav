@@ -32,6 +32,13 @@ interface DistributionResult {
   message: string;
 }
 
+/**
+ * Distributes inboxes across domains and personas based on product type and configuration.
+ * 
+ * @param input - Distribution configuration including product type, domain source, and personas
+ * @returns Distribution result with inbox allocations and domain usage
+ * @throws Error if validation fails or distribution cannot be completed
+ */
 export function distributeInboxes(input: DistributionInput): DistributionResult {
   const {
     productType,
@@ -81,6 +88,13 @@ export function distributeInboxes(input: DistributionInput): DistributionResult 
   return distributeMultipleDomains(totalInboxes, personas, providedDomains, perDomain);
 }
 
+/**
+ * Determines the optimal number of inboxes per domain based on product type.
+ * 
+ * @param productType - The type of product (EDU, LEGACY, RESELLER, etc.)
+ * @param userPreference - Optional user-specified preference
+ * @returns Number of inboxes per domain
+ */
 function getInboxesPerDomain(productType: ProductType, userPreference?: number): number {
   if (productType === ProductType.RESELLER || productType === ProductType.EDU || productType === ProductType.LEGACY || productType === ProductType.AWS) {
     return userPreference || 3;

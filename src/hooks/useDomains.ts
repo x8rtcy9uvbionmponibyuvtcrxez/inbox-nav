@@ -42,7 +42,7 @@ export function useDomains() {
       setDomains(data);
     } catch (error) {
       console.error('Failed to fetch domains:', error);
-      setDomainsError(error instanceof Error ? error.message : 'Failed to fetch domains');
+      setDomainsError(error instanceof Error ? error.message : 'Unable to load domains. Please try again.');
     } finally {
       setDomainsLoading(false);
     }
