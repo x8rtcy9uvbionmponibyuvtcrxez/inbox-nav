@@ -35,6 +35,11 @@ model Order {
   onboardingData       OnboardingData?
   pendingInvites       PendingOrderInvite[]
 
+  @@index([clerkUserId])
+  @@index([status])
+  @@index([productType])
+  @@index([createdAt])
+  @@index([stripeSessionId])
   @@map("orders")
 }
 
@@ -89,6 +94,10 @@ model Inbox {
   is_active        Boolean     @default(true)
   order            Order       @relation(fields: [orderId], references: [id])
 
+  @@index([orderId])
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
   @@map("inboxes")
 }
 
@@ -106,6 +115,10 @@ model Domain {
   status        DomainStatus @default(PENDING)
   order         Order        @relation(fields: [orderId], references: [id])
 
+  @@index([orderId])
+  @@index([status])
+  @@index([domain])
+  @@index([createdAt])
   @@map("domains")
 }
 

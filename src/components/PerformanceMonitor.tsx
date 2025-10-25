@@ -43,7 +43,7 @@ export function PerformanceMonitor() {
         const renderTime = performance.now() - renderStart;
         
         // Get memory usage (if available)
-        const memory = (performance as unknown as { memory?: { usedJSHeapSize: number } }).memory;
+        const memory = (performance as any).memory;
         const memoryUsage = memory ? memory.usedJSHeapSize / 1024 / 1024 : 0;
         
         setMetrics({

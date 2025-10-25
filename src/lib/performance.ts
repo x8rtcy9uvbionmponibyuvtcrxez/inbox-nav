@@ -128,11 +128,12 @@ export function usePerformanceMonitor() {
 
   // Send metrics after page load
   if (typeof window !== 'undefined') {
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        monitor.sendMetrics();
-      }, 2000); // Wait 2 seconds for all metrics to be collected
-    });
+    const timeoutId = setTimeout(() => {
+      monitor.sendMetrics();
+    }, 2000); // Wait 2 seconds for all metrics to be collected
+    
+    // Cleanup timeout if needed
+    return () => clearTimeout(timeoutId);
   }
 
   return monitor;
