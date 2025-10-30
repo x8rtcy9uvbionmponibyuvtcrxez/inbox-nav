@@ -88,7 +88,8 @@ export async function getDashboardData(userId: string) {
           not: 'CANCELLED'
         },
         subscriptionStatus: {
-          notIn: ['cancelled', 'cancel_at_period_end']
+          // Exclude both US and UK spellings and end-of-period cancellations
+          notIn: ['cancelled', 'canceled', 'cancel_at_period_end']
         },
       },
       _sum: {
