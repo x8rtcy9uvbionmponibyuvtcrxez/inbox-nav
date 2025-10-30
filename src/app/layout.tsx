@@ -91,6 +91,12 @@ export default function RootLayout({
     <ClerkProvider
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
+      appearance={{
+        elements: {
+          // Only force the social button TEXT to be black; leave button styles intact
+          socialButtonsBlockButtonText: 'text-black',
+        },
+      }}
     >
       <IntercomProvider>
         <html lang="en" suppressHydrationWarning>

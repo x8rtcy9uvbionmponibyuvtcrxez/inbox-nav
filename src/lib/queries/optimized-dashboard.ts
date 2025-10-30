@@ -22,6 +22,8 @@ export async function getDashboardData(userId: string) {
       select: {
         id: true,
         createdAt: true,
+        businessType: true,
+        website: true,
         order: {
           select: {
             id: true,
