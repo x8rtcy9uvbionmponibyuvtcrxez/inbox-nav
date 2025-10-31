@@ -12,6 +12,9 @@ type OrderWithRelations = {
   createdAt: Date;
   businessType?: string | null;
   website?: string | null;
+  // Legacy/fallback configuration bag – may contain forwardingUrl for BUY_FOR_ME orders
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  domainPreferences?: any;
   order: {
     id: string;
     productType: string;
@@ -312,6 +315,18 @@ export default function DashboardClient({
                 const order = record.order;
                 // Business name comes from onboarding sequence (OnboardingData.businessType)
                 const businessName = record.businessType || "—";
+                const forwardingFromPrefs = (() => {
+                  const prefs = record.domainPreferences;
+                  if (!prefs || typeof prefs !== 'object') return null;
+                  // Common keys used historically
+                  return (
+                    prefs.forwardingUrl ||
+                    prefs.forwarding_url ||
+                    prefs.forwardTo ||
+                    prefs.forward ||
+                    null
+                  );
+                })();
                 const inboxCount = order?.inboxes && order.inboxes.length > 0
                   ? order.inboxes.length
                   : (order?.quantity ?? 0);
@@ -319,6 +334,7 @@ export default function DashboardClient({
                 const isCancelled = order?.status === 'CANCELLED' || order?.subscriptionStatus === 'cancel_at_period_end' || order?.subscriptionStatus === 'cancelled' || order?.subscriptionStatus === 'canceled';
                 const forwardingLabel =
                   record.website ||
+                  forwardingFromPrefs ||
                   order?.inboxes?.find((inbox) => inbox.forwardingDomain && inbox.forwardingDomain !== "-")?.forwardingDomain ||
                   order?.domains?.find((domain) => domain.forwardingUrl)?.forwardingUrl ||
                   "—";
