@@ -271,8 +271,8 @@ function OnboardingPage() {
         console.log('[ONBOARDING] Applying session data to form state');
         setSessionData(data);
         setProductType(data.productType);
-        // Respect product-specific minimums when applying session quantity
-        const sessionMin = data.productType === 'MICROSOFT' ? 50 : 10;
+        // Respect product-specific minimums when applying session quantity (case-insensitive)
+        const sessionMin = String(data.productType || '').toUpperCase() === 'MICROSOFT' ? 50 : 10;
         setInboxCount(Math.max(sessionMin, data.quantity));
         setIsQuantityLocked(true);
         
@@ -627,7 +627,7 @@ const personaSummaryNames = personas
                     <div>
                       <p className="text-xs uppercase tracking-[0.28em] opacity-70">{sessionData ? 'Payment successful! 🎉' : 'Selected plan'}</p>
                       <p className="mt-1 text-lg font-semibold">{productDisplayName}</p>
-                      <p className="text-sm opacity-80">{productType === 'MICROSOFT' ? Math.max(50, inboxCount) : inboxCount} Inboxes/Month</p>
+                      <p className="text-sm opacity-80">{String((productType ?? sessionData?.productType) || '').toUpperCase() === 'MICROSOFT' ? Math.max(50, inboxCount) : inboxCount} Inboxes/Month</p>
                     </div>
                     {sessionData && (
                       <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-emerald-100">
@@ -643,11 +643,10 @@ const personaSummaryNames = personas
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white">Monthly inbox volume</label>
-                  <p className="text-xs text-white/50">Recommended: minimum 10 inboxes per product for stable sending.</p>
+                  <label className="text-sm font-medium text-white">Monthly domain volume</label>
                   <input
                     type="number"
-                    min={productType === 'MICROSOFT' ? 50 : 10}
+                    min={String((productType ?? sessionData?.productType) || '').toUpperCase() === 'MICROSOFT' ? 50 : 10}
                     max={2000}
                     value={inboxCount}
                     onChange={(e) => !isQuantityLocked && setInboxCount(parseInt(e.target.value, 10) || 10)}
