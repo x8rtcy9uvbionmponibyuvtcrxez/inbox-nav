@@ -32,10 +32,13 @@ export async function getDashboardData(userId: string) {
             quantity: true,
             totalAmount: true,
             subscriptionStatus: true,
+            businessName: true,
             inboxes: {
               select: {
                 id: true,
                 status: true,
+                businessName: true,
+                forwardingDomain: true,
               },
             },
             domains: {
@@ -43,6 +46,8 @@ export async function getDashboardData(userId: string) {
                 id: true,
                 domain: true,
                 status: true,
+                businessName: true,
+                forwardingUrl: true,
               },
             },
           },

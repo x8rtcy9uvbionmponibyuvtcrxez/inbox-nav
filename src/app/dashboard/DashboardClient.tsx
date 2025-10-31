@@ -310,7 +310,9 @@ export default function DashboardClient({
             <tbody className="divide-y divide-white/5">
               {orders.map((record) => {
                 const order = record.order;
-                const businessLabel = record.businessType || record.website || "Untitled order";
+                const domainBusiness = order?.domains?.find(d => d.businessName)?.businessName || null;
+                const inboxBusiness = order?.inboxes?.find(i => i.businessName)?.businessName || null;
+                const businessLabel = order?.businessName || record.businessType || record.website || domainBusiness || inboxBusiness || "Untitled order";
                 const inboxCount = order?.inboxes && order.inboxes.length > 0
                   ? order.inboxes.length
                   : (order?.quantity ?? 0);
