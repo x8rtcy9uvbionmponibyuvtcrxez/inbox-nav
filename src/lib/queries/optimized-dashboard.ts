@@ -80,26 +80,18 @@ export async function getDashboardData(userId: string) {
     }),
     
     // Calculate monthly spend as sum of all CURRENTLY ACTIVE subscriptions
-    // Exclude ANY cancelled orders (status CANCELLED OR subscriptionStatus indicates cancellation)
+    // Exclude any cancelled orders (status CANCELLED or subscriptionStatus indicates cancellation)
     prisma.order.aggregate({
       where: {
         onboardingData: {
           clerkUserId: userId,
         },
-        // Exclude orders where status is CANCELLED OR subscriptionStatus indicates cancellation
-        AND: [
-          {
-            status: {
-              not: 'CANCELLED',
-            },
-          },
-          {
-            OR: [
-              { subscriptionStatus: null },
-              { subscriptionStatus: { notIn: ['cancelled', 'canceled', 'cancel_at_period_end'] } }
-            ]
-          }
-        ],
+        status: {
+          not: 'CANCELLED',
+        },
+        subscriptionStatus: {
+          notIn: ['cancelled', 'canceled', 'cancel_at_period_end'],
+        },
       },
       _sum: {
         totalAmount: true,
