@@ -298,7 +298,7 @@ export default function DashboardClient({
             <thead className="bg-white/5 text-xs uppercase tracking-wider text-brand-muted">
               <tr>
                 <th scope="col" className="px-6 py-4 text-left font-semibold">URL</th>
-                <th scope="col" className="px-6 py-4 text-left font-semibold">Brand</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Business Name</th>
                 <th scope="col" className="px-6 py-4 text-left font-semibold">Product</th>
                 <th scope="col" className="px-6 py-4 text-left font-semibold">Volume</th>
                 <th scope="col" className="px-6 py-4 text-left font-semibold">Amount</th>
@@ -310,14 +310,13 @@ export default function DashboardClient({
             <tbody className="divide-y divide-white/5">
               {orders.map((record) => {
                 const order = record.order;
-                const domainBusiness = order?.domains?.find(d => d.businessName)?.businessName || null;
-                const inboxBusiness = order?.inboxes?.find(i => i.businessName)?.businessName || null;
-                const businessLabel = order?.businessName || record.businessType || record.website || domainBusiness || inboxBusiness || "Untitled order";
+                // Business name comes from onboarding sequence (OnboardingData.businessType)
+                const businessName = record.businessType || "—";
                 const inboxCount = order?.inboxes && order.inboxes.length > 0
                   ? order.inboxes.length
                   : (order?.quantity ?? 0);
                 const totalCost = order?.totalAmount ?? inboxCount * 300;
-                const isCancelled = order?.status === 'CANCELLED' || order?.subscriptionStatus === 'cancel_at_period_end';
+                const isCancelled = order?.status === 'CANCELLED' || order?.subscriptionStatus === 'cancel_at_period_end' || order?.subscriptionStatus === 'cancelled' || order?.subscriptionStatus === 'canceled';
                 const forwardingLabel =
                   record.website ||
                   order?.inboxes?.find((inbox) => inbox.forwardingDomain && inbox.forwardingDomain !== "-")?.forwardingDomain ||
@@ -332,7 +331,7 @@ export default function DashboardClient({
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <div className="text-base font-semibold text-brand-primary">{businessLabel}</div>
+                      <div className="text-base font-semibold text-brand-primary">{businessName}</div>
                       <div className="text-xs text-brand-muted mt-1">{record.website ? record.website : "—"}</div>
                     </td>
                     <td className="px-6 py-5">
