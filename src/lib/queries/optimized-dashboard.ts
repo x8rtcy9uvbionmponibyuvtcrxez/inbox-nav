@@ -25,6 +25,7 @@ export async function getDashboardData(userId: string) {
         businessType: true,
         website: true,
         domainPreferences: true,
+        personas: true,
         order: {
           select: {
             id: true,
@@ -33,6 +34,8 @@ export async function getDashboardData(userId: string) {
             quantity: true,
             totalAmount: true,
             subscriptionStatus: true,
+            stripeSubscriptionId: true,
+            cancelledAt: true,
             businessName: true,
             inboxes: {
               select: {

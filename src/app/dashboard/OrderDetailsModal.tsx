@@ -30,7 +30,7 @@ type OrderWithRelations = {
   createdAt: Date;
   businessType?: string | null;
   website?: string | null;
-  personas?: string[];
+  personas?: unknown;
   specialRequirements?: string;
   domainPreferences?: string;
   domainSource?: string;
@@ -232,7 +232,9 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
   const totalCost = orderData?.totalAmount ?? inboxCount * 300;
   const isCancelled = orderData?.status === 'CANCELLED' || orderData?.subscriptionStatus === 'cancel_at_period_end';
   const hasSubscription = Boolean(orderData?.stripeSubscriptionId);
-  const hasActiveSubscription = Boolean(hasSubscription && !isCancelled);
+  const hasActiveSubscription = Boolean(!isCancelled && (
+    hasSubscription || (orderData?.subscriptionStatus && orderData.subscriptionStatus !== 'cancelled' && orderData.subscriptionStatus !== 'canceled' && orderData.subscriptionStatus !== 'cancel_at_period_end')
+  ));
   
   // Debug logging
   console.log('OrderDetailsModal Debug:', {
@@ -244,11 +246,9 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
     status: orderData?.status,
     subscriptionStatus: orderData?.subscriptionStatus
   });
-  const subscriptionStatusLabel = hasSubscription ? (
-    isCancelled ? (
-      orderData?.subscriptionStatus === 'cancel_at_period_end' ? 'Cancelling at period end' : 'Cancelled'
-    ) : 'Active'
-  ) : '—';
+  const subscriptionStatusLabel = isCancelled
+    ? (orderData?.subscriptionStatus === 'cancel_at_period_end' ? 'Cancelling at period end' : 'Cancelled')
+    : (hasActiveSubscription ? 'Active' : '—');
   const personas = normalizePersonas(order.personas);
   const specialRequirementsRaw = typeof order.specialRequirements === 'string' ? order.specialRequirements.trim() : '';
   const specialRequirements = specialRequirementsRaw.length ? specialRequirementsRaw : null;
@@ -473,7 +473,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
             </div>
           ) : (
             <p className="text-sm text-white/60">
-              No domains were provided during onboarding. Once fulfillment runs, any domains sourced for this order appear here.
+              The domains that the team will buy will show up here once the order has been fulfilled.
             </p>
           )}
 
