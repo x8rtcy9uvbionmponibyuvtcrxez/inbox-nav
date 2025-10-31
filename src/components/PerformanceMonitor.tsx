@@ -42,9 +42,13 @@ export function PerformanceMonitor() {
       requestAnimationFrame(() => {
         const renderTime = performance.now() - renderStart;
         
-        // Get memory usage (if available)
-        const memory = (performance as any).memory;
-        const memoryUsage = memory ? memory.usedJSHeapSize / 1024 / 1024 : 0;
+        // Get memory usage (if available) without using `any`
+        const perfWithMemory = performance as Performance & {
+          memory?: { usedJSHeapSize: number };
+        };
+        const memoryUsage = perfWithMemory.memory
+          ? perfWithMemory.memory.usedJSHeapSize / 1024 / 1024
+          : 0;
         
         setMetrics({
           loadTime,

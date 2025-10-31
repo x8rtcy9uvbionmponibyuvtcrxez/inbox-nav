@@ -4,6 +4,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { assertStripe } from '@/lib/stripe';
 import { distributeInboxes, validateDistribution } from '@/lib/inbox-distribution';
 import { prisma } from '@/lib/prisma';
+import { invalidateCache } from '@/lib/redis';
 import { ProductType, OrderStatus, InboxStatus, DomainStatus } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 import { protectSecret } from '@/lib/encryption';
@@ -75,7 +76,6 @@ const DEFAULT_INBOXES_PER_DOMAIN: Record<ProductType, number> = {
 };
 
 // Validation constants
-const MIN_INBOX_COUNT = 10;
 const MAX_INBOX_COUNT = 2000;
 const CENTS_PER_DOLLAR = 100;
 
@@ -452,6 +452,8 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
           where: { id: onboarding.id },
           data: { calculatedDomainCount: distribution.domainsNeeded },
         });
+        // Invalidate dashboard cache for this user before returning
+        await invalidateCache(`dashboard:${userId}`);
         return {
           success: true,
           orderId: order.id,
@@ -545,6 +547,8 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
 
     console.log("[ACTION] 🎉 Onboarding submission completed successfully!");
     console.log("[ACTION] 🎉 Final result:", { success: true, orderId: order.id, onboardingId: onboarding.id });
+    // Invalidate dashboard cache for this user after successful onboarding
+    await invalidateCache(`dashboard:${userId}`);
     return { success: true, orderId: order.id, onboardingId: onboarding.id };
   } catch (error: unknown) {
     console.error("[ACTION] === ACTION CRASHED ===");
