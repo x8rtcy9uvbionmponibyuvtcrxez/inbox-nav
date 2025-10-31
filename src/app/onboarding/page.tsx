@@ -271,7 +271,9 @@ function OnboardingPage() {
         console.log('[ONBOARDING] Applying session data to form state');
         setSessionData(data);
         setProductType(data.productType);
-        setInboxCount(data.quantity);
+        // Respect product-specific minimums when applying session quantity
+        const sessionMin = data.productType === 'MICROSOFT' ? 50 : 10;
+        setInboxCount(Math.max(sessionMin, data.quantity));
         setIsQuantityLocked(true);
         
         // Extract domain source from session metadata if available
@@ -336,7 +338,8 @@ const currentStepKey = currentStepMeta?.key as StepKey | undefined;
 const canNext = useMemo(() => {
   switch (currentStepKey) {
     case 'workspace': {
-      if (inboxCount < 10 || inboxCount > 2000) return false;
+      const minRequired = productType === 'MICROSOFT' ? 50 : 10;
+      if (inboxCount < minRequired || inboxCount > 2000) return false;
       if (!businessName.trim()) return false;
 
       if (productType === 'PREWARMED' && !primaryForwardUrl.trim()) return false;
@@ -624,7 +627,7 @@ const personaSummaryNames = personas
                     <div>
                       <p className="text-xs uppercase tracking-[0.28em] opacity-70">{sessionData ? 'Payment successful! 🎉' : 'Selected plan'}</p>
                       <p className="mt-1 text-lg font-semibold">{productDisplayName}</p>
-                      <p className="text-sm opacity-80">{inboxCount} Inboxes/Month</p>
+                      <p className="text-sm opacity-80">{productType === 'MICROSOFT' ? Math.max(50, inboxCount) : inboxCount} Inboxes/Month</p>
                     </div>
                     {sessionData && (
                       <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-emerald-100">
@@ -644,7 +647,7 @@ const personaSummaryNames = personas
                   <p className="text-xs text-white/50">Recommended: minimum 10 inboxes per product for stable sending.</p>
                   <input
                     type="number"
-                    min={10}
+                    min={productType === 'MICROSOFT' ? 50 : 10}
                     max={2000}
                     value={inboxCount}
                     onChange={(e) => !isQuantityLocked && setInboxCount(parseInt(e.target.value, 10) || 10)}
