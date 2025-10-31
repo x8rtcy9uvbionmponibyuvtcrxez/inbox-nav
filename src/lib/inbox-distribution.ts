@@ -164,8 +164,6 @@ function distributeMultipleDomains(
   const basePerDomain = Math.floor(totalInboxes / domainsToUse.length);
   const remainder = totalInboxes % domainsToUse.length;
   
-  let variationOffset = 0;
-  
   domainsToUse.forEach((domain, domainIndex) => {
     const inboxesForThisDomain = basePerDomain + (domainIndex < remainder ? 1 : 0);
     const inboxesPerPersonaOnDomain = Math.floor(inboxesForThisDomain / personas.length);
@@ -176,23 +174,23 @@ function distributeMultipleDomains(
       
       if (count === 0) return;
       
+      // Generate 4 core variations for this persona on this domain
+      // Variations restart from 0 for each domain+persona combination
       const variations = generateEmailVariations(
         persona.firstName,
         persona.lastName,
         domain,
-        50
+        count
       );
       
-      for (let i = 0; i < count; i++) {
-        const email = variations[(variationOffset + i) % variations.length];
+      variations.forEach(email => {
         allocations.push({
           email,
           firstName: persona.firstName,
-        lastName: persona.lastName,
+          lastName: persona.lastName,
           domain
         });
-      }
-      variationOffset += count;
+      });
     });
   });
   
