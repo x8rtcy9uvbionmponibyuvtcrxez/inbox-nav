@@ -175,6 +175,7 @@ function formatDate(value: string | Date | null | undefined) {
 }
 
 function toTitle(value: string) {
+  if (value === 'RESELLER') return 'Premium';
   return value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 

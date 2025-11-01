@@ -308,7 +308,7 @@ function OnboardingPage() {
 
   const getProductDisplayName = (productType: string | null) => {
     switch (productType) {
-      case 'RESELLER': return 'Reseller Inboxes';
+      case 'RESELLER': return 'Premium Inboxes';
       case 'EDU': return 'Edu Inboxes';
       case 'LEGACY': return 'Legacy Inboxes';
       case 'PREWARMED': return 'Prewarmed Inboxes';

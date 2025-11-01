@@ -71,6 +71,7 @@ function formatDate(input: Date | string | null | undefined) {
 
 function toTitle(value: string | null | undefined) {
   if (!value) return "Unknown";
+  if (value === 'RESELLER') return 'Premium';
   return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 

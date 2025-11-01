@@ -30,7 +30,7 @@ const PRODUCT_DISPLAY_ORDER = ["EDU", "LEGACY", "RESELLER", "PREWARMED", "AWS", 
 const ITEMS_PER_PAGE = 50;
 
 const PRODUCT_LABELS: Record<string, string> = {
-  RESELLER: "Reseller",
+  RESELLER: "Premium",
   EDU: "Edu",
   LEGACY: "Legacy",
   PREWARMED: "Prewarmed",
