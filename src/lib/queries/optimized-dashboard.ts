@@ -61,10 +61,12 @@ export async function getDashboardData(userId: string) {
       take: 50, // Limit to recent 50 orders for performance
     }),
     
-    // Count LIVE inboxes only
+    // Count LIVE and PENDING inboxes (excluding DELETED and CANCELLED)
     prisma.inbox.count({
       where: {
-        status: 'LIVE',
+        status: {
+          in: ['LIVE', 'PENDING']
+        },
         order: {
           onboardingData: {
             clerkUserId: userId,
@@ -73,10 +75,12 @@ export async function getDashboardData(userId: string) {
       },
     }),
     
-    // Count LIVE domains only
+    // Count LIVE and PENDING domains (excluding DELETED, DECOMMISSIONED, and CANCELLED)
     prisma.domain.count({
       where: {
-        status: 'LIVE',
+        status: {
+          in: ['LIVE', 'PENDING']
+        },
         order: {
           onboardingData: {
             clerkUserId: userId,
