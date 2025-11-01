@@ -61,9 +61,10 @@ export async function getDashboardData(userId: string) {
       take: 50, // Limit to recent 50 orders for performance
     }),
     
-    // Count inboxes directly
+    // Count LIVE inboxes only
     prisma.inbox.count({
       where: {
+        status: 'LIVE',
         order: {
           onboardingData: {
             clerkUserId: userId,
@@ -72,9 +73,10 @@ export async function getDashboardData(userId: string) {
       },
     }),
     
-    // Count unique domains
+    // Count LIVE domains only
     prisma.domain.count({
       where: {
+        status: 'LIVE',
         order: {
           onboardingData: {
             clerkUserId: userId,
