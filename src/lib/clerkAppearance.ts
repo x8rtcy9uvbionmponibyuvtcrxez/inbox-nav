@@ -9,15 +9,15 @@ const baseElements = {
   headerTitle: "text-white text-2xl font-semibold mb-1 tracking-tight",
   headerSubtitle: "text-white/82 text-[0.95rem]",
   formButtonPrimary:
-    "bg-white text-[#050508] font-semibold tracking-wide rounded-full shadow-[0_16px_46px_-24px_rgba(255,255,255,0.92)] transition-all duration-200 hover:bg-[#f4f4f7] hover:shadow-[0_20px_58px_-22px_rgba(255,255,255,0.96)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(14,14,18,0.8)]",
+    "bg-white !text-[#050508] font-semibold tracking-wide rounded-full shadow-[0_16px_46px_-24px_rgba(255,255,255,0.92)] transition-all duration-200 hover:bg-[#f4f4f7] hover:shadow-[0_20px_58px_-22px_rgba(255,255,255,0.96)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(14,14,18,0.8)] disabled:bg-white disabled:!text-[#050508]/55 disabled:shadow-none",
   formFieldInput:
     "bg-[rgba(255,255,255,0.05)] border-white/[0.12] text-white placeholder:text-white/55 focus:border-white/35 focus:bg-[rgba(255,255,255,0.08)] rounded-[14px] transition-all duration-200",
   formFieldLabel: "text-white/92 font-medium mb-1 tracking-[0.015em]",
   formFieldInputShowPasswordButton: "text-white/88 hover:text-white",
   socialButtonsBlockButton:
-    "bg-[rgba(255,255,255,0.06)] border border-white/14 text-white rounded-full transition-all duration-200 hover:bg-[rgba(255,255,255,0.1)] hover:border-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(12,12,16,0.6)]",
+    "bg-[rgba(255,255,255,0.08)] border border-white/28 text-white rounded-full transition-all duration-200 hover:bg-[rgba(255,255,255,0.14)] hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(12,12,16,0.7)]",
   socialButtonsIconButton:
-    "bg-[rgba(255,255,255,0.06)] border border-white/14 rounded-full hover:bg-[rgba(255,255,255,0.1)] transition-all duration-200",
+    "bg-[rgba(255,255,255,0.08)] border border-white/28 rounded-full hover:bg-[rgba(255,255,255,0.14)] transition-all duration-200",
   socialButtonsBlockButtonText: "text-white font-semibold tracking-[0.02em]",
   footerActionLink: "text-white hover:text-white underline underline-offset-4",
   footerActionText: "text-white/82",
