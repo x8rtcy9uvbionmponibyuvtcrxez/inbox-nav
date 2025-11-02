@@ -501,7 +501,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
           )}
 
           {/* Registrar Details - Only show if OWN domain flow */}
-          {domainSource === "OWN" && (order.domainRegistrar || order.registrarUsername || order.registrarPassword) && (
+          {domainSource === "OWN" && (localOrder.domainRegistrar || localOrder.registrarUsername || localOrder.registrarPassword) && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-white">Registrar</h3>
               <div className="grid gap-3 md:grid-cols-3">
