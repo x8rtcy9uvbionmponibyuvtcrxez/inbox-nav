@@ -34,12 +34,12 @@ type OrderWithRelations = {
   registrarUsername?: string | null;
   registrarPassword?: string | null;
   personas?: unknown;
-  specialRequirements?: string;
-  domainPreferences?: string;
-  domainSource?: string;
-  providedDomains?: string[];
-  calculatedDomainCount?: number;
-  inboxesPerDomain?: number;
+  specialRequirements?: string | null;
+  domainPreferences?: string | null;
+  domainSource?: string | null;
+  providedDomains?: string[] | null;
+  calculatedDomainCount?: number | null;
+  inboxesPerDomain?: number | null;
   order: {
     id: string;
     productType: string;
