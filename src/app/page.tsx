@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { SignIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import PageTransition from "@/components/animations/PageTransition";
 import FadeIn from "@/components/animations/FadeIn";
+import PageTransition from "@/components/animations/PageTransition";
+import { clerkDarkAppearance } from "@/lib/clerkAppearance";
 
 export default async function Home() {
   const { userId } = await auth();
@@ -28,7 +29,11 @@ export default async function Home() {
                 </div>
               </FadeIn>
               <FadeIn delay={0.4} direction="up">
-                <SignIn routing="hash" signUpUrl="/sign-up" />
+                <SignIn
+                  routing="hash"
+                  signUpUrl="/sign-up"
+                  appearance={clerkDarkAppearance}
+                />
               </FadeIn>
             </div>
           </div>

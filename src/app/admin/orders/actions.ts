@@ -222,6 +222,7 @@ export async function markOrderAsFulfilledAction(
     
     // Invalidate Redis cache for this user
     if (order.clerkUserId) {
+      await invalidateCache(`dashboard:${order.clerkUserId}`);
       await invalidateCache(`inboxes:${order.clerkUserId}`);
       await invalidateCache(`domains:${order.clerkUserId}`);
     }

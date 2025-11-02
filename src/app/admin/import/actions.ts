@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/admin-auth';
 import { Prisma, ProductType, DomainStatus, InboxStatus, OrderStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { sendClerkInvitation } from '@/lib/clerk-invites';
+import { invalidateCache } from '@/lib/redis';
 
 export type CSVRow = Record<string, string>;
 
@@ -373,6 +374,8 @@ export async function linkOrdersToUserAction(userEmail: string, clerkUserId: str
     // PendingOrderInvite feature disabled: no cleanup needed
 
     await prisma.$transaction(tx);
+    // Invalidate dashboard cache for this user since orders were linked
+    await invalidateCache(`dashboard:${clerkUserId}`);
     
     console.log(`[LINK] Linked ${orderIds.length} orders to user ${clerkUserId}`);
 

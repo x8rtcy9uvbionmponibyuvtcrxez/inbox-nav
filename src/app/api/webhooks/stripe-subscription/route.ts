@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import type Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { invalidateCache } from '@/lib/redis'
 import { notifySubscriptionCancelled } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
@@ -87,6 +88,11 @@ export async function POST(request: NextRequest) {
 
         console.log(`[Stripe Webhook] Successfully processed subscription deletion for order: ${order.id}`)
 
+        // Invalidate dashboard cache for the affected user
+        if (order.clerkUserId) {
+          await invalidateCache(`dashboard:${order.clerkUserId}`)
+        }
+
         // Send subscription cancelled notification
         try {
           const affectedCounts = {
@@ -165,6 +171,11 @@ export async function POST(request: NextRequest) {
           })
         }
 
+        // Invalidate dashboard cache for the affected user
+        if (order.clerkUserId) {
+          await invalidateCache(`dashboard:${order.clerkUserId}`)
+        }
+
         console.log(`[Stripe Webhook] Successfully updated subscription status for order: ${order.id}`)
         break
       }
@@ -195,6 +206,11 @@ export async function POST(request: NextRequest) {
           where: { id: order.id },
           data: { subscriptionStatus: 'past_due' },
         })
+
+        // Invalidate dashboard cache for the affected user
+        if (order.clerkUserId) {
+          await invalidateCache(`dashboard:${order.clerkUserId}`)
+        }
 
         console.log(`[Stripe Webhook] Successfully updated subscription status to past_due for order: ${order.id}`)
         break

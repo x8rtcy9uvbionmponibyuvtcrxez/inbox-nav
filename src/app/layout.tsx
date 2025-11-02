@@ -37,10 +37,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' }
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/favicon.svg', type: 'image/svg+xml' }
     ],
-    shortcut: '/favicon.svg',
+    shortcut: '/favicon.ico',
     apple: [
       { url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' }
     ],
@@ -116,10 +116,10 @@ export default function RootLayout({
       <IntercomProvider>
         <html lang="en" suppressHydrationWarning>
           <head>
-            {/* Favicon links - explicit for browser compatibility, SVG prioritized */}
-            <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+            {/* Favicon links - explicit for browser compatibility */}
             <link rel="icon" href="/favicon.ico" sizes="32x32" type="image/x-icon" />
-            <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
+            <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+            <link rel="shortcut icon" href="/favicon.ico" />
             <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
             <link rel="manifest" href="/site.webmanifest" />
             

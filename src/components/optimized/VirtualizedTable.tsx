@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useCallback, useState } from 'react';
+import { memo, useMemo, useCallback, useState, useRef, useEffect } from 'react';
 
 interface VirtualizedTableProps<T> {
   items: T[];
@@ -22,15 +22,52 @@ function VirtualizedTable<T>({
   emptyState,
 }: VirtualizedTableProps<T>) {
   const [scrollTop, setScrollTop] = useState(0);
+  const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Observe container size changes to keep visible window accurate
+  useEffect(() => {
+    if (!containerRef.current) return;
+    if (typeof window === 'undefined') return;
+
+    const element = containerRef.current;
+    let rafId: number | null = null;
+
+    const updateSize = () => {
+      // Guard against fractional sizes causing churn
+      const nextHeight = Math.round(element.clientHeight);
+      setMeasuredHeight((prev) => (prev !== nextHeight ? nextHeight : prev));
+    };
+
+    // Initial measure
+    updateSize();
+
+    // Use ResizeObserver when available
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => {
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(updateSize);
+        })
+      : null;
+
+    resizeObserver?.observe(element);
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      resizeObserver?.disconnect();
+    };
+  }, []);
+
+  const effectiveContainerHeight = measuredHeight ?? containerHeight;
 
   const visibleRange = useMemo(() => {
     const startIndex = Math.floor(scrollTop / rowHeight);
     const endIndex = Math.min(
-      startIndex + Math.ceil(containerHeight / rowHeight) + 1,
+      startIndex + Math.ceil(effectiveContainerHeight / rowHeight) + 1,
       items.length
     );
     return { startIndex, endIndex };
-  }, [scrollTop, rowHeight, containerHeight, items.length]);
+  }, [scrollTop, rowHeight, effectiveContainerHeight, items.length]);
 
   const visibleItems = useMemo(() => {
     return items.slice(visibleRange.startIndex, visibleRange.endIndex);
@@ -45,14 +82,14 @@ function VirtualizedTable<T>({
 
   if (items.length === 0) {
     return (
-      <div className={`flex items-center justify-center ${className}`} style={{ height: containerHeight }}>
+      <div ref={containerRef} className={`flex items-center justify-center ${className}`} style={{ height: containerHeight }}>
         {emptyState || <div className="text-gray-500">No items to display</div>}
       </div>
     );
   }
 
   return (
-    <div className={`overflow-auto ${className}`} style={{ height: containerHeight }} onScroll={handleScroll}>
+    <div ref={containerRef} className={`overflow-auto ${className}`} style={{ height: containerHeight }} onScroll={handleScroll}>
       {header}
       <div style={{ height: totalHeight, position: 'relative' }}>
         <div
