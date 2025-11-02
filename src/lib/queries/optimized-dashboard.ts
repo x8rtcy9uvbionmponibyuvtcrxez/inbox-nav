@@ -26,6 +26,14 @@ export async function getDashboardData(userId: string) {
         website: true,
         domainPreferences: true,
         personas: true,
+        domainRegistrar: true,
+        registrarUsername: true,
+        registrarPassword: true,
+        domainSource: true,
+        providedDomains: true,
+        inboxesPerDomain: true,
+        calculatedDomainCount: true,
+        specialRequirements: true,
         order: {
           select: {
             id: true,

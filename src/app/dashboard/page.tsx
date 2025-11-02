@@ -7,6 +7,16 @@ type OrderWithRelations = {
   createdAt: Date;
   businessType?: string | null;
   website?: string | null;
+  domainRegistrar?: string | null;
+  registrarUsername?: string | null;
+  registrarPassword?: string | null;
+  domainSource?: string | null;
+  providedDomains?: string[] | null;
+  inboxesPerDomain?: number | null;
+  calculatedDomainCount?: number | null;
+  specialRequirements?: string | null;
+  domainPreferences?: unknown;
+  personas?: unknown;
   order: {
     id: string;
     productType: string;

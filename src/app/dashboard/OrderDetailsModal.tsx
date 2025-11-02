@@ -30,6 +30,9 @@ type OrderWithRelations = {
   createdAt: Date;
   businessType?: string | null;
   website?: string | null;
+  domainRegistrar?: string | null;
+  registrarUsername?: string | null;
+  registrarPassword?: string | null;
   personas?: unknown;
   specialRequirements?: string;
   domainPreferences?: string;
@@ -289,6 +292,9 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
       ["Domains Needed", domainCountPlan != null ? String(domainCountPlan) : ""],
       ["Forwarding URL", forwardingUrl],
       ["Domain Plan", domainList.join("; ")],
+      ["Registrar", order.domainRegistrar ?? ""],
+      ["Registrar Username", order.registrarUsername ?? ""],
+      ["Registrar Password", order.registrarPassword ? "••••••••" : ""],
       ["ESP Account ID", espCredentials.accountId ?? ""],
       ["ESP Password", espCredentials.password ?? ""],
       ["ESP API Key", espCredentials.apiKey ?? ""],
@@ -489,6 +495,29 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
               <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                 <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">ESP API Key</p>
                 <p className="mt-2 break-all font-mono text-xs text-white/80">{espCredentials.apiKey ?? '—'}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Registrar Details - Only show if OWN domain flow */}
+          {domainSource === "OWN" && (order.domainRegistrar || order.registrarUsername || order.registrarPassword) && (
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar</p>
+                <p className="mt-2 text-xs text-white/80">{order.domainRegistrar ?? '—'}</p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Username</p>
+                <p className="mt-2 font-mono text-xs text-white/80 break-all">{order.registrarUsername ?? '—'}</p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Password</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <p className="font-mono text-xs text-white/80">
+                    {order.registrarPassword ? '•'.repeat(Math.min(order.registrarPassword.length, 20)) : '—'}
+                  </p>
+                  <span className="text-[8px] text-white/40">(encrypted)</span>
+                </div>
               </div>
             </div>
           )}

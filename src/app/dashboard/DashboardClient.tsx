@@ -12,6 +12,14 @@ type OrderWithRelations = {
   createdAt: Date;
   businessType?: string | null;
   website?: string | null;
+  domainRegistrar?: string | null;
+  registrarUsername?: string | null;
+  registrarPassword?: string | null;
+  domainSource?: string | null;
+  providedDomains?: string[] | null;
+  inboxesPerDomain?: number | null;
+  calculatedDomainCount?: number | null;
+  specialRequirements?: string | null;
   // Legacy/fallback configuration bag – may contain forwardingUrl for BUY_FOR_ME orders
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   domainPreferences?: any;
