@@ -231,7 +231,11 @@ function VirtualizedInboxesClient({ inboxes, error, isLoading = false }: Props) 
         {inbox.password ? '••••••••' : '—'}
       </td>
       <td className="px-6 py-4 text-white/70">
-        {inbox.createdAt.toLocaleDateString()}
+        {new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }).format(typeof inbox.createdAt === "string" ? new Date(inbox.createdAt) : inbox.createdAt)}
       </td>
     </tr>
   );

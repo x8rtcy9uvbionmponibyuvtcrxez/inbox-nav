@@ -48,7 +48,7 @@ export default async function DashboardLayout({
           <DashboardNav />
         </div>
 
-        <div className="border-t border-[var(--border-subtle)] px-6 py-6 text-xs text-[var(--text-muted)]">
+        <div className="border-t border-[var(--border-subtle)] px-6 py-6 text-xs text-[var(--text-muted)]" suppressHydrationWarning>
           © {new Date().getFullYear()} Inbox Navigator
         </div>
       </aside>

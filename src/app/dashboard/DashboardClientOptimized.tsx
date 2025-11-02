@@ -191,7 +191,11 @@ export default function DashboardClientOptimized({ orders }: DashboardClientOpti
                       </div>
                       {isCancelled && (
                         <div className="text-xs text-red-400">
-                          Cancelled {order.cancelledAt ? new Date(order.cancelledAt).toLocaleDateString() : ''}
+                          Cancelled {order.cancelledAt ? new Intl.DateTimeFormat("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          }).format(new Date(order.cancelledAt)) : ''}
                         </div>
                       )}
                     </td>
@@ -218,7 +222,11 @@ export default function DashboardClientOptimized({ orders }: DashboardClientOpti
                       ${((order.totalAmount || 0) / 100).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Intl.DateTimeFormat("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(new Date(order.createdAt))}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <Button
