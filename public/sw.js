@@ -1,4 +1,4 @@
-const CACHE_NAME = 'inbox-nav-v3';
+const CACHE_NAME = 'inbox-nav-v4';
 const urlsToCache = [
   '/',
   '/dashboard',
