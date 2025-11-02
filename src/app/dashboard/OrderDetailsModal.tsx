@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { revealSecret } from "@/lib/encryption";
 import {
@@ -223,10 +223,18 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
   const [showAllDomains, setShowAllDomains] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
+  const [localOrder, setLocalOrder] = useState(order);
+  
+  // Update local order when prop changes (after refresh)
+  useEffect(() => {
+    if (order) {
+      setLocalOrder(order);
+    }
+  }, [order]);
   
   if (!isOpen) return null;
 
-  const orderData = (order.order ?? null) as CustomerOrder | null;
+  const orderData = (localOrder.order ?? null) as CustomerOrder | null;
   if (!orderData) {
     console.error('OrderData is null! Order structure:', order);
     return null;
@@ -243,20 +251,20 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
   const subscriptionStatusLabel = isCancelled
     ? (orderData?.subscriptionStatus === 'cancel_at_period_end' ? 'Cancelling at period end' : 'Cancelled')
     : (hasActiveSubscription ? 'Active' : '—');
-  const personas = normalizePersonas(order.personas);
-  const specialRequirementsRaw = typeof order.specialRequirements === 'string' ? order.specialRequirements.trim() : '';
+  const personas = normalizePersonas(localOrder.personas);
+  const specialRequirementsRaw = typeof localOrder.specialRequirements === 'string' ? localOrder.specialRequirements.trim() : '';
   const specialRequirements = specialRequirementsRaw.length ? specialRequirementsRaw : null;
-  const domainPreferences = parseDomainPreferences(order.domainPreferences);
-  const domainSource = (order.domainSource ?? (domainPreferences.domains?.length ? "OWN" : "BUY_FOR_ME")).toUpperCase();
-  const providedDomains = normalizeArray(order.providedDomains);
+  const domainPreferences = parseDomainPreferences(localOrder.domainPreferences);
+  const domainSource = (localOrder.domainSource ?? (domainPreferences.domains?.length ? "OWN" : "BUY_FOR_ME")).toUpperCase();
+  const providedDomains = normalizeArray(localOrder.providedDomains);
   const domainList =
     domainPreferences.domains && domainPreferences.domains.length
       ? domainPreferences.domains
       : providedDomains;
   const ownDomains = domainSource === "OWN" ? domainList : [];
-  const domainCountPlan = order.calculatedDomainCount ?? null;
-  const inboxesPerDomain = order.inboxesPerDomain ?? null;
-  const forwardingUrl = order.website ?? "";
+  const domainCountPlan = localOrder.calculatedDomainCount ?? null;
+  const inboxesPerDomain = localOrder.inboxesPerDomain ?? null;
+  const forwardingUrl = localOrder.website ?? "";
   const espCredentials = domainPreferences.espCredentials ?? {
     accountId: null,
     password: null,
@@ -271,8 +279,8 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
       ["Product", orderData.productType],
       ["Quantity", String(orderData.quantity ?? inboxCount)],
       ["Total Amount (cents)", String(orderData.totalAmount ?? totalCost)],
-      ["Business Name", order.businessType ?? ""],
-      ["Website", order.website ?? ""],
+      ["Business Name", localOrder.businessType ?? ""],
+      ["Website", localOrder.website ?? ""],
       ["Subscription Status", subscriptionStatusLabel],
       ["Stripe Subscription ID", orderData.stripeSubscriptionId ?? ""],
       ["Cancelled On", orderData.cancelledAt ? formatDate(orderData.cancelledAt) : ""],
@@ -282,9 +290,9 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
       ["Domains Needed", domainCountPlan != null ? String(domainCountPlan) : ""],
       ["Forwarding URL", forwardingUrl],
       ["Domain Plan", domainList.join("; ")],
-      ["Registrar", order.domainRegistrar ?? ""],
-      ["Registrar Username", order.registrarUsername ?? ""],
-      ["Registrar Password", order.registrarPassword ? "••••••••" : ""],
+      ["Registrar", localOrder.domainRegistrar ?? ""],
+      ["Registrar Username", localOrder.registrarUsername ?? ""],
+      ["Registrar Password", localOrder.registrarPassword ? "••••••••" : ""],
       ["ESP Account ID", espCredentials.accountId ?? ""],
       ["ESP Password", espCredentials.password ?? ""],
       ["ESP API Key", espCredentials.apiKey ?? ""],
@@ -499,16 +507,16 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
               <div className="grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar</p>
-                  <p className="mt-2 text-xs text-white/80">{order.domainRegistrar ?? '—'}</p>
+                  <p className="mt-2 text-xs text-white/80">{localOrder.domainRegistrar ?? '—'}</p>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Username</p>
-                  <p className="mt-2 font-mono text-xs text-white/80 break-all">{order.registrarUsername ?? '—'}</p>
+                  <p className="mt-2 font-mono text-xs text-white/80 break-all">{localOrder.registrarUsername ?? '—'}</p>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Password</p>
                   <p className="mt-2 font-mono text-xs text-white/80">
-                    {order.registrarPassword ? revealSecret(order.registrarPassword) ?? '—' : '—'}
+                    {localOrder.registrarPassword ? revealSecret(localOrder.registrarPassword) ?? '—' : '—'}
                   </p>
                 </div>
               </div>
@@ -633,22 +641,30 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                   const result = await response.json();
                   
                   if (response.ok && result.success) {
+                    // Optimistically update local order state
+                    const updatedOrder = {
+                      ...localOrder,
+                      order: {
+                        ...localOrder.order,
+                        subscriptionStatus: 'cancel_at_period_end',
+                        cancelledAt: new Date(),
+                      }
+                    };
+                    setLocalOrder(updatedOrder as OrderWithRelations);
+                    
                     setCancelMessage('Subscription cancelled successfully. It will end at the current period.');
                     
-                    // Close modal and refresh immediately to show updated data
-                    onClose();
-                    
-                    // Use router.refresh() for Next.js server component refresh
-                    // This will re-fetch server data without full page reload
+                    // Refresh server data in background
                     router.refresh();
                     
-                    // Small delay to ensure cache invalidation completed
-                    // The refresh should fetch fresh data from the server
+                    // Close modal after a brief delay to show success message
                     setTimeout(() => {
-                      // Force a hard refresh if router.refresh didn't update
-                      // This ensures the cache invalidation is reflected
-                      window.location.reload();
-                    }, 1000);
+                      onClose();
+                      // Force hard refresh to ensure everything is synced
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 500);
+                    }, 2000);
                   } else {
                     setCancelMessage(result.error || 'Failed to cancel subscription');
                   }
