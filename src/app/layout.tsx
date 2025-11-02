@@ -91,7 +91,6 @@ export default function RootLayout({
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
       appearance={{
-        baseTheme: 'dark',
         elements: {
           // Social buttons - maintain black text for labels
           socialButtonsBlockButton: 'text-black [&>span]:text-black',
