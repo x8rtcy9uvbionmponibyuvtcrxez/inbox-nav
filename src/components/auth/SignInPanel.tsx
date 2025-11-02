@@ -41,9 +41,10 @@ export function SignInPanel() {
       }
 
       setErrorMessage("Unable to sign in with those credentials. Please try again.");
-    } catch (err: any) {
-      if (err?.errors?.[0]) {
-        const firstError = err.errors[0];
+    } catch (err) {
+      const error = err as { errors?: Array<{ longMessage?: string; message?: string }> };
+      if (error?.errors?.[0]) {
+        const firstError = error.errors[0];
         setErrorMessage(firstError?.longMessage || firstError?.message || "We couldn't sign you in. Please try again.");
       } else {
         setErrorMessage("We couldn't sign you in. Please try again.");
@@ -64,10 +65,11 @@ export function SignInPanel() {
         redirectUrl: "/sign-in",
         redirectUrlComplete: "/dashboard",
       });
-    } catch (err: any) {
+    } catch (err) {
       setIsGoogleLoading(false);
-      if (err?.errors?.[0]) {
-        const firstError = err.errors[0];
+      const error = err as { errors?: Array<{ longMessage?: string; message?: string }> };
+      if (error?.errors?.[0]) {
+        const firstError = error.errors[0];
         setErrorMessage(firstError?.longMessage || firstError?.message || "Google sign-in failed. Please try again.");
       } else {
         setErrorMessage("Google sign-in failed. Please try again.");
