@@ -32,7 +32,7 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  // Ignore non-GET requests (e.g., POST/PUT). These cannot be cached reliably.
+  // Never attempt to cache non-GET requests; just pass through to network
   if (event.request.method !== 'GET') {
     event.respondWith(fetch(event.request));
     return;
@@ -69,22 +69,7 @@ self.addEventListener('fetch', (event) => {
   if (isAPI) {
     event.respondWith(
       fetch(event.request, { redirect: 'follow', cache: 'no-cache' })
-        .then((response) => {
-          // Only cache successful non-redirect responses
-          if (response.ok && response.status === 200 && response.type === 'basic') {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // If network fails, try cache as fallback
-          return caches.match(event.request).then((cachedResponse) => {
-            return cachedResponse || new Response('Network error', { status: 503 });
-          });
-        })
+        .catch(() => new Response('Network error', { status: 503 }))
     );
     return;
   }
