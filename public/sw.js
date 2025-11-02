@@ -1,10 +1,14 @@
-const CACHE_NAME = 'inbox-nav-v1';
+const CACHE_NAME = 'inbox-nav-v2';
 const urlsToCache = [
   '/',
   '/dashboard',
   '/dashboard/products',
   '/dashboard/inboxes',
   '/dashboard/domains',
+  '/favicon.ico',
+  '/favicon.svg',
+  '/apple-touch-icon.svg',
+  '/site.webmanifest',
   '/_next/static/css/',
   '/_next/static/js/',
 ];
@@ -21,6 +25,21 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  // Always fetch favicons from network to ensure they're up-to-date
+  const isFavicon = event.request.url.includes('/favicon') || 
+                    event.request.url.includes('/apple-touch-icon') ||
+                    event.request.url.includes('/site.webmanifest');
+  
+  if (isFavicon) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // Fallback to cache only if network fails
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
