@@ -1,25 +1,30 @@
-const CACHE_NAME = 'inbox-nav-v4';
-const urlsToCache = [
-  '/',
-  '/dashboard',
-  '/dashboard/products',
-  '/dashboard/inboxes',
-  '/dashboard/domains',
-  '/favicon.ico',
-  '/favicon.svg',
-  '/apple-touch-icon.svg',
-  '/site.webmanifest',
-  '/_next/static/css/',
-  '/_next/static/js/',
-];
+const CACHE_NAME = 'inbox-nav-v5';
 
-// Install event - cache resources
+// Install event - cache resources (only cache actual files, not directories)
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then((cache) => {
+      // Only cache actual files that exist, not directories
+      const urlsToCache = [
+        '/favicon.ico',
+        '/favicon.svg',
+        '/apple-touch-icon.svg',
+        '/site.webmanifest',
+      ];
+      
+      // Use Promise.allSettled to avoid failing on individual cache misses
+      return Promise.allSettled(
+        urlsToCache.map(url => 
+          cache.add(url).catch(err => {
+            console.warn(`Failed to cache ${url}:`, err);
+            return null;
+          })
+        )
+      );
+    }).then(() => {
+      // Skip waiting to activate immediately
+      return self.skipWaiting();
+    })
   );
 });
 

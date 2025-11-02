@@ -235,22 +235,9 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
     ? orderData.inboxes.length
     : (orderData?.quantity ?? 0);
   const totalCost = orderData?.totalAmount ?? inboxCount * 300;
-  const isCancelled = orderData?.status === 'CANCELLED' || orderData?.subscriptionStatus === 'cancel_at_period_end';
-  const hasSubscription = Boolean(orderData?.stripeSubscriptionId);
-  const hasActiveSubscription = Boolean(!isCancelled && (
-    hasSubscription || (orderData?.subscriptionStatus && orderData.subscriptionStatus !== 'cancelled' && orderData.subscriptionStatus !== 'canceled' && orderData.subscriptionStatus !== 'cancel_at_period_end')
-  ));
-  
-  // Debug logging
-  console.log('OrderDetailsModal Debug:', {
-    orderId: orderData?.id,
-    stripeSubscriptionId: orderData?.stripeSubscriptionId,
-    hasSubscription,
-    isCancelled,
-    hasActiveSubscription,
-    status: orderData?.status,
-    subscriptionStatus: orderData?.subscriptionStatus
-  });
+  const isCancelled = orderData?.status === 'CANCELLED' || orderData?.subscriptionStatus === 'cancel_at_period_end' || orderData?.subscriptionStatus === 'cancelled' || orderData?.subscriptionStatus === 'canceled';
+  const hasSubscription = Boolean(orderData?.stripeSubscriptionId || (orderData?.subscriptionStatus && orderData.subscriptionStatus !== 'cancelled' && orderData.subscriptionStatus !== 'canceled' && orderData.subscriptionStatus !== 'cancel_at_period_end'));
+  const hasActiveSubscription = Boolean(!isCancelled && hasSubscription);
   const subscriptionStatusLabel = isCancelled
     ? (orderData?.subscriptionStatus === 'cancel_at_period_end' ? 'Cancelling at period end' : 'Cancelled')
     : (hasActiveSubscription ? 'Active' : '—');
