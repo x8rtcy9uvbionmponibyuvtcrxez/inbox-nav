@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { revealSecret } from "@/lib/encryption";
 import {
   XMarkIcon,
@@ -217,6 +218,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetailsModalProps) {
+  const router = useRouter();
   const [showAllInboxes, setShowAllInboxes] = useState(false);
   const [showAllDomains, setShowAllDomains] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
@@ -632,12 +634,21 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                   
                   if (response.ok && result.success) {
                     setCancelMessage('Subscription cancelled successfully. It will end at the current period.');
-                    // Close modal after 2 seconds
+                    
+                    // Close modal and refresh immediately to show updated data
+                    onClose();
+                    
+                    // Use router.refresh() for Next.js server component refresh
+                    // This will re-fetch server data without full page reload
+                    router.refresh();
+                    
+                    // Small delay to ensure cache invalidation completed
+                    // The refresh should fetch fresh data from the server
                     setTimeout(() => {
-                      onClose();
-                      // Refresh the page to update the order status
+                      // Force a hard refresh if router.refresh didn't update
+                      // This ensures the cache invalidation is reflected
                       window.location.reload();
-                    }, 2000);
+                    }, 1000);
                   } else {
                     setCancelMessage(result.error || 'Failed to cancel subscription');
                   }
