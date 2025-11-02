@@ -100,9 +100,9 @@ export default function RootLayout({
         "bg-white text-black hover:bg-gray-100 font-semibold transition shadow-sm",
       userButtonPopoverCard: clerkCardClassName,
       userButtonPopoverActionButton:
-        "text-white/80 hover:text-white bg-transparent hover:bg-white/[0.08]",
-      userButtonPopoverActionButtonIcon: "text-white/60",
-      userButtonPopoverActionButtonText: "text-white/80",
+        "text-white hover:text-white bg-transparent hover:bg-white/[0.08]",
+      userButtonPopoverActionButtonIcon: "text-white/90",
+      userButtonPopoverActionButtonText: "text-white",
       userButtonPopoverFooter: "border-t border-white/10 mt-2 pt-2",
     },
   }
