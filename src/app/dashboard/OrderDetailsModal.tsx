@@ -654,17 +654,13 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                     
                     setCancelMessage('Subscription cancelled successfully. It will end at the current period.');
                     
-                    // Refresh server data in background
-                    router.refresh();
-                    
-                    // Close modal after a brief delay to show success message
+                    // Force immediate hard reload to ensure cache is cleared and fresh data is fetched
+                    // Use a small delay to show success message first
                     setTimeout(() => {
                       onClose();
-                      // Force hard refresh to ensure everything is synced
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 500);
-                    }, 2000);
+                      // Force a hard reload with cache-busting
+                      window.location.href = window.location.href.split('?')[0] + '?refresh=' + Date.now();
+                    }, 1500);
                   } else {
                     setCancelMessage(result.error || 'Failed to cancel subscription');
                   }
