@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { revealSecret } from "@/lib/encryption";
 import {
   XMarkIcon,
   CalendarIcon,
@@ -483,40 +484,43 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
           )}
 
           {(espCredentials.accountId || espCredentials.password || espCredentials.apiKey) && (
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">ESP Account ID</p>
-                <p className="mt-2 font-mono text-xs text-white/80">{espCredentials.accountId ?? '—'}</p>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">ESP Password</p>
-                <p className="mt-2 font-mono text-xs text-white/80">{espCredentials.password ?? '—'}</p>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">ESP API Key</p>
-                <p className="mt-2 break-all font-mono text-xs text-white/80">{espCredentials.apiKey ?? '—'}</p>
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-white">ESP</h3>
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">ESP Account ID</p>
+                  <p className="mt-2 font-mono text-xs text-white/80">{espCredentials.accountId ?? '—'}</p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">ESP Password</p>
+                  <p className="mt-2 font-mono text-xs text-white/80">{espCredentials.password ?? '—'}</p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">ESP API Key</p>
+                  <p className="mt-2 break-all font-mono text-xs text-white/80">{espCredentials.apiKey ?? '—'}</p>
+                </div>
               </div>
             </div>
           )}
 
           {/* Registrar Details - Only show if OWN domain flow */}
           {domainSource === "OWN" && (order.domainRegistrar || order.registrarUsername || order.registrarPassword) && (
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar</p>
-                <p className="mt-2 text-xs text-white/80">{order.domainRegistrar ?? '—'}</p>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Username</p>
-                <p className="mt-2 font-mono text-xs text-white/80 break-all">{order.registrarUsername ?? '—'}</p>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Password</p>
-                <div className="mt-2 flex items-center gap-2">
-                  <p className="font-mono text-xs text-white/80">
-                    {order.registrarPassword ? '•'.repeat(Math.min(order.registrarPassword.length, 20)) : '—'}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-white">Registrar</h3>
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar</p>
+                  <p className="mt-2 text-xs text-white/80">{order.domainRegistrar ?? '—'}</p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Username</p>
+                  <p className="mt-2 font-mono text-xs text-white/80 break-all">{order.registrarUsername ?? '—'}</p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Password</p>
+                  <p className="mt-2 font-mono text-xs text-white/80">
+                    {order.registrarPassword ? revealSecret(order.registrarPassword) ?? '—' : '—'}
                   </p>
-                  <span className="text-[8px] text-white/40">(encrypted)</span>
                 </div>
               </div>
             </div>
