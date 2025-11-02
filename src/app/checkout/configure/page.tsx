@@ -234,9 +234,9 @@ function ConfigurePageContent() {
 
                 <section className="surface-card space-y-6">
                   <div>
-                    <h2 className="text-lg font-semibold text-[var(--text-primary)]">Domain options</h2>
+                    <h2 className="text-lg font-semibold text-[var(--text-primary)]">Domain setup</h2>
                     <p className="text-sm text-[var(--text-secondary)]">
-                      Decide if we should procure fresh domains or if you&apos;ll connect existing inventory during onboarding.
+                      Choose how you want to handle domains for your inboxes.
                     </p>
                   </div>
 
@@ -304,7 +304,7 @@ function ConfigurePageContent() {
                     </label>
                     {domainSource === "OWN" && (
                       <div className="rounded-[12px] border border-[var(--border-medium)] bg-[rgba(254,254,254,0.08)] p-4 text-xs text-[var(--text-muted)]">
-                        You&apos;ll provide your domain list, forwarding URL, and registrar access during onboarding so we can configure DNS and launch quickly.
+                        Next steps: You&apos;ll provide your domain list and registrar login details. We&apos;ll configure all DNS records (SPF, DKIM, DMARC) and have your inboxes ready in 48 hours.
                       </div>
                     )}
                   </div>

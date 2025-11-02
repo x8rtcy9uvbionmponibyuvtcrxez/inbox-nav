@@ -40,6 +40,7 @@ export async function getDashboardData(userId: string) {
             inboxes: {
               select: {
                 id: true,
+                email: true,
                 status: true,
                 businessName: true,
                 forwardingDomain: true,
