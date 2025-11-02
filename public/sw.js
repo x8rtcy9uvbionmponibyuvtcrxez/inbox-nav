@@ -1,4 +1,4 @@
-const CACHE_NAME = 'inbox-nav-v6';
+const CACHE_NAME = 'inbox-nav-v7';
 
 // Install event - cache resources (only cache actual files, not directories)
 self.addEventListener('install', (event) => {
@@ -41,7 +41,7 @@ self.addEventListener('fetch', (event) => {
   if (isFavicon) {
     // Always fetch from network, never from cache
     event.respondWith(
-      fetch(event.request, { cache: 'no-store' })
+      fetch(event.request, { cache: 'no-store', redirect: 'follow' })
         .catch(() => {
           // If network fails, don't show anything - don't fallback to cache
           return new Response('', { status: 404 });
@@ -50,11 +50,39 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
+  // For navigation requests or API requests, always use network with redirect: 'follow'
+  const isNavigation = event.request.mode === 'navigate';
+  const isAPI = event.request.url.includes('/api/');
+  
+  if (isNavigation || isAPI) {
+    event.respondWith(
+      fetch(event.request, { redirect: 'follow', cache: 'no-cache' })
+        .then((response) => {
+          // Only cache successful non-redirect responses
+          if (response.ok && response.status === 200 && response.type === 'basic') {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // If network fails, try cache as fallback
+          return caches.match(event.request).then((cachedResponse) => {
+            return cachedResponse || new Response('Network error', { status: 503 });
+          });
+        })
+    );
+    return;
+  }
+  
+  // For other requests, use cache-first strategy
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
+        // Return cached version or fetch from network with redirect handling
+        return response || fetch(event.request, { redirect: 'follow' });
       })
   );
 });
