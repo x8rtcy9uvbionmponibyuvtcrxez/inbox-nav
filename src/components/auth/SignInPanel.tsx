@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { isClerkAPIResponseError, useSignIn } from "@clerk/nextjs";
+import { useSignIn } from "@clerk/nextjs";
 import { clerkCardClassName } from "@/lib/clerkAppearance";
 
 export function SignInPanel() {
@@ -41,12 +41,12 @@ export function SignInPanel() {
       }
 
       setErrorMessage("Unable to sign in with those credentials. Please try again.");
-    } catch (err) {
-      if (isClerkAPIResponseError(err)) {
-        const firstError = err.errors?.[0];
-        setErrorMessage(firstError?.longMessage || firstError?.message || "We couldn’t sign you in. Please try again.");
+    } catch (err: any) {
+      if (err?.errors?.[0]) {
+        const firstError = err.errors[0];
+        setErrorMessage(firstError?.longMessage || firstError?.message || "We couldn't sign you in. Please try again.");
       } else {
-        setErrorMessage("We couldn’t sign you in. Please try again.");
+        setErrorMessage("We couldn't sign you in. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
@@ -64,10 +64,10 @@ export function SignInPanel() {
         redirectUrl: "/sign-in",
         redirectUrlComplete: "/dashboard",
       });
-    } catch (err) {
+    } catch (err: any) {
       setIsGoogleLoading(false);
-      if (isClerkAPIResponseError(err)) {
-        const firstError = err.errors?.[0];
+      if (err?.errors?.[0]) {
+        const firstError = err.errors[0];
         setErrorMessage(firstError?.longMessage || firstError?.message || "Google sign-in failed. Please try again.");
       } else {
         setErrorMessage("Google sign-in failed. Please try again.");
