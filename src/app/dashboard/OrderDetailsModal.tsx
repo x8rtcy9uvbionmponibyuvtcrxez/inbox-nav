@@ -446,12 +446,10 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
               )}
             </div>
             <div className="space-y-3">
-              {forwardingUrl && (
-                <div className="flex justify-between">
-                  <span className="text-white/60">Forwarding URL:</span>
-                  <span className="text-white break-all">{forwardingUrl}</span>
-                </div>
-              )}
+              <div className="flex justify-between">
+                <span className="text-white/60">Forwarding URL:</span>
+                <span className="text-white break-all">{forwardingUrl || '—'}</span>
+              </div>
               {domainCountPlan != null && (
                 <div className="flex justify-between">
                   <span className="text-white/60">Domains Needed:</span>
