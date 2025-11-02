@@ -23,41 +23,55 @@ export default function SignInPage() {
           signUpUrl="/sign-up"
           appearance={{
             elements: {
-              // Main container styling - ensure proper alignment
+              // Main container styling
               rootBox: 'mx-auto w-full',
               card: 'bg-transparent shadow-none border-none w-full',
               
-              // Header text - make it brighter and more readable
+              // Header text - white per branding guide
               headerTitle: 'text-white text-2xl font-semibold mb-1',
-              headerSubtitle: 'text-white/80 text-sm',
+              headerSubtitle: 'text-white/90 text-sm',
               
-              // Form fields - improve contrast and visibility
-              formButtonPrimary: 'bg-white text-black hover:bg-gray-100 font-semibold',
-              formFieldInput: 'bg-white/15 border-white/30 text-white placeholder:text-white/50 focus:border-white/60 focus:bg-white/20',
-              formFieldLabel: 'text-white/95 font-medium',
-              formFieldInputShowPasswordButton: 'text-white/80 hover:text-white',
+              // Form fields - white text on dark backgrounds
+              formButtonPrimary: 'bg-white text-black hover:bg-gray-100 font-semibold shadow-sm',
+              formFieldInput: 'bg-white/[0.08] border-white/[0.16] text-white placeholder:text-white/60 focus:border-white/40 focus:bg-white/[0.12]',
+              formFieldLabel: 'text-white font-medium mb-1',
+              formFieldInputShowPasswordButton: 'text-white/90 hover:text-white',
               
-              // Social buttons - improve visibility
-              socialButtonsBlockButton: 'bg-white/15 border-white/30 text-white hover:bg-white/25 hover:border-white/40',
-              socialButtonsIconButton: 'bg-white/15 border-white/30 hover:bg-white/25',
+              // Social buttons - white text
+              socialButtonsBlockButton: 'bg-white/[0.08] border-white/[0.16] text-white hover:bg-white/[0.12] hover:border-white/30',
+              socialButtonsIconButton: 'bg-white/[0.08] border-white/[0.16] hover:bg-white/[0.12]',
               socialButtonsBlockButtonText: 'text-white font-medium',
               
-              // Links - make them more visible
+              // Links and actions - white text
               footerActionLink: 'text-white hover:text-white/80 underline',
-              identityPreviewEditButton: 'text-white/90 hover:text-white',
-              formFieldAction: 'text-white/90 hover:text-white',
+              footerActionText: 'text-white/80',
+              identityPreviewEditButton: 'text-white hover:text-white/80',
+              formFieldAction: 'text-white hover:text-white/80',
               
-              // Divider - make it more visible
-              dividerLine: 'bg-white/20',
-              dividerText: 'text-white/70 font-medium',
+              // Divider - subtle white
+              dividerLine: 'bg-white/[0.08]',
+              dividerText: 'text-white/80',
+              
+              // Other text elements
+              formHeaderTitle: 'text-white',
+              formHeaderSubtitle: 'text-white/80',
+              otpCodeFieldInput: 'bg-white/[0.08] border-white/[0.16] text-white',
             },
             variables: {
+              // Primary colors - white on black per branding guide
               colorPrimary: '#FFFFFF',
               colorBackground: '#000000',
-              colorInputBackground: 'rgba(255, 255, 255, 0.15)',
-              colorInputText: '#FFFFFF',
-              colorText: 'rgba(255, 255, 255, 0.98)',
-              colorTextSecondary: 'rgba(255, 255, 255, 0.90)',
+              colorInputBackground: 'rgba(255, 255, 255, 0.08)',
+              colorInputText: 'rgba(255, 255, 255, 0.96)',
+              
+              // Text colors - white per branding guide
+              colorText: 'rgba(255, 255, 255, 0.96)',
+              colorTextSecondary: 'rgba(255, 255, 255, 0.86)',
+              colorTextOnPrimaryBackground: 'rgba(255, 255, 255, 0.96)',
+              
+              // Borders - subtle per branding guide
+              colorShimmer: 'rgba(255, 255, 255, 0.08)',
+              
               borderRadius: '0.5rem',
             },
           }}

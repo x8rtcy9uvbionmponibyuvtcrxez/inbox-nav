@@ -31,41 +31,46 @@ export default function SignUpPage() {
               signInUrl="/sign-in"
               appearance={{
                 elements: {
-                  // Main container styling - ensure proper alignment
+                  // Main container styling
                   rootBox: 'mx-auto w-full',
                   card: 'bg-transparent shadow-none border-none w-full',
                   
-                  // Header text - make it brighter and more readable
+                  // Header text - white on black (branding: --text-primary)
                   headerTitle: 'text-white text-2xl font-semibold mb-1',
-                  headerSubtitle: 'text-white/80 text-sm',
+                  headerSubtitle: 'text-white text-sm',
                   
-                  // Form fields - improve contrast and visibility
+                  // Form fields - white text on dark inputs (branding: --text-primary)
                   formButtonPrimary: 'bg-white text-black hover:bg-gray-100 font-semibold',
-                  formFieldInput: 'bg-white/15 border-white/30 text-white placeholder:text-white/50 focus:border-white/60 focus:bg-white/20',
-                  formFieldLabel: 'text-white/95 font-medium',
-                  formFieldInputShowPasswordButton: 'text-white/80 hover:text-white',
+                  formFieldInput: 'bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 focus:bg-white/15',
+                  formFieldLabel: 'text-white font-medium',
+                  formFieldInputShowPasswordButton: 'text-white hover:text-white',
                   
-                  // Social buttons - improve visibility
-                  socialButtonsBlockButton: 'bg-white/15 border-white/30 text-white hover:bg-white/25 hover:border-white/40',
-                  socialButtonsIconButton: 'bg-white/15 border-white/30 hover:bg-white/25',
+                  // Social buttons - white text (branding: --text-secondary)
+                  socialButtonsBlockButton: 'bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30',
+                  socialButtonsIconButton: 'bg-white/10 border-white/20 hover:bg-white/20',
                   socialButtonsBlockButtonText: 'text-white font-medium',
                   
-                  // Links - make them more visible
-                  footerActionLink: 'text-white hover:text-white/80 underline',
-                  identityPreviewEditButton: 'text-white/90 hover:text-white',
-                  formFieldAction: 'text-white/90 hover:text-white',
+                  // Links - white text (branding: --text-secondary)
+                  footerActionLink: 'text-white hover:text-white/90 underline',
+                  identityPreviewEditButton: 'text-white hover:text-white',
+                  formFieldAction: 'text-white hover:text-white',
                   
-                  // Divider - make it more visible
+                  // Divider - white (branding: --text-muted)
                   dividerLine: 'bg-white/20',
-                  dividerText: 'text-white/70 font-medium',
+                  dividerText: 'text-white font-medium',
+                  
+                  // Footer text - white
+                  footerActionText: 'text-white',
                 },
                 variables: {
-                  colorPrimary: '#FFFFFF',
+                  // Branding guide colors
+                  colorPrimary: '#FFFFFF', // --accent-primary
                   colorBackground: '#000000',
-                  colorInputBackground: 'rgba(255, 255, 255, 0.15)',
-                  colorInputText: '#FFFFFF',
-                  colorText: 'rgba(255, 255, 255, 0.98)',
-                  colorTextSecondary: 'rgba(255, 255, 255, 0.90)',
+                  colorInputBackground: 'rgba(255, 255, 255, 0.1)',
+                  colorInputText: 'rgba(255, 255, 255, 0.96)', // --text-primary
+                  colorText: 'rgba(255, 255, 255, 0.96)', // --text-primary
+                  colorTextSecondary: 'rgba(228, 233, 255, 0.86)', // --text-secondary
+                  colorDanger: '#FB7185', // --danger
                   borderRadius: '0.5rem',
                 },
               }}
