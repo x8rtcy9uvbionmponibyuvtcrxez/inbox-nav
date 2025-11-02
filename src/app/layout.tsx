@@ -8,7 +8,7 @@ import PerformanceDashboard from '@/components/PerformanceDashboard'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import IntercomProvider from '@/components/IntercomProvider'
-import { clerkCardClassName, clerkDarkElements, clerkDarkVariables } from '@/lib/clerkAppearance'
+import { clerkCardClassName, clerkDarkAppearance } from '@/lib/clerkAppearance'
 import './globals.css'
 
 const inter = Inter({
@@ -37,10 +37,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
-      { url: '/favicon.svg', type: 'image/svg+xml' }
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' }
     ],
-    shortcut: '/favicon.ico',
+    shortcut: '/favicon.svg',
     apple: [
       { url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' }
     ],
@@ -88,18 +88,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   const providerAppearance = {
-    variables: clerkDarkVariables,
+    ...clerkDarkAppearance,
     elements: {
+      ...clerkDarkAppearance.elements,
       socialButtonsBlockButton:
-        clerkDarkElements?.socialButtonsBlockButton ??
         "bg-white/[0.08] border-white/[0.16] text-white hover:bg-white/[0.12] hover:border-white/30 transition",
-      socialButtonsBlockButtonText:
-        clerkDarkElements?.socialButtonsBlockButtonText ?? "text-white font-medium",
+      socialButtonsBlockButtonText: "text-white font-medium",
       socialButtonsIconButton:
-        clerkDarkElements?.socialButtonsIconButton ??
         "bg-white/[0.08] border-white/[0.16] hover:bg-white/[0.12]",
       formButtonPrimary:
-        clerkDarkElements?.formButtonPrimary ??
         "bg-white text-black hover:bg-gray-100 font-semibold transition shadow-sm",
       userButtonPopoverCard: clerkCardClassName,
       userButtonPopoverActionButton:
@@ -119,10 +116,10 @@ export default function RootLayout({
       <IntercomProvider>
         <html lang="en" suppressHydrationWarning>
           <head>
-            {/* Favicon links - explicit for browser compatibility */}
-            <link rel="icon" href="/favicon.ico" sizes="32x32" type="image/x-icon" />
+            {/* Favicon links - explicit for browser compatibility, SVG prioritized */}
             <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-            <link rel="shortcut icon" href="/favicon.ico" />
+            <link rel="icon" href="/favicon.ico" sizes="32x32" type="image/x-icon" />
+            <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
             <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
             <link rel="manifest" href="/site.webmanifest" />
             
