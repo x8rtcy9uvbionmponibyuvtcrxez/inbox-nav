@@ -309,7 +309,7 @@ export default function DashboardClient({
           <table className="min-w-full divide-y divide-white/5 text-sm">
             <thead className="bg-white/5 text-xs uppercase tracking-wider text-brand-muted">
               <tr>
-                <th scope="col" className="px-6 py-4 text-left font-semibold">URL</th>
+                <th scope="col" className="px-6 py-4 text-left font-semibold">Forwarding URL</th>
                 <th scope="col" className="px-6 py-4 text-left font-semibold">Business Name</th>
                 <th scope="col" className="px-6 py-4 text-left font-semibold">Product</th>
                 <th scope="col" className="px-6 py-4 text-left font-semibold">Volume</th>
@@ -341,11 +341,10 @@ export default function DashboardClient({
                   : (order?.quantity ?? 0);
                 const totalCost = order?.totalAmount ?? inboxCount * 300;
                 const isCancelled = order?.status === 'CANCELLED' || order?.subscriptionStatus === 'cancel_at_period_end' || order?.subscriptionStatus === 'cancelled' || order?.subscriptionStatus === 'canceled';
+                // Get forwarding URL from domains first (primary source), then from preferences
                 const forwardingLabel =
-                  record.website ||
+                  order?.domains?.find((domain) => domain.forwardingUrl && domain.forwardingUrl.trim() !== "")?.forwardingUrl ||
                   forwardingFromPrefs ||
-                  order?.inboxes?.find((inbox) => inbox.forwardingDomain && inbox.forwardingDomain !== "-")?.forwardingDomain ||
-                  order?.domains?.find((domain) => domain.forwardingUrl)?.forwardingUrl ||
                   "—";
                 
                 return (
@@ -357,7 +356,6 @@ export default function DashboardClient({
                     </td>
                     <td className="px-6 py-5">
                       <div className="text-base font-semibold text-brand-primary">{businessName}</div>
-                      <div className="text-xs text-brand-muted mt-1">{record.website ? record.website : "—"}</div>
                     </td>
                     <td className="px-6 py-5">
                       <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-brand-primary">
