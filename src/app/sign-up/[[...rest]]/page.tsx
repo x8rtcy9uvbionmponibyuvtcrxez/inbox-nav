@@ -15,7 +15,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_#131a36_0%,_#030616_70%)] px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(34,34,42,0.85)_0%,_#060608_65%)] px-4">
       <div className="w-full max-w-md">
         {/* Header - aligned with sign-up form */}
         <div className="text-center mb-8">
