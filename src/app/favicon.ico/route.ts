@@ -9,10 +9,13 @@ export async function GET() {
     const svgContent = fs.readFileSync(publicPath, 'utf-8')
     
     // Serve as SVG with proper headers - browsers will accept this
+    // Use no-cache to prevent stale favicons
     return new NextResponse(svgContent, {
       headers: {
         'Content-Type': 'image/svg+xml',
-        'Cache-Control': 'public, max-age=86400, must-revalidate',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     })
   } catch (error) {

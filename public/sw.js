@@ -1,15 +1,17 @@
-const CACHE_NAME = 'inbox-nav-v5';
+const CACHE_NAME = 'inbox-nav-v6';
 
 // Install event - cache resources (only cache actual files, not directories)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Only cache actual files that exist, not directories
+      // Don't cache favicons - always fetch fresh from network
+      // Only cache pages, not static assets that might change
       const urlsToCache = [
-        '/favicon.ico',
-        '/favicon.svg',
-        '/apple-touch-icon.svg',
-        '/site.webmanifest',
+        '/',
+        '/dashboard',
+        '/dashboard/products',
+        '/dashboard/inboxes',
+        '/dashboard/domains',
       ];
       
       // Use Promise.allSettled to avoid failing on individual cache misses
@@ -30,17 +32,20 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  // Always fetch favicons from network to ensure they're up-to-date
+  // NEVER cache favicons - always fetch fresh from network, no cache fallback
   const isFavicon = event.request.url.includes('/favicon') || 
                     event.request.url.includes('/apple-touch-icon') ||
-                    event.request.url.includes('/site.webmanifest');
+                    event.request.url.includes('/site.webmanifest') ||
+                    event.request.url.includes('/icon.');
   
   if (isFavicon) {
+    // Always fetch from network, never from cache
     event.respondWith(
-      fetch(event.request).catch(() => {
-        // Fallback to cache only if network fails
-        return caches.match(event.request);
-      })
+      fetch(event.request, { cache: 'no-store' })
+        .catch(() => {
+          // If network fails, don't show anything - don't fallback to cache
+          return new Response('', { status: 404 });
+        })
     );
     return;
   }
