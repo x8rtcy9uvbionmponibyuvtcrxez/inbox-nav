@@ -91,9 +91,15 @@ export default function RootLayout({
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
       appearance={{
+        baseTheme: 'dark',
         elements: {
-          // Only force the social button TEXT to be black; leave button styles intact
+          // Social buttons - maintain black text for labels
+          socialButtonsBlockButton: 'text-black [&>span]:text-black',
           socialButtonsBlockButtonText: 'text-black',
+        },
+        variables: {
+          colorPrimary: '#FFFFFF',
+          colorBackground: '#000000',
         },
       }}
     >
