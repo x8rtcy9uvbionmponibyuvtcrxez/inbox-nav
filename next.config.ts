@@ -9,12 +9,14 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   experimental: {
     optimizePackageImports: ['@heroicons/react', 'framer-motion', '@clerk/nextjs'],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  },
+  
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },
