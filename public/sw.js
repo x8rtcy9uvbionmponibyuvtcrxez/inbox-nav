@@ -1,4 +1,4 @@
-const CACHE_NAME = 'inbox-nav-v8';
+const CACHE_NAME = 'inbox-nav-v9';
 
 // Install event - cache resources (only cache actual files, not directories)
 self.addEventListener('install', (event) => {
@@ -32,6 +32,12 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  // Ignore non-GET requests (e.g., POST/PUT). These cannot be cached reliably.
+  if (event.request.method !== 'GET') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   // Don't intercept navigation requests - let them go directly to network
   // This prevents redirect issues with authentication and routing
   if (event.request.mode === 'navigate') {
