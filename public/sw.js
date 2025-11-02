@@ -1,4 +1,4 @@
-const CACHE_NAME = 'inbox-nav-v7';
+const CACHE_NAME = 'inbox-nav-v8';
 
 // Install event - cache resources (only cache actual files, not directories)
 self.addEventListener('install', (event) => {
@@ -32,6 +32,13 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  // Don't intercept navigation requests - let them go directly to network
+  // This prevents redirect issues with authentication and routing
+  if (event.request.mode === 'navigate') {
+    // Let navigation requests pass through without service worker interception
+    return;
+  }
+  
   // NEVER cache favicons - always fetch fresh from network, no cache fallback
   const isFavicon = event.request.url.includes('/favicon') || 
                     event.request.url.includes('/apple-touch-icon') ||
@@ -50,11 +57,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // For navigation requests or API requests, always use network with redirect: 'follow'
-  const isNavigation = event.request.mode === 'navigate';
+  // For API requests, always use network with redirect: 'follow'
   const isAPI = event.request.url.includes('/api/');
   
-  if (isNavigation || isAPI) {
+  if (isAPI) {
     event.respondWith(
       fetch(event.request, { redirect: 'follow', cache: 'no-cache' })
         .then((response) => {
@@ -77,7 +83,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // For other requests, use cache-first strategy
+  // For other requests (static assets), use cache-first strategy
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
