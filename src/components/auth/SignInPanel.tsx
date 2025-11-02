@@ -82,11 +82,6 @@ export function SignInPanel() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">Inbox Navigator</h1>
-        <p className="text-lg text-white/85">Email inbox management platform</p>
-      </div>
-
       <div className={`${clerkCardClassName} px-8 py-9`}>
         <div className="mb-8 text-center">
           <h2 className="text-xl font-semibold text-white">Sign in to Inbox Nav</h2>
