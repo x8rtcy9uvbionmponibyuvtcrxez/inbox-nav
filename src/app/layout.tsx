@@ -8,6 +8,7 @@ import PerformanceDashboard from '@/components/PerformanceDashboard'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import IntercomProvider from '@/components/IntercomProvider'
+import { clerkCardClassName, clerkDarkElements, clerkDarkVariables } from '@/lib/clerkAppearance'
 import './globals.css'
 
 const inter = Inter({
@@ -86,21 +87,34 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const providerAppearance = {
+    variables: clerkDarkVariables,
+    elements: {
+      socialButtonsBlockButton:
+        clerkDarkElements?.socialButtonsBlockButton ??
+        "bg-white/[0.08] border-white/[0.16] text-white hover:bg-white/[0.12] hover:border-white/30 transition",
+      socialButtonsBlockButtonText:
+        clerkDarkElements?.socialButtonsBlockButtonText ?? "text-white font-medium",
+      socialButtonsIconButton:
+        clerkDarkElements?.socialButtonsIconButton ??
+        "bg-white/[0.08] border-white/[0.16] hover:bg-white/[0.12]",
+      formButtonPrimary:
+        clerkDarkElements?.formButtonPrimary ??
+        "bg-white text-black hover:bg-gray-100 font-semibold transition shadow-sm",
+      userButtonPopoverCard: clerkCardClassName,
+      userButtonPopoverActionButton:
+        "text-white/80 hover:text-white bg-transparent hover:bg-white/[0.08]",
+      userButtonPopoverActionButtonIcon: "text-white/60",
+      userButtonPopoverActionButtonText: "text-white/80",
+      userButtonPopoverFooter: "border-t border-white/10 mt-2 pt-2",
+    },
+  }
+
   return (
     <ClerkProvider
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
-      appearance={{
-        elements: {
-          // Social buttons - maintain black text for labels
-          socialButtonsBlockButton: 'text-black [&>span]:text-black',
-          socialButtonsBlockButtonText: 'text-black',
-        },
-        variables: {
-          colorPrimary: '#FFFFFF',
-          colorBackground: '#000000',
-        },
-      }}
+      appearance={providerAppearance}
     >
       <IntercomProvider>
         <html lang="en" suppressHydrationWarning>

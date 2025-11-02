@@ -1,4 +1,4 @@
-const CACHE_NAME = 'inbox-nav-v2';
+const CACHE_NAME = 'inbox-nav-v3';
 const urlsToCache = [
   '/',
   '/dashboard',
@@ -60,6 +60,9 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // Force skip waiting to activate new service worker immediately
+      return self.clients.claim();
     })
   );
 });
