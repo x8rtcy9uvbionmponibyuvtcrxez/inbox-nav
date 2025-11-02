@@ -156,6 +156,11 @@ export default function DashboardClient({
     setIsModalOpen(true);
   }, []);
 
+  const handleCloseOrderDetails = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
+  }, []);
+
   // Memoize expensive calculations
   const cardAccent = useMemo(() => ({
     inboxes: "from-blue-500/20 via-blue-600/20 to-blue-700/20 border-blue-500/30",
@@ -403,11 +408,13 @@ export default function DashboardClient({
       </div>
       
       {/* Order Details Modal */}
-      <OrderDetailsModal
-        order={selectedOrder!}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      {selectedOrder && (
+        <OrderDetailsModal
+          order={selectedOrder}
+          isOpen={isModalOpen}
+          onClose={handleCloseOrderDetails}
+        />
+      )}
     </div>
   );
 }

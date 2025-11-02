@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { revealSecret } from "@/lib/encryption";
 import {
   XMarkIcon,
@@ -218,12 +217,11 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetailsModalProps) {
-  const router = useRouter();
   const [showAllInboxes, setShowAllInboxes] = useState(false);
   const [showAllDomains, setShowAllDomains] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
-  const [localOrder, setLocalOrder] = useState(order);
+  const [localOrder, setLocalOrder] = useState<OrderWithRelations | null>(order ?? null);
   
   // Update local order when prop changes (after refresh)
   useEffect(() => {
@@ -232,11 +230,18 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
     }
   }, [order]);
   
+  const currentOrder = localOrder ?? order ?? null;
+
   if (!isOpen) return null;
 
-  const orderData = (localOrder.order ?? null) as CustomerOrder | null;
+  if (!currentOrder) {
+    console.error('OrderDetailsModal: missing order data');
+    return null;
+  }
+
+  const orderData = (currentOrder.order ?? null) as CustomerOrder | null;
   if (!orderData) {
-    console.error('OrderData is null! Order structure:', order);
+    console.error('OrderData is null! Order structure:', currentOrder);
     return null;
   }
 
@@ -251,20 +256,20 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
   const subscriptionStatusLabel = isCancelled
     ? (orderData?.subscriptionStatus === 'cancel_at_period_end' ? 'Cancelling at period end' : 'Cancelled')
     : (hasActiveSubscription ? 'Active' : '—');
-  const personas = normalizePersonas(localOrder.personas);
-  const specialRequirementsRaw = typeof localOrder.specialRequirements === 'string' ? localOrder.specialRequirements.trim() : '';
+  const personas = normalizePersonas(currentOrder.personas);
+  const specialRequirementsRaw = typeof currentOrder.specialRequirements === 'string' ? currentOrder.specialRequirements.trim() : '';
   const specialRequirements = specialRequirementsRaw.length ? specialRequirementsRaw : null;
-  const domainPreferences = parseDomainPreferences(localOrder.domainPreferences);
-  const domainSource = (localOrder.domainSource ?? (domainPreferences.domains?.length ? "OWN" : "BUY_FOR_ME")).toUpperCase();
-  const providedDomains = normalizeArray(localOrder.providedDomains);
+  const domainPreferences = parseDomainPreferences(currentOrder.domainPreferences);
+  const domainSource = (currentOrder.domainSource ?? (domainPreferences.domains?.length ? "OWN" : "BUY_FOR_ME")).toUpperCase();
+  const providedDomains = normalizeArray(currentOrder.providedDomains);
   const domainList =
     domainPreferences.domains && domainPreferences.domains.length
       ? domainPreferences.domains
       : providedDomains;
   const ownDomains = domainSource === "OWN" ? domainList : [];
-  const domainCountPlan = localOrder.calculatedDomainCount ?? null;
-  const inboxesPerDomain = localOrder.inboxesPerDomain ?? null;
-  const forwardingUrl = localOrder.website ?? "";
+  const domainCountPlan = currentOrder.calculatedDomainCount ?? null;
+  const inboxesPerDomain = currentOrder.inboxesPerDomain ?? null;
+  const forwardingUrl = currentOrder.website ?? "";
   const espCredentials = domainPreferences.espCredentials ?? {
     accountId: null,
     password: null,
@@ -279,8 +284,8 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
       ["Product", orderData.productType],
       ["Quantity", String(orderData.quantity ?? inboxCount)],
       ["Total Amount (cents)", String(orderData.totalAmount ?? totalCost)],
-      ["Business Name", localOrder.businessType ?? ""],
-      ["Website", localOrder.website ?? ""],
+      ["Business Name", currentOrder.businessType ?? ""],
+      ["Website", currentOrder.website ?? ""],
       ["Subscription Status", subscriptionStatusLabel],
       ["Stripe Subscription ID", orderData.stripeSubscriptionId ?? ""],
       ["Cancelled On", orderData.cancelledAt ? formatDate(orderData.cancelledAt) : ""],
@@ -290,9 +295,9 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
       ["Domains Needed", domainCountPlan != null ? String(domainCountPlan) : ""],
       ["Forwarding URL", forwardingUrl],
       ["Domain Plan", domainList.join("; ")],
-      ["Registrar", localOrder.domainRegistrar ?? ""],
-      ["Registrar Username", localOrder.registrarUsername ?? ""],
-      ["Registrar Password", localOrder.registrarPassword ? "••••••••" : ""],
+      ["Registrar", currentOrder.domainRegistrar ?? ""],
+      ["Registrar Username", currentOrder.registrarUsername ?? ""],
+      ["Registrar Password", currentOrder.registrarPassword ? "••••••••" : ""],
       ["ESP Account ID", espCredentials.accountId ?? ""],
       ["ESP Password", espCredentials.password ?? ""],
       ["ESP API Key", espCredentials.apiKey ?? ""],
@@ -501,22 +506,22 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
           )}
 
           {/* Registrar Details - Only show if OWN domain flow */}
-          {domainSource === "OWN" && (localOrder.domainRegistrar || localOrder.registrarUsername || localOrder.registrarPassword) && (
+          {domainSource === "OWN" && (currentOrder.domainRegistrar || currentOrder.registrarUsername || currentOrder.registrarPassword) && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-white">Registrar</h3>
               <div className="grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar</p>
-                  <p className="mt-2 text-xs text-white/80">{localOrder.domainRegistrar ?? '—'}</p>
+                  <p className="mt-2 text-xs text-white/80">{currentOrder.domainRegistrar ?? '—'}</p>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Username</p>
-                  <p className="mt-2 font-mono text-xs text-white/80 break-all">{localOrder.registrarUsername ?? '—'}</p>
+                  <p className="mt-2 font-mono text-xs text-white/80 break-all">{currentOrder.registrarUsername ?? '—'}</p>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-white/50">Registrar Password</p>
                   <p className="mt-2 font-mono text-xs text-white/80">
-                    {localOrder.registrarPassword ? revealSecret(localOrder.registrarPassword) ?? '—' : '—'}
+                    {currentOrder.registrarPassword ? revealSecret(currentOrder.registrarPassword) ?? '—' : '—'}
                   </p>
                 </div>
               </div>
@@ -642,15 +647,15 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                   
                   if (response.ok && result.success) {
                     // Optimistically update local order state
-                    const updatedOrder = {
-                      ...localOrder,
+                    const updatedOrder: OrderWithRelations = {
+                      ...currentOrder,
                       order: {
-                        ...localOrder.order,
+                        ...orderData,
                         subscriptionStatus: 'cancel_at_period_end',
                         cancelledAt: new Date(),
-                      }
+                      },
                     };
-                    setLocalOrder(updatedOrder as OrderWithRelations);
+                    setLocalOrder(updatedOrder);
                     
                     setCancelMessage('Subscription cancelled successfully. It will end at the current period.');
                     
