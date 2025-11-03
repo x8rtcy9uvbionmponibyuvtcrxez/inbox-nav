@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
           break
         }
 
-        console.log(`[Stripe Webhook] Processing subscription update: ${subId}, status: ${subscriptionStatus}`)
+        console.log(`[Stripe Webhook] Processing subscription update: ${subId}, status: ${subscriptionStatus}, cancel_at_period_end: ${subscription.cancel_at_period_end}`)
 
         const order = await prisma.order.findFirst({ where: { stripeSubscriptionId: subId } })
         if (!order) {
@@ -144,22 +144,36 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ received: true })
         }
 
-        console.log(`[Stripe Webhook] Found order: ${order.id}, updating subscription status to: ${subscriptionStatus}`)
-
-        // Update subscription status and handle cancellation
+        // Check if subscription is scheduled for cancellation at period end
+        const isScheduledForCancellation = subscription.cancel_at_period_end === true
         const isCanceled = subscriptionStatus === 'canceled'
         const cancelledAt = subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null
+
+        // Determine the subscription status to store
+        // If scheduled for cancellation, preserve 'cancel_at_period_end'
+        // If already cancelled, use 'canceled'
+        // Otherwise use the subscription status
+        const statusToStore = isScheduledForCancellation 
+          ? 'cancel_at_period_end' 
+          : isCanceled 
+            ? 'canceled' 
+            : subscriptionStatus
+
+        console.log(`[Stripe Webhook] Found order: ${order.id}, updating subscription status to: ${statusToStore}`)
 
         await prisma.order.update({
           where: { id: order.id },
           data: {
-            subscriptionStatus: subscriptionStatus,
-            cancelledAt: isCanceled ? cancelledAt ?? new Date() : cancelledAt,
+            subscriptionStatus: statusToStore,
+            // Preserve cancelledAt if scheduled for cancellation or already cancelled
+            cancelledAt: isScheduledForCancellation || isCanceled 
+              ? (cancelledAt ?? order.cancelledAt ?? new Date()) 
+              : cancelledAt,
             status: isCanceled ? 'CANCELLED' : order.status,
           },
         })
 
-        // If subscription is actually cancelled, mark related items as deleted
+        // If subscription is actually cancelled (not just scheduled), mark related items as deleted
         if (isCanceled) {
           await prisma.inbox.updateMany({
             where: { orderId: order.id },
@@ -176,7 +190,7 @@ export async function POST(request: NextRequest) {
           await invalidateCache(`dashboard:${order.clerkUserId}`)
         }
 
-        console.log(`[Stripe Webhook] Successfully updated subscription status for order: ${order.id}`)
+        console.log(`[Stripe Webhook] Successfully updated subscription status for order: ${order.id} to ${statusToStore}`)
         break
       }
       case 'invoice.payment_failed': {
