@@ -160,6 +160,18 @@ export async function markOrderAsFulfilledAction(
               skipDuplicates: true
             });
             
+            // Update existing inboxes with passwords (in case they were created during onboarding without passwords)
+            if (uniformPassword?.trim()) {
+              await prisma.inbox.updateMany({
+                where: { orderId },
+                data: { 
+                  password: uniformPassword.trim(),
+                  updatedAt: new Date()
+                }
+              });
+              console.log(`[FULFILLMENT] ✅ Updated all inboxes with uniform password`);
+            }
+            
             // Update domain inbox counts
             for (const domain of distribution.domainsUsed) {
               const count = distribution.allocations.filter(a => a.domain === domain).length;

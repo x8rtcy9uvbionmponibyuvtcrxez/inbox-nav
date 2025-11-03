@@ -237,6 +237,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, onCancelled 
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
   const [cancelMessageType, setCancelMessageType] = useState<'success' | 'error' | null>(null);
   const [localOrder, setLocalOrder] = useState<OrderWithRelations | null>(order ?? null);
+  const [isHydrated, setIsHydrated] = useState(false);
   
   // Update local order when prop changes (after refresh)
   useEffect(() => {
@@ -244,6 +245,10 @@ export default function OrderDetailsModal({ order, isOpen, onClose, onCancelled 
       setLocalOrder(order);
     }
   }, [order]);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
   
   const currentOrder = localOrder ?? order ?? null;
 
@@ -568,7 +573,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, onCancelled 
                       {persona.profileImage ? (
                         <div className="flex items-center gap-3">
                           <p className="text-xs text-white/50">Avatar supplied</p>
-                          {downloadMeta && (
+                          {isHydrated && downloadMeta && (
                             <a
                               href={downloadMeta.href}
                               download={downloadMeta.download}
