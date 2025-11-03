@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
           break
         }
 
-        console.log(`[Stripe Webhook] Processing subscription update: ${subId}, status: ${subscriptionStatus}`)
+        console.log(`[Stripe Webhook] Processing subscription update: ${subId}, status: ${subscriptionStatus}, cancel_at_period_end: ${subscription.cancel_at_period_end}`)
 
         const order = await prisma.order.findFirst({ where: { stripeSubscriptionId: subId } })
         if (!order) {
@@ -144,7 +144,15 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ received: true })
         }
 
-        console.log(`[Stripe Webhook] Found order: ${order.id}, updating subscription status to: ${subscriptionStatus}`)
+        // Check if subscription is scheduled for cancellation at period end
+        const isCancelScheduled = subscription.cancel_at_period_end === true
+
+        // Determine the correct subscription status:
+        // If cancel_at_period_end is true, use 'cancel_at_period_end' to preserve cancellation state
+        // Otherwise, use the actual Stripe subscription status
+        const newSubscriptionStatus = isCancelScheduled ? 'cancel_at_period_end' : subscriptionStatus
+
+        console.log(`[Stripe Webhook] Found order: ${order.id}, updating subscription status to: ${newSubscriptionStatus}`)
 
         // Update subscription status and handle cancellation
         const isCanceled = subscriptionStatus === 'canceled'
@@ -153,8 +161,8 @@ export async function POST(request: NextRequest) {
         await prisma.order.update({
           where: { id: order.id },
           data: {
-            subscriptionStatus: subscriptionStatus,
-            cancelledAt: isCanceled ? cancelledAt ?? new Date() : cancelledAt,
+            subscriptionStatus: newSubscriptionStatus,
+            cancelledAt: isCanceled ? cancelledAt ?? new Date() : (isCancelScheduled ? order.cancelledAt || new Date() : cancelledAt),
             status: isCanceled ? 'CANCELLED' : order.status,
           },
         })
