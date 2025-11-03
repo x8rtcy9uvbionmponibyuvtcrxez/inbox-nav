@@ -41,6 +41,11 @@ export async function getCachedData<T>(
   }
   
   try {
+    // Ensure Redis is connected before attempting operations
+    if (!client.isOpen) {
+      await client.connect();
+    }
+    
     // Try to get from cache
     const cached = await client.get(key);
     if (cached) {
@@ -64,27 +69,43 @@ export async function getCachedData<T>(
 export async function invalidateCache(pattern: string): Promise<void> {
   const client = getRedisClient();
 
-  if (!client) return;
+  if (!client) {
+    console.warn(`[Cache] Redis not available, skipping invalidation for: ${pattern}`);
+    return;
+  }
 
   try {
+    // Ensure Redis is connected before attempting operations
+    if (!client.isOpen) {
+      console.log('[Cache] Redis not connected yet, attempting to connect...');
+      await client.connect();
+    }
+
     // Always attempt exact-key delete first (fast path)
-    await client.del(pattern);
+    const deleted = await client.del(pattern);
+    console.log(`[Cache] Deleted ${deleted} key(s) matching exact pattern: ${pattern}`);
 
     // If a wildcard pattern is provided, scan and delete matches
     const hasWildcard = pattern.includes('*') || pattern.includes('?') || pattern.includes('[');
     if (hasWildcard) {
       const keysToDelete: string[] = [];
-      const iterator = client.scanIterator({ MATCH: pattern, COUNT: 100 }) as AsyncIterableIterator<string>;
-      // Use SCAN to avoid blocking Redis on KEYS
-      for await (const key of iterator) {
-        keysToDelete.push(key);
-      }
-      if (keysToDelete.length > 0) {
-        await client.del(keysToDelete);
+      try {
+        const iterator = client.scanIterator({ MATCH: pattern, COUNT: 100 }) as AsyncIterableIterator<string>;
+        // Use SCAN to avoid blocking Redis on KEYS
+        for await (const key of iterator) {
+          keysToDelete.push(key);
+        }
+        if (keysToDelete.length > 0) {
+          const deletedWildcard = await client.del(keysToDelete);
+          console.log(`[Cache] Deleted ${deletedWildcard} key(s) matching wildcard pattern: ${pattern}`);
+        }
+      } catch (scanError) {
+        console.error('[Cache] Error during wildcard scan:', scanError);
       }
     }
   } catch (error) {
-    console.error('Cache invalidation error:', error);
+    console.error('[Cache] Cache invalidation error:', error);
+    // Don't throw - we don't want cache errors to fail the request
   }
 }
 

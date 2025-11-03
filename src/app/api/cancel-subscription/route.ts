@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
 import { invalidateCache } from '@/lib/redis'
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update order status in database (only after Stripe success or safe fallback)
-    await prisma.order.update({
+    const updatedOrder = await prisma.order.update({
       where: { id: order.id },
       data: {
         subscriptionStatus: 'cancel_at_period_end',
@@ -95,16 +96,39 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Invalidate dashboard cache so the UI updates immediately
+    // Verify the update succeeded
+    console.log(`[Cancel] Database updated for order ${order.id}, subscriptionStatus: ${updatedOrder.subscriptionStatus}`)
+
+    // Invalidate dashboard cache BEFORE returning - ensure it completes
     // Get clerkUserId from order.clerkUserId, onboardingData, or use auth userId
     const clerkUserId = order.clerkUserId || order.onboardingData?.clerkUserId || userId
     if (clerkUserId) {
       try {
         await invalidateCache(`dashboard:${clerkUserId}`)
         console.log(`[Cancel] Invalidated dashboard cache for user ${clerkUserId}`)
+        
+        // Verify cache was actually cleared
+        const { getRedisClient } = await import('@/lib/redis')
+        const redisClient = getRedisClient()
+        if (redisClient) {
+          try {
+            const stillCached = await redisClient.get(`dashboard:${clerkUserId}`)
+            console.log(`[Cancel] Cache verification after invalidation:`, stillCached ? 'STILL CACHED (ERROR!)' : 'CLEARED (OK)')
+          } catch (verifyErr) {
+            console.warn('[Cancel] Could not verify cache invalidation:', verifyErr)
+          }
+        }
+
+        // Revalidate Next.js cache for the dashboard page
+        try {
+          revalidatePath('/dashboard')
+          console.log(`[Cancel] Revalidated Next.js cache for /dashboard`)
+        } catch (revalidateErr) {
+          console.warn('[Cancel] Failed to revalidate Next.js cache:', revalidateErr)
+        }
       } catch (cacheError) {
         console.error('[Cancel] Failed to invalidate cache:', cacheError)
-        // Don't fail the request if cache invalidation fails
+        // Don't fail the request if cache invalidation fails, but log it
       }
     } else {
       console.warn(`[Cancel] No clerkUserId found for order ${order.id}, cache not invalidated`)

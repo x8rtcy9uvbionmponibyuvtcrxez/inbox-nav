@@ -137,12 +137,12 @@ function TagList({ items, emptyMessage }: { items: string[]; emptyMessage: strin
 function PersonaCard({ persona, index }: { persona: Persona; index: number }) {
   const initials = `${persona.firstName?.[0] ?? ''}${persona.lastName?.[0] ?? ''}`.toUpperCase();
   const profileImage = typeof persona.profileImage === 'string' ? persona.profileImage : null;
-  const isDataUrl = profileImage?.startsWith('data:image/');
+  const isDataUrl = Boolean(profileImage && profileImage.startsWith('data:image/'));
   const personaName = `${persona.firstName ?? ''} ${persona.lastName ?? ''}`.trim() || 'Persona';
   const slug = personaName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase();
-  const extensionMatch = isDataUrl ? profileImage.match(/^data:image\/([a-z0-9+]+);/i) : null;
+  const extensionMatch = profileImage && isDataUrl ? profileImage.match(/^data:image\/([a-z0-9+]+);/i) : null;
   const urlExtensionMatch =
-    !isDataUrl && profileImage
+    profileImage && !isDataUrl
       ? profileImage.match(/\.([a-z0-9]{2,5})(?:$|[?#])/i)
       : null;
   const inferredExtension = extensionMatch?.[1]?.toLowerCase() ?? urlExtensionMatch?.[1]?.toLowerCase() ?? 'png';

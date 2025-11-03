@@ -59,9 +59,17 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         }
 
+        // Skip caching chrome-extension:// URLs and other unsupported schemes
+        const url = new URL(request.url);
+        if (url.protocol === 'chrome-extension:' || url.protocol === 'chrome:' || url.protocol === 'moz-extension:') {
+          return networkResponse;
+        }
+
         const responseClone = networkResponse.clone();
         caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, responseClone);
+          cache.put(request, responseClone).catch((err) => {
+            console.warn(`Failed to cache ${request.url}:`, err);
+          });
         });
 
         return networkResponse;
