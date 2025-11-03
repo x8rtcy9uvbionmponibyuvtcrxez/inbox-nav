@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { isAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
-import { encryptSecret } from '@/lib/encryption'
+import { protectSecret } from '@/lib/encryption'
 import { invalidateCache } from '@/lib/redis'
 
 export async function PATCH(
@@ -69,7 +69,7 @@ export async function PATCH(
 
     // Password (only update if new password provided)
     if (updates.password !== undefined && updates.password !== '') {
-      inboxUpdates.password = encryptSecret(updates.password)
+      inboxUpdates.password = protectSecret(updates.password)
     }
 
     // Persona name

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { isAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
-import { encryptSecret } from '@/lib/encryption'
+import { protectSecret } from '@/lib/encryption'
 import { invalidateCache } from '@/lib/redis'
 
 export async function PATCH(
@@ -110,10 +110,10 @@ export async function PATCH(
             ? updates.espCredentials.accountId
             : currentEspCreds.accountId,
           password: updates.espCredentials.password && updates.espCredentials.password !== ''
-            ? encryptSecret(updates.espCredentials.password)
+            ? protectSecret(updates.espCredentials.password)
             : currentEspCreds.password,
           apiKey: updates.espCredentials.apiKey && updates.espCredentials.apiKey !== ''
-            ? encryptSecret(updates.espCredentials.apiKey)
+            ? protectSecret(updates.espCredentials.apiKey)
             : currentEspCreds.apiKey,
         }
       }
@@ -130,7 +130,7 @@ export async function PATCH(
 
     // Only update password if a new one is provided
     if (updates.registrarPassword !== undefined && updates.registrarPassword !== '') {
-      onboardingUpdates.registrarPassword = encryptSecret(updates.registrarPassword)
+      onboardingUpdates.registrarPassword = protectSecret(updates.registrarPassword)
     }
 
     // 5. Update database
