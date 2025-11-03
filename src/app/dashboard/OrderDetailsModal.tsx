@@ -445,6 +445,18 @@ export default function OrderDetailsModal({ order, isOpen, onClose, onCancelled 
                   <span className="text-red-300">{formatDate(orderData.inboxes[0].deletionDate)}</span>
                 </div>
               )}
+              {isCancelled && orderData?.inboxes && orderData.inboxes.length > 0 && !orderData.inboxes[0]?.deletionDate && orderData?.cancelledAt && (
+                <div className="flex justify-between">
+                  <span className="text-white/60">Inbox Deletion Date:</span>
+                  <span className="text-red-300">
+                    {(() => {
+                      const deletionDate = new Date(orderData.cancelledAt);
+                      deletionDate.setDate(deletionDate.getDate() + 30);
+                      return formatDate(deletionDate);
+                    })()}
+                  </span>
+                </div>
+              )}
               {orderData?.cancellationReason && (
                 <div className="flex justify-between">
                   <span className="text-white/60">Cancellation Reason:</span>
