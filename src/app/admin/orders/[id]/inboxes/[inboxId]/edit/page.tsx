@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 type EditInboxPageProps = {
-  params: { id: string; inboxId: string };
+  params: Promise<{ id: string; inboxId: string }>;
 };
 
 export default function EditInboxPage({ params }: EditInboxPageProps) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -34,31 +35,31 @@ export default function EditInboxPage({ params }: EditInboxPageProps) {
   const [originalEmail, setOriginalEmail] = useState("");
 
   useEffect(() => {
-    fetchInboxData();
-  }, [params.id, params.inboxId]);
+    async function fetchInboxData() {
+      try {
+        // Fetch order data to get personas
+        const orderResponse = await fetch(`/api/admin/orders/${resolvedParams.id}`);
+        if (!orderResponse.ok) {
+          throw new Error("Failed to fetch order");
+        }
+        const orderData = await orderResponse.json();
 
-  async function fetchInboxData() {
-    try {
-      // Fetch order data to get personas
-      const orderResponse = await fetch(`/api/admin/orders/${params.id}`);
-      if (!orderResponse.ok) {
-        throw new Error("Failed to fetch order");
-      }
-      const orderData = await orderResponse.json();
+        // Handle onboardingData which could be an array or object
+        const onboarding = Array.isArray(orderData.onboardingData) ? orderData.onboardingData[0] : orderData.onboardingData;
 
-      // Extract persona names from onboarding data
-      const personas = orderData.onboarding?.personas || [];
-      const personaNames = personas.map((p: { firstName?: string; lastName?: string }) =>
-        `${p.firstName || ''} ${p.lastName || ''}`.trim()
-      );
-      setAvailablePersonas(personaNames);
+        // Extract persona names from onboarding data
+        const personas = onboarding?.personas || [];
+        const personaNames = personas.map((p: { firstName?: string; lastName?: string }) =>
+          `${p.firstName || ''} ${p.lastName || ''}`.trim()
+        );
+        setAvailablePersonas(personaNames);
 
-      // Fetch inbox data
-      const inboxResponse = await fetch(`/api/admin/orders/${params.id}`);
-      const data = await inboxResponse.json();
+        // Fetch inbox data
+        const inboxResponse = await fetch(`/api/admin/orders/${resolvedParams.id}`);
+        const data = await inboxResponse.json();
 
-      // Find the specific inbox
-      const inbox = data.inboxes?.find((i: { id: string }) => i.id === params.inboxId);
+        // Find the specific inbox
+        const inbox = data.inboxes?.find((i: { id: string }) => i.id === resolvedParams.inboxId);
 
       if (!inbox) {
         throw new Error("Inbox not found");
@@ -85,6 +86,9 @@ export default function EditInboxPage({ params }: EditInboxPageProps) {
     }
   }
 
+    fetchInboxData();
+  }, [resolvedParams.id, resolvedParams.inboxId]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -93,7 +97,7 @@ export default function EditInboxPage({ params }: EditInboxPageProps) {
 
     try {
       const response = await fetch(
-        `/api/admin/orders/${params.id}/inboxes/${params.inboxId}/update`,
+        `/api/admin/orders/${resolvedParams.id}/inboxes/${resolvedParams.inboxId}/update`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -111,7 +115,7 @@ export default function EditInboxPage({ params }: EditInboxPageProps) {
 
       // Redirect back to order details after 1 second
       setTimeout(() => {
-        router.push(`/admin/orders/${params.id}`);
+        router.push(`/admin/orders/${resolvedParams.id}`);
       }, 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update inbox");
@@ -149,14 +153,14 @@ export default function EditInboxPage({ params }: EditInboxPageProps) {
         {/* Header */}
         <div className="mb-8">
           <Link
-            href={`/admin/orders/${params.id}`}
+            href={`/admin/orders/${resolvedParams.id}`}
             className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-4"
           >
             <ArrowLeftIcon className="h-4 w-4" />
             Back to Order
           </Link>
           <h1 className="text-3xl font-bold text-white">Edit Inbox</h1>
-          <p className="text-white/60 mt-2">Inbox ID: {params.inboxId}</p>
+          <p className="text-white/60 mt-2">Inbox ID: {resolvedParams.inboxId}</p>
         </div>
 
         {/* Messages */}

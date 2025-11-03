@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
@@ -12,10 +12,11 @@ type Persona = {
 };
 
 type EditOrderPageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default function EditOrderPage({ params }: EditOrderPageProps) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -46,48 +47,51 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
   });
 
   useEffect(() => {
-    fetchOrderData();
-  }, [params.id]);
+    async function fetchOrderData() {
+      try {
+        const response = await fetch(`/api/admin/orders/${resolvedParams.id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch order");
+        }
 
-  async function fetchOrderData() {
-    try {
-      const response = await fetch(`/api/admin/orders/${params.id}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch order");
+        const data = await response.json();
+
+        // Handle onboardingData which could be an array or object
+        const onboarding = Array.isArray(data.onboardingData) ? data.onboardingData[0] : data.onboardingData;
+
+        // Populate form with existing data
+        setFormData({
+          businessName: onboarding?.businessType || "",
+          website: onboarding?.website || "",
+          specialRequirements: onboarding?.specialRequirements || "",
+          espProvider: onboarding?.espProvider || "",
+          espCredentials: {
+            accountId: onboarding?.domainPreferences?.espCredentials?.accountId || "",
+            password: "", // Never pre-fill passwords
+            apiKey: "", // Never pre-fill API keys
+          },
+          domainRegistrar: onboarding?.domainRegistrar || "",
+          registrarUsername: onboarding?.registrarUsername || "",
+          registrarPassword: "", // Never pre-fill passwords
+          personas: onboarding?.personas || [],
+        });
+
+        setOrderInfo({
+          productType: data.productType || "",
+          quantity: data.quantity || 0,
+          totalAmount: data.totalAmount || 0,
+          status: data.status || "",
+        });
+
+        setLoading(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load order");
+        setLoading(false);
       }
-
-      const data = await response.json();
-
-      // Populate form with existing data
-      setFormData({
-        businessName: data.onboarding?.businessType || "",
-        website: data.onboarding?.website || "",
-        specialRequirements: data.onboarding?.specialRequirements || "",
-        espProvider: data.onboarding?.espProvider || "",
-        espCredentials: {
-          accountId: data.onboarding?.domainPreferences?.espCredentials?.accountId || "",
-          password: "", // Never pre-fill passwords
-          apiKey: "", // Never pre-fill API keys
-        },
-        domainRegistrar: data.onboarding?.domainRegistrar || "",
-        registrarUsername: data.onboarding?.registrarUsername || "",
-        registrarPassword: "", // Never pre-fill passwords
-        personas: data.onboarding?.personas || [],
-      });
-
-      setOrderInfo({
-        productType: data.productType || "",
-        quantity: data.quantity || 0,
-        totalAmount: data.totalAmount || 0,
-        status: data.status || "",
-      });
-
-      setLoading(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load order");
-      setLoading(false);
     }
-  }
+
+    fetchOrderData();
+  }, [resolvedParams.id]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -96,7 +100,7 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
     setSuccessMessage(null);
 
     try {
-      const response = await fetch(`/api/admin/orders/${params.id}/update`, {
+      const response = await fetch(`/api/admin/orders/${resolvedParams.id}/update`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -112,7 +116,7 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
 
       // Redirect back to order details after 1 second
       setTimeout(() => {
-        router.push(`/admin/orders/${params.id}`);
+        router.push(`/admin/orders/${resolvedParams.id}`);
       }, 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update order");
@@ -155,14 +159,14 @@ export default function EditOrderPage({ params }: EditOrderPageProps) {
         {/* Header */}
         <div className="mb-8">
           <Link
-            href={`/admin/orders/${params.id}`}
+            href={`/admin/orders/${resolvedParams.id}`}
             className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-4"
           >
             <ArrowLeftIcon className="h-4 w-4" />
             Back to Order
           </Link>
           <h1 className="text-3xl font-bold text-white">Edit Order Details</h1>
-          <p className="text-white/60 mt-2">Order ID: {params.id}</p>
+          <p className="text-white/60 mt-2">Order ID: {resolvedParams.id}</p>
         </div>
 
         {/* Messages */}
