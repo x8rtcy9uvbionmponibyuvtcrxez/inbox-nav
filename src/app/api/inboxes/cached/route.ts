@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { getCachedData } from '@/lib/redis';
+import { revealSecret } from '@/lib/encryption';
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,7 +78,13 @@ export async function GET(request: NextRequest) {
       300 // 5 minutes cache
     );
 
-    return NextResponse.json(inboxes, {
+    // Decrypt passwords before returning
+    const inboxesWithDecryptedPasswords = inboxes.map((inbox) => ({
+      ...inbox,
+      password: inbox.password ? revealSecret(inbox.password) : null,
+    }));
+
+    return NextResponse.json(inboxesWithDecryptedPasswords, {
       headers: {
         'Cache-Control': 'private, max-age=300', // 5 minutes
         'Last-Modified': lastModified.toUTCString(),

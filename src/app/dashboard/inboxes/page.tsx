@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import InboxesClient from "./InboxesClient";
 import { Suspense } from "react";
 import { TableSkeleton } from "@/components/skeletons";
+import { revealSecret } from "@/lib/encryption";
 
 async function InboxesContent() {
   const { userId } = await auth();
@@ -27,7 +28,13 @@ async function InboxesContent() {
       take: 100, // Limit to 100 most recent inboxes
     });
 
-    return <InboxesClient inboxes={inboxes} />;
+    // Decrypt passwords before passing to client
+    const inboxesWithDecryptedPasswords = inboxes.map((inbox) => ({
+      ...inbox,
+      password: inbox.password ? revealSecret(inbox.password) : null,
+    }));
+
+    return <InboxesClient inboxes={inboxesWithDecryptedPasswords} />;
   } catch (error) {
     console.error("[Inboxes] Failed to load inboxes", error);
     return <InboxesClient inboxes={[]} error="FAILED" />;
