@@ -57,10 +57,6 @@ export async function POST(request: NextRequest) {
         console.log(`[Stripe Webhook] Found order: ${order.id}, updating status to CANCELLED`)
 
         const now = new Date()
-        // Calculate deletion date: 30 days from order creation (subscription creation)
-        const deletionDate = new Date(order.createdAt)
-        deletionDate.setDate(deletionDate.getDate() + 30)
-        
         let inboxCount = 0;
         let domainCount = 0;
         
@@ -76,10 +72,7 @@ export async function POST(request: NextRequest) {
           
           const inboxUpdateResult = await tx.inbox.updateMany({ 
             where: { orderId: order.id }, 
-            data: { 
-              status: 'DELETED',
-              deletionDate: deletionDate,
-            } 
+            data: { status: 'DELETED' } 
           })
           
           const domainUpdateResult = await tx.domain.updateMany({ 
@@ -90,7 +83,7 @@ export async function POST(request: NextRequest) {
           inboxCount = inboxUpdateResult.count;
           domainCount = domainUpdateResult.count;
 
-          console.log(`[Stripe Webhook] Updated ${inboxCount} inboxes and ${domainCount} domains to DELETED with deletion date ${deletionDate.toISOString()}`)
+          console.log(`[Stripe Webhook] Updated ${inboxCount} inboxes and ${domainCount} domains to DELETED`)
         })
 
         console.log(`[Stripe Webhook] Successfully processed subscription deletion for order: ${order.id}`)
@@ -168,15 +161,6 @@ export async function POST(request: NextRequest) {
 
         console.log(`[Stripe Webhook] Found order: ${order.id}, updating subscription status to: ${statusToStore}`)
 
-        // Calculate deletion date: 30 days from order creation (subscription creation)
-        const deletionDate = isScheduledForCancellation || isCanceled
-          ? (() => {
-              const date = new Date(order.createdAt)
-              date.setDate(date.getDate() + 30)
-              return date
-            })()
-          : null
-
         await prisma.order.update({
           where: { id: order.id },
           data: {
@@ -189,21 +173,16 @@ export async function POST(request: NextRequest) {
           },
         })
 
-        // If subscription is scheduled for cancellation or actually cancelled, set deletion date
-        if (isScheduledForCancellation || isCanceled) {
+        // If subscription is actually cancelled (not just scheduled), mark related items as deleted
+        if (isCanceled) {
           await prisma.inbox.updateMany({
             where: { orderId: order.id },
-            data: { 
-              deletionDate: deletionDate,
-              ...(isCanceled ? { status: 'DELETED' } : {}),
-            },
+            data: { status: 'DELETED' },
           })
-          if (isCanceled) {
-            await prisma.domain.updateMany({
-              where: { orderId: order.id },
-              data: { status: 'DELETED' },
-            })
-          }
+          await prisma.domain.updateMany({
+            where: { orderId: order.id },
+            data: { status: 'DELETED' },
+          })
         }
 
         // Invalidate dashboard cache for the affected user

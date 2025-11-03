@@ -22,7 +22,7 @@ type CustomerOrder = {
   stripeSubscriptionId?: string;
   cancelledAt?: Date | null;
   cancellationReason?: string | null;
-  inboxes: { id: string; email?: string; forwardingDomain?: string | null; deletionDate?: Date | null }[];
+  inboxes: { id: string; email?: string; forwardingDomain?: string | null }[];
   domains: { id: string; domain: string; forwardingUrl?: string | null }[];
 };
 
@@ -437,24 +437,6 @@ export default function OrderDetailsModal({ order, isOpen, onClose, onCancelled 
                 <div className="flex justify-between">
                   <span className="text-white/60">Cancelled On:</span>
                   <span className="text-red-300">{formatDate(orderData.cancelledAt)}</span>
-                </div>
-              )}
-              {isCancelled && orderData?.inboxes && orderData.inboxes.length > 0 && orderData.inboxes[0]?.deletionDate && (
-                <div className="flex justify-between">
-                  <span className="text-white/60">Inbox Deletion Date:</span>
-                  <span className="text-red-300">{formatDate(orderData.inboxes[0].deletionDate)}</span>
-                </div>
-              )}
-              {isCancelled && orderData?.inboxes && orderData.inboxes.length > 0 && !orderData.inboxes[0]?.deletionDate && currentOrder?.createdAt && (
-                <div className="flex justify-between">
-                  <span className="text-white/60">Inbox Deletion Date:</span>
-                  <span className="text-red-300">
-                    {(() => {
-                      const deletionDate = new Date(currentOrder.createdAt);
-                      deletionDate.setDate(deletionDate.getDate() + 30);
-                      return formatDate(deletionDate);
-                    })()}
-                  </span>
                 </div>
               )}
               {orderData?.cancellationReason && (
