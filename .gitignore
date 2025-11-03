@@ -112,3 +112,10 @@ test-*.js
 .vercel
 .env*.local
 .env.local.backup
+# Env files
+.env*
+.env.*
+.env.local
+.env.production
+.env.vercel
+.env.vercel.production

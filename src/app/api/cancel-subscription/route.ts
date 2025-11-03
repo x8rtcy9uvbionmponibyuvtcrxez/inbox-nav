@@ -16,20 +16,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
     }
 
-    const order = await prisma.order.findFirst({ 
-      where: { 
+    const order = await prisma.order.findFirst({
+      where: {
         id: orderId,
-        onboardingData: {
-          clerkUserId: userId
-        }
+        OR: [
+          { clerkUserId: userId },
+          { onboardingData: { clerkUserId: userId } },
+        ],
       },
       include: {
         onboardingData: {
           select: {
-            clerkUserId: true
-          }
-        }
-      }
+            clerkUserId: true,
+          },
+        },
+      },
     })
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
@@ -39,8 +40,17 @@ export async function POST(request: NextRequest) {
     const subId = order.stripeSubscriptionId ?? undefined
     let stripeError: string | null = null
     let stripeSuccess = false
+    let alreadyCancelledInStripe = false
     
-    if (subId && stripe) {
+    if (subId) {
+      if (!stripe) {
+        console.error('[Cancel] Stripe secret key missing while cancelling subscription', { orderId: order.id })
+        return NextResponse.json(
+          { error: 'Unable to cancel subscription because Stripe is not configured. Please contact support.' },
+          { status: 500 },
+        )
+      }
+
       try {
         // End-of-period cancellation per product policy
         const updated = await stripe.subscriptions.update(subId, { 
@@ -54,42 +64,35 @@ export async function POST(request: NextRequest) {
           console.warn(`[Cancel] Warning: cancel_at_period_end not set on subscription ${subId}`)
         }
       } catch (err) {
-        console.error('[Cancel] Stripe cancel failed:', err)
         const errorMessage = err instanceof Error ? err.message : 'Unknown Stripe error'
+        console.error('[Cancel] Stripe cancel failed:', errorMessage)
         stripeError = errorMessage
         
-        // Check if subscription doesn't exist or is already cancelled
         if (err instanceof Error && (
-          err.message.includes('No such subscription') ||
-          err.message.includes('already canceled')
+          errorMessage.includes('No such subscription') ||
+          errorMessage.includes('already canceled')
         )) {
-          console.log(`[Cancel] Subscription ${subId} already cancelled or doesn't exist, proceeding with local update`)
-          // Continue to update locally
+          alreadyCancelledInStripe = true
+          console.log(`[Cancel] Subscription ${subId} already cancelled in Stripe, updating local record`)
         } else {
-          // For other errors, we still update locally but return the error
-          console.warn('[Cancel] Stripe error, but proceeding with local cancellation')
+          return NextResponse.json(
+            { error: `Stripe cancellation failed: ${errorMessage}` },
+            { status: 502 },
+          )
         }
       }
-    } else if (subId) {
-      stripeError = 'Stripe not configured - subscription will be cancelled locally only'
-      console.warn('[Cancel] Stripe not configured, cancelling locally only')
     } else {
       console.warn(`[Cancel] Order ${order.id} has no Stripe subscription ID, cancelling locally only`)
     }
 
-    // Update order status in database
-    await prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: order.id },
-        data: {
-          subscriptionStatus: 'cancel_at_period_end',
-          cancellationReason: reason || 'User initiated cancellation',
-          cancelledAt: new Date(),
-        },
-      })
-      // We don't delete inboxes/domains until Stripe confirms via webhook
-      // This happens once the subscription actually ends.
-      // We also don't update order.status to CANCELLED until the period ends
+    // Update order status in database (only after Stripe success or safe fallback)
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        subscriptionStatus: 'cancel_at_period_end',
+        cancellationReason: reason || 'User initiated cancellation',
+        cancelledAt: new Date(),
+      },
     })
 
     // Invalidate dashboard cache so the UI updates immediately
@@ -107,11 +110,21 @@ export async function POST(request: NextRequest) {
       console.warn(`[Cancel] No clerkUserId found for order ${order.id}, cache not invalidated`)
     }
 
+    const message = alreadyCancelledInStripe
+      ? 'Subscription was already cancelled in Stripe. Local records synced.'
+      : subId
+        ? 'Subscription cancelled successfully'
+        : 'Subscription record updated locally'
+
+    if (!stripeSuccess && !alreadyCancelledInStripe && subId) {
+      stripeError = stripeError ?? 'Unknown Stripe error'
+    }
+
     return NextResponse.json({ 
       success: true, 
-      message: 'Subscription cancelled successfully', 
+      message, 
       stripeError: stripeError || undefined,
-      stripeSuccess 
+      stripeSuccess: stripeSuccess || alreadyCancelledInStripe || !subId 
     })
   } catch (error) {
     console.error('[Cancel] error:', error)

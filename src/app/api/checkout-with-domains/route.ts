@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { getStripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
+import { prisma } from '@/lib/prisma'
 
 import { ProductType } from '@prisma/client';
 type DomainSource = 'OWN' | 'BUY_FOR_ME'
@@ -120,6 +121,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const existingStripeCustomer = await prisma.order.findFirst({
+      where: {
+        clerkUserId: userId,
+        stripeCustomerId: { not: null },
+      },
+      orderBy: { createdAt: 'asc' },
+      select: { stripeCustomerId: true },
+    })
+
+    let fallbackCustomerEmail: string | undefined
+
+    if (!existingStripeCustomer?.stripeCustomerId) {
+      try {
+        const client = await clerkClient()
+        const user = await client.users.getUser(userId)
+        const primaryEmailId = user.primaryEmailAddressId
+        const primaryEmail = user.emailAddresses?.find((addr) => addr.id === primaryEmailId)
+        fallbackCustomerEmail =
+          primaryEmail?.emailAddress ?? user.emailAddresses?.[0]?.emailAddress ?? undefined
+      } catch (clerkError) {
+        console.warn('Failed to load Clerk user for Stripe customer reuse:', clerkError)
+      }
+    }
+
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       line_items: lineItems,
@@ -143,6 +168,12 @@ export async function POST(request: NextRequest) {
     if (!stripe) {
       console.error('Stripe secret key missing for checkout-with-domains')
       return NextResponse.json({ error: 'Payment processing is temporarily unavailable' }, { status: 503 })
+    }
+
+    if (existingStripeCustomer?.stripeCustomerId) {
+      sessionParams.customer = existingStripeCustomer.stripeCustomerId
+    } else if (fallbackCustomerEmail) {
+      sessionParams.customer_email = fallbackCustomerEmail
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);

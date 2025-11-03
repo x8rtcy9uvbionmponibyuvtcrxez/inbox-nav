@@ -360,7 +360,10 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
 
       if (result.success) {
         setFulfillmentMessage(result.message || 'Order fulfilled successfully!');
-        const response = await fetch(`/api/admin/orders/${order.id}`);
+        // Force a fresh fetch to bypass any cache - use timestamp to bust cache
+        const response = await fetch(`/api/admin/orders/${order.id}?t=${Date.now()}`, {
+          cache: 'no-store',
+        });
         if (response.ok) {
           const updatedOrder = await response.json();
           setOrder(updatedOrder);

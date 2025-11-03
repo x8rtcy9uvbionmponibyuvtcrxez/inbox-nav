@@ -113,24 +113,7 @@ export default function RootLayout({
     >
       <IntercomProvider>
         <html lang="en" suppressHydrationWarning>
-          <head>
-            {/* Favicon links - explicit for browser compatibility */}
-            <link rel="icon" href="/favicon.ico" sizes="32x32" type="image/x-icon" />
-            <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-            <link rel="shortcut icon" href="/favicon.ico" />
-            <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
-            <link rel="manifest" href="/site.webmanifest" />
-            
-            <link rel="preload" href="/api/dashboard" as="fetch" crossOrigin="anonymous" />
-            <link rel="preload" href="/dashboard" as="document" />
-            <link rel="preload" href="/dashboard/products" as="document" />
-            <link rel="preload" href="/dashboard/inboxes" as="document" />
-            <link rel="preload" href="/dashboard/domains" as="document" />
-            <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-            <link rel="dns-prefetch" href="//fonts.gstatic.com" />
-            <link rel="dns-prefetch" href="//clerk.com" />
-            <link rel="dns-prefetch" href="//api.stripe.com" />
-            <link rel="dns-prefetch" href="//vercel.com" />
+          <body className={`${inter.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
             <style dangerouslySetInnerHTML={{
               __html: `
                 /* Critical CSS for above-the-fold content */
@@ -168,8 +151,6 @@ export default function RootLayout({
                 .space-y-6 > * + * { margin-top: 1.5rem; }
               `
             }} />
-          </head>
-          <body className={`${inter.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
             <ErrorBoundary>
               {children}
             </ErrorBoundary>

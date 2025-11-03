@@ -18,6 +18,11 @@ interface PerformanceDashboardProps {
 export default function PerformanceDashboard({ showDetails = false }: PerformanceDashboardProps) {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Only show in development or when explicitly enabled
@@ -74,7 +79,7 @@ export default function PerformanceDashboard({ showDetails = false }: Performanc
   const clsScore = metrics?.cls ? getScore(metrics.cls, { good: 0.1, poor: 0.25 }) : null;
   const ttfbScore = metrics?.ttfb ? getScore(metrics.ttfb, { good: 800, poor: 1800 }) : null;
 
-  if (!metrics || process.env.NODE_ENV === 'production') {
+  if (!mounted || !metrics || process.env.NODE_ENV === 'production') {
     return null;
   }
 

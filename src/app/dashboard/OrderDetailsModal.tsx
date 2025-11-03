@@ -61,6 +61,7 @@ type OrderDetailsModalProps = {
   order: OrderWithRelations;
   isOpen: boolean;
   onClose: () => void;
+  onCancelled?: (orderId: string) => void;
 };
 
 type NormalizedPersona = {
@@ -216,11 +217,12 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetailsModalProps) {
+export default function OrderDetailsModal({ order, isOpen, onClose, onCancelled }: OrderDetailsModalProps) {
   const [showAllInboxes, setShowAllInboxes] = useState(false);
   const [showAllDomains, setShowAllDomains] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
+  const [cancelMessageType, setCancelMessageType] = useState<'success' | 'error' | null>(null);
   const [localOrder, setLocalOrder] = useState<OrderWithRelations | null>(order ?? null);
   
   // Update local order when prop changes (after refresh)
@@ -619,8 +621,8 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
         <div className="mt-8 space-y-4 border-t border-white/10 pt-6">
           {cancelMessage && (
             <div className={`p-3 rounded-lg text-sm ${
-              cancelMessage.includes('successfully') 
-                ? 'bg-green-500/20 text-green-200 border border-green-500/30' 
+              cancelMessageType === 'success'
+                ? 'bg-green-500/20 text-green-200 border border-green-500/30'
                 : 'bg-red-500/20 text-red-200 border border-red-500/30'
             }`}>
               {cancelMessage}
@@ -635,6 +637,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                 
                 setIsCancelling(true);
                 setCancelMessage(null);
+                setCancelMessageType(null);
                 
                 try {
                   const response = await fetch('/api/cancel-subscription', {
@@ -645,7 +648,17 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                   
                   const result = await response.json();
                   
-                  if (response.ok && result.success) {
+                  if (!response.ok || !result?.success) {
+                    const errorMessage = result?.error || result?.message || 'Failed to cancel subscription';
+                    setCancelMessage(errorMessage);
+                    setCancelMessageType('error');
+                    return;
+                  }
+
+                  const successMessage = result?.message || 'Subscription cancelled successfully.';
+                  const stripeNotice = result?.stripeError ? ` Stripe notice: ${result.stripeError}` : '';
+                  
+                  if (currentOrder && orderData) {
                     // Optimistically update local order state
                     const updatedOrder: OrderWithRelations = {
                       ...currentOrder,
@@ -656,22 +669,28 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                       },
                     };
                     setLocalOrder(updatedOrder);
-                    
-                    setCancelMessage('Subscription cancelled successfully. It will end at the current period.');
-                    
-                    // Force immediate hard reload to ensure cache is cleared and fresh data is fetched
-                    // Use a small delay to show success message first
-                    setTimeout(() => {
-                      onClose();
-                      // Force a hard reload with cache-busting
-                      window.location.href = window.location.href.split('?')[0] + '?refresh=' + Date.now();
-                    }, 1500);
-                  } else {
-                    setCancelMessage(result.error || 'Failed to cancel subscription');
+                    // Inform parent so tables/lists can update immediately
+                    try {
+                      onCancelled?.(orderData.id);
+                    } catch {
+                      // ignore consumer errors
+                    }
                   }
+
+                  setCancelMessage(`${successMessage}${stripeNotice}`);
+                  setCancelMessageType('success');
+                  
+                  // Force immediate hard reload to ensure cache is cleared and fresh data is fetched
+                  // Use a small delay to show success message first
+                  setTimeout(() => {
+                    onClose();
+                    // Force a hard reload with cache-busting
+                    window.location.href = window.location.href.split('?')[0] + '?refresh=' + Date.now();
+                  }, 1500);
                 } catch (error) {
                   console.error('Failed to cancel subscription:', error);
                   setCancelMessage('Failed to cancel subscription. Please try again.');
+                  setCancelMessageType('error');
                 } finally {
                   setIsCancelling(false);
                 }

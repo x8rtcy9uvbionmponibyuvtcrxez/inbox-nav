@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { getStripe } from '@/lib/stripe'
+import { prisma } from '@/lib/prisma'
+import type Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,8 +43,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
+    const existingStripeCustomer = await prisma.order.findFirst({
+      where: {
+        clerkUserId: userId,
+        stripeCustomerId: { not: null },
+      },
+      orderBy: { createdAt: 'asc' },
+      select: { stripeCustomerId: true },
+    })
+
+    let fallbackCustomerEmail: string | undefined
+
+    if (!existingStripeCustomer?.stripeCustomerId) {
+      try {
+        const client = await clerkClient()
+        const user = await client.users.getUser(userId)
+        const primaryEmailId = user.primaryEmailAddressId
+        const primaryEmail = user.emailAddresses?.find((addr) => addr.id === primaryEmailId)
+        fallbackCustomerEmail =
+          primaryEmail?.emailAddress ?? user.emailAddresses?.[0]?.emailAddress ?? undefined
+      } catch (clerkError) {
+        console.warn('Failed to load Clerk user for Stripe customer reuse:', clerkError)
+      }
+    }
+
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       line_items: [
         {
@@ -58,8 +83,16 @@ export async function POST(request: NextRequest) {
       },
       success_url: `${baseUrl}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/dashboard/products`,
-      customer_email: undefined, // Let Stripe handle customer creation
-    })
+    }
+
+    if (existingStripeCustomer?.stripeCustomerId) {
+      sessionParams.customer = existingStripeCustomer.stripeCustomerId
+    } else if (fallbackCustomerEmail) {
+      sessionParams.customer_email = fallbackCustomerEmail
+    }
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create(sessionParams)
 
     return NextResponse.json({ url: session.url })
   } catch (error) {

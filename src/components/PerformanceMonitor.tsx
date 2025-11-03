@@ -17,6 +17,11 @@ interface PerformanceMetrics {
 export function PerformanceMonitor() {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Only show in development
@@ -76,7 +81,7 @@ export function PerformanceMonitor() {
     };
   }, []);
 
-  if (process.env.NODE_ENV !== 'development' || !metrics) {
+  if (!mounted || process.env.NODE_ENV !== 'development' || !metrics) {
     return null;
   }
 

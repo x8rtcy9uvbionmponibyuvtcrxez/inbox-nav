@@ -119,11 +119,13 @@ function distributeMicrosoft(
   
   personas.forEach((persona, pIndex) => {
     const count = inboxesPerPersona + (pIndex < remainder ? 1 : 0);
+    // Microsoft creates 50 inboxes per domain per persona - use high volume flag
     const variations = generateEmailVariations(
       persona.firstName,
       persona.lastName,
       domain,
-      count
+      count,
+      true // isHighVolumeSingleDomain = true for Microsoft (50 per domain)
     );
     
     variations.forEach(email => {
@@ -174,13 +176,16 @@ function distributeMultipleDomains(
       
       if (count === 0) return;
       
-      // Generate 4 core variations for this persona on this domain
+      // Generate priority 3 variations for this persona on this domain
       // Variations restart from 0 for each domain+persona combination
+      // Only use extended variations if 50+ inboxes on single domain (not typical for multiple domains)
+      const isHighVolume = count >= 50;
       const variations = generateEmailVariations(
         persona.firstName,
         persona.lastName,
         domain,
-        count
+        count,
+        isHighVolume
       );
       
       variations.forEach(email => {

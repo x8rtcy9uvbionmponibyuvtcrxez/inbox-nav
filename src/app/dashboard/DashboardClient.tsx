@@ -129,9 +129,42 @@ export default function DashboardClient({
   fetchError,
   isLoading = false
 }: DashboardClientProps) {
+  const [ordersState, setOrdersState] = useState<OrderWithRelations[]>(orders);
   const [selectedOrder, setSelectedOrder] = useState<OrderWithRelations | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasVisited, setHasVisited] = useState<boolean>(false);
+
+  // Keep local copy in sync if server sends new props, but preserve optimistic updates
+  useEffect(() => {
+    setOrdersState((prev) => {
+      if (!prev.length) return orders;
+
+      const prevById = new Map(prev.map((o) => [o.order.id, o]));
+      const merged = orders.map((incoming) => {
+        const existing = prevById.get(incoming.order.id);
+        if (!existing) return incoming;
+
+        const localSub = existing.order.subscriptionStatus;
+        const incomingSub = incoming.order.subscriptionStatus;
+        const keepLocalCancel = localSub === 'cancel_at_period_end' && incomingSub !== 'cancel_at_period_end';
+
+        if (keepLocalCancel) {
+          return {
+            ...incoming,
+            order: {
+              ...incoming.order,
+              subscriptionStatus: localSub,
+              cancelledAt: existing.order.cancelledAt ?? incoming.order.cancelledAt,
+            },
+          };
+        }
+
+        return incoming;
+      });
+
+      return merged;
+    });
+  }, [orders]);
 
   useEffect(() => {
     try {
@@ -325,7 +358,7 @@ export default function DashboardClient({
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {orders.map((record) => {
+              {ordersState.map((record) => {
                 const order = record.order;
                 // Business name comes from onboarding sequence (OnboardingData.businessType)
                 const businessName = record.businessType || "—";
@@ -413,6 +446,13 @@ export default function DashboardClient({
           order={selectedOrder}
           isOpen={isModalOpen}
           onClose={handleCloseOrderDetails}
+          onCancelled={(orderId) => {
+            setOrdersState(prev => prev.map(o => (
+              o.order.id === orderId
+                ? { ...o, order: { ...o.order, subscriptionStatus: 'cancel_at_period_end', cancelledAt: new Date() as unknown as Date } }
+                : o
+            )));
+          }}
         />
       )}
     </div>
