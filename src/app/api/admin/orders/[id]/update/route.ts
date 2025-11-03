@@ -98,7 +98,7 @@ export async function PATCH(
     // ESP Credentials (stored in domainPreferences JSON)
     if (updates.espCredentials !== undefined) {
       const currentPrefs = (order.onboardingData.domainPreferences as Record<string, unknown>) || {}
-      const currentEspCreds = currentPrefs.espCredentials || {}
+      const currentEspCreds = (currentPrefs.espCredentials as { accountId?: string; password?: string; apiKey?: string } | undefined) || {}
 
       onboardingUpdates.domainPreferences = {
         ...currentPrefs,
