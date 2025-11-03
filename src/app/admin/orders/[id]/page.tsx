@@ -500,6 +500,12 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
           <p className="mt-1 text-sm text-gray-400">Placed {formatDate(order.createdAt)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/admin/orders/${order.id}/edit`}
+            className="rounded-lg border border-blue-600 bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700"
+          >
+            Edit Order
+          </Link>
           <button
             onClick={handleDownloadCsv}
             className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-sm text-gray-100 transition hover:border-indigo-500 hover:text-white"
@@ -820,6 +826,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                       <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Persona</th>
                       <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Status</th>
                       <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Password</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-800">
@@ -829,6 +836,14 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                         <td className="px-4 py-2 text-gray-200">{[inbox.firstName, inbox.lastName].filter(Boolean).join(' ') || '—'}</td>
                         <td className="px-4 py-2 text-gray-300">{toTitle(inbox.status)}</td>
                         <td className="px-4 py-2 text-gray-400">{inbox.password ? 'Set' : '—'}</td>
+                        <td className="px-4 py-2">
+                          <Link
+                            href={`/admin/orders/${order.id}/inboxes/${inbox.id}/edit`}
+                            className="text-xs text-blue-400 hover:text-blue-300"
+                          >
+                            Edit
+                          </Link>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
