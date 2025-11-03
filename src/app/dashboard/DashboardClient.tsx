@@ -362,32 +362,13 @@ export default function DashboardClient({
                 const order = record.order;
                 // Business name comes from onboarding sequence (OnboardingData.businessType)
                 const businessName = record.businessType || "—";
-                const forwardingFromPrefs = (() => {
-                  const prefs = record.domainPreferences;
-                  if (!prefs || typeof prefs !== 'object') return null;
-                  // Common keys used historically
-                  return (
-                    prefs.forwardingUrl ||
-                    prefs.forwarding_url ||
-                    prefs.forwardTo ||
-                    prefs.forward ||
-                    null
-                  );
-                })();
                 const inboxCount = order?.inboxes && order.inboxes.length > 0
                   ? order.inboxes.length
                   : (order?.quantity ?? 0);
                 const totalCost = order?.totalAmount ?? inboxCount * 300;
                 const isCancelled = order?.status === 'CANCELLED' || order?.subscriptionStatus === 'cancel_at_period_end' || order?.subscriptionStatus === 'cancelled' || order?.subscriptionStatus === 'canceled';
-                // Get forwarding URL in priority order:
-                // 1) From domains (authoritative once provisioned)
-                // 2) From onboarding.website (entered during onboarding)
-                // 3) From legacy preferences bag
-                const forwardingLabel =
-                  order?.domains?.find((domain) => domain.forwardingUrl && domain.forwardingUrl.trim() !== "")?.forwardingUrl ||
-                  (record.website && record.website.trim() !== '' ? record.website : null) ||
-                  forwardingFromPrefs ||
-                  "—";
+                // RULE: Only show primary forwarding URL from onboarding.website, no fallbacks
+                const forwardingLabel = record.website || "—";
                 
                 return (
                   <tr key={record.id} className={`group transition-all duration-200 hover:bg-white/5 ${isCancelled ? 'opacity-60' : ''}`}>
