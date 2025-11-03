@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { isAdmin } from '@/lib/admin-auth'
+import { requireAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 import { protectSecret } from '@/lib/encryption'
 import { invalidateCache } from '@/lib/redis'
@@ -11,11 +10,8 @@ export async function PATCH(
 ) {
   const resolvedParams = await params;
   try {
-    // 1. Authentication
-    const { userId } = await auth()
-    if (!userId || !isAdmin(userId)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // 1. Authentication & Authorization
+    const userId = await requireAdmin()
 
     const updates = await request.json()
 
@@ -168,6 +164,17 @@ export async function PATCH(
     })
   } catch (error) {
     console.error('[Admin] Order update failed:', error)
+
+    // Handle auth/authorization errors
+    if (error instanceof Error) {
+      if (error.message === 'Authentication required' || error.message === 'Admin access required') {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 401 }
+        )
+      }
+    }
+
     return NextResponse.json(
       { error: 'Failed to update order' },
       { status: 500 }
