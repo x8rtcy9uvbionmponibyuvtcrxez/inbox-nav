@@ -134,19 +134,32 @@ function TagList({ items, emptyMessage }: { items: string[]; emptyMessage: strin
   );
 }
 
-function PersonaCard({ persona, index }: { persona: Persona; index: number }) {
+function getPersonaDownloadMeta(profileImage: string | null, personaName: string, fallbackIndex: number) {
+  if (!profileImage) return null;
+  const isDataUrl = profileImage.startsWith('data:image/');
+  const extensionMatch = isDataUrl ? profileImage.match(/^data:image\/([a-z0-9+]+);/i) : null;
+  const urlExtensionMatch = !isDataUrl ? profileImage.match(/\.([a-z0-9]{2,5})(?:$|[?#])/i) : null;
+  const extension = extensionMatch?.[1]?.toLowerCase() ?? urlExtensionMatch?.[1]?.toLowerCase() ?? 'png';
+  const slug = personaName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  return {
+    href: profileImage,
+    download: `${slug || `persona-${fallbackIndex}`}.${extension}`,
+  };
+}
+
+function PersonaCard({
+  persona,
+  index,
+  showDownloadLink,
+}: {
+  persona: Persona;
+  index: number;
+  showDownloadLink: boolean;
+}) {
   const initials = `${persona.firstName?.[0] ?? ''}${persona.lastName?.[0] ?? ''}`.toUpperCase();
   const profileImage = typeof persona.profileImage === 'string' ? persona.profileImage : null;
-  const isDataUrl = Boolean(profileImage && profileImage.startsWith('data:image/'));
   const personaName = `${persona.firstName ?? ''} ${persona.lastName ?? ''}`.trim() || 'Persona';
-  const slug = personaName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase();
-  const extensionMatch = profileImage && isDataUrl ? profileImage.match(/^data:image\/([a-z0-9+]+);/i) : null;
-  const urlExtensionMatch =
-    profileImage && !isDataUrl
-      ? profileImage.match(/\.([a-z0-9]{2,5})(?:$|[?#])/i)
-      : null;
-  const inferredExtension = extensionMatch?.[1]?.toLowerCase() ?? urlExtensionMatch?.[1]?.toLowerCase() ?? 'png';
-  const downloadName = `${slug || `persona-${index + 1}`}.${inferredExtension}`;
+  const downloadMeta = getPersonaDownloadMeta(profileImage, personaName, index + 1);
 
   return (
     <div className="flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/60 p-3">
@@ -158,13 +171,15 @@ function PersonaCard({ persona, index }: { persona: Persona; index: number }) {
         {profileImage ? (
           <div className="flex items-center gap-3">
             <p className="text-xs text-gray-500">Avatar supplied</p>
-            <a
-              href={profileImage}
-              download={downloadName}
-              className="text-xs font-medium text-indigo-200 hover:text-indigo-100"
-            >
-              Download avatar
-            </a>
+            {showDownloadLink && downloadMeta && (
+              <a
+                href={downloadMeta.href}
+                download={downloadMeta.download}
+                className="text-xs font-medium text-indigo-200 hover:text-indigo-100"
+              >
+                Download avatar
+              </a>
+            )}
           </div>
         ) : (
           <p className="text-xs text-gray-500">No avatar</p>
@@ -237,6 +252,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
   const [uniformPassword, setUniformPassword] = useState('');
   const [fulfilling, setFulfilling] = useState(false);
   const [fulfillmentMessage, setFulfillmentMessage] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     async function fetchOrder() {
@@ -255,6 +271,10 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
     }
     fetchOrder();
   }, [resolvedParams.id]);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const onboarding = useMemo(() => {
     if (!order?.onboardingData) return null;
@@ -737,7 +757,12 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {personas.map((persona, index) => (
-                  <PersonaCard key={`${persona.firstName}-${persona.lastName}-${index}`} persona={persona} index={index} />
+                  <PersonaCard
+                    key={`${persona.firstName}-${persona.lastName}-${index}`}
+                    persona={persona}
+                    index={index}
+                    showDownloadLink={isHydrated}
+                  />
                 ))}
               </div>
             )}

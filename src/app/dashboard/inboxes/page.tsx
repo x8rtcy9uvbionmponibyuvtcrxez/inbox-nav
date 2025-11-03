@@ -28,11 +28,15 @@ async function InboxesContent() {
       take: 100, // Limit to 100 most recent inboxes
     });
 
+    console.log('[Inboxes] Sample inbox before decryption:', inboxes[0]?.email, 'password:', inboxes[0]?.password);
+
     // Decrypt passwords before passing to client
     const inboxesWithDecryptedPasswords = inboxes.map((inbox) => ({
       ...inbox,
       password: inbox.password ? revealSecret(inbox.password) : null,
     }));
+
+    console.log('[Inboxes] Sample inbox after decryption:', inboxesWithDecryptedPasswords[0]?.email, 'password:', inboxesWithDecryptedPasswords[0]?.password);
 
     return <InboxesClient inboxes={inboxesWithDecryptedPasswords} />;
   } catch (error) {
