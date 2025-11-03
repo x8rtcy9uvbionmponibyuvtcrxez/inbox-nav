@@ -7,8 +7,9 @@ import { invalidateCache } from '@/lib/redis'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; inboxId: string } }
+  { params }: { params: Promise<{ id: string; inboxId: string }> }
 ) {
+  const resolvedParams = await params;
   try {
     // 1. Authentication
     const { userId } = await auth()
@@ -20,7 +21,7 @@ export async function PATCH(
 
     // 2. Find the inbox
     const inbox = await prisma.inbox.findUnique({
-      where: { id: params.inboxId },
+      where: { id: resolvedParams.inboxId },
       include: { order: true }
     })
 
@@ -28,7 +29,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Inbox not found' }, { status: 404 })
     }
 
-    if (inbox.orderId !== params.id) {
+    if (inbox.orderId !== resolvedParams.id) {
       return NextResponse.json(
         { error: 'Inbox does not belong to this order' },
         { status: 400 }
@@ -53,7 +54,7 @@ export async function PATCH(
       const existing = await prisma.inbox.findFirst({
         where: {
           email: updates.email,
-          id: { not: params.inboxId }
+          id: { not: resolvedParams.inboxId }
         }
       })
 
@@ -126,7 +127,7 @@ export async function PATCH(
 
     // 4. Update database
     const updatedInbox = await prisma.inbox.update({
-      where: { id: params.inboxId },
+      where: { id: resolvedParams.inboxId },
       data: inboxUpdates
     })
 
@@ -136,8 +137,8 @@ export async function PATCH(
         actorUserId: userId,
         action: 'INBOX_UPDATED',
         details: {
-          inboxId: params.inboxId,
-          orderId: params.id,
+          inboxId: resolvedParams.inboxId,
+          orderId: resolvedParams.id,
           updatedFields: Object.keys(inboxUpdates).filter(
             key => !['password'].includes(key) // Don't log sensitive field names
           ),
@@ -148,7 +149,7 @@ export async function PATCH(
       }
     })
 
-    console.log(`[Admin] Inbox ${params.inboxId} updated by ${userId}`)
+    console.log(`[Admin] Inbox ${resolvedParams.inboxId} updated by ${userId}`)
 
     // 6. Invalidate cache
     if (inbox.order.clerkUserId) {

@@ -7,8 +7,9 @@ import { invalidateCache } from '@/lib/redis'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
   try {
     // 1. Authentication
     const { userId } = await auth()
@@ -31,7 +32,7 @@ export async function PATCH(
 
     // 3. Find the order and its onboarding data
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       include: { onboardingData: true }
     })
 
@@ -145,7 +146,7 @@ export async function PATCH(
         actorUserId: userId,
         action: 'ORDER_UPDATED',
         details: {
-          orderId: params.id,
+          orderId: resolvedParams.id,
           updatedFields: Object.keys(onboardingUpdates).filter(
             key => !['registrarPassword'].includes(key) // Don't log sensitive field names
           ),
@@ -154,7 +155,7 @@ export async function PATCH(
       }
     })
 
-    console.log(`[Admin] Order ${params.id} updated by ${userId}`)
+    console.log(`[Admin] Order ${resolvedParams.id} updated by ${userId}`)
 
     // 7. Invalidate cache
     if (order.clerkUserId) {
