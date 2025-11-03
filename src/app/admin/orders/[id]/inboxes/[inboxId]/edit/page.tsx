@@ -48,8 +48,8 @@ export default function EditInboxPage({ params }: EditInboxPageProps) {
 
       // Extract persona names from onboarding data
       const personas = orderData.onboarding?.personas || [];
-      const personaNames = personas.map((p: any) =>
-        `${p.firstName} ${p.lastName}`.trim()
+      const personaNames = personas.map((p: { firstName?: string; lastName?: string }) =>
+        `${p.firstName || ''} ${p.lastName || ''}`.trim()
       );
       setAvailablePersonas(personaNames);
 
@@ -58,7 +58,7 @@ export default function EditInboxPage({ params }: EditInboxPageProps) {
       const data = await inboxResponse.json();
 
       // Find the specific inbox
-      const inbox = data.inboxes?.find((i: any) => i.id === params.inboxId);
+      const inbox = data.inboxes?.find((i: { id: string }) => i.id === params.inboxId);
 
       if (!inbox) {
         throw new Error("Inbox not found");

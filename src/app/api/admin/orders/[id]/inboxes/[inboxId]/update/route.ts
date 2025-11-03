@@ -36,7 +36,7 @@ export async function PATCH(
     }
 
     // 3. Prepare updates
-    const inboxUpdates: Record<string, any> = {}
+    const inboxUpdates: Record<string, unknown> = {}
 
     // Email address
     if (updates.email !== undefined) {

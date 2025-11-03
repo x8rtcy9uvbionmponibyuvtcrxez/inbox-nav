@@ -44,7 +44,7 @@ export async function PATCH(
     }
 
     // 4. Prepare updates (encrypt sensitive fields)
-    const onboardingUpdates: Record<string, any> = {}
+    const onboardingUpdates: Record<string, unknown> = {}
 
     // Business information
     if (updates.businessName !== undefined) {
@@ -100,7 +100,7 @@ export async function PATCH(
 
     // ESP Credentials (stored in domainPreferences JSON)
     if (updates.espCredentials !== undefined) {
-      const currentPrefs = (order.onboardingData.domainPreferences as any) || {}
+      const currentPrefs = (order.onboardingData.domainPreferences as Record<string, unknown>) || {}
       const currentEspCreds = currentPrefs.espCredentials || {}
 
       onboardingUpdates.domainPreferences = {
