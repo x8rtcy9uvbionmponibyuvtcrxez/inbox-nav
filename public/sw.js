@@ -1,27 +1,19 @@
-const CACHE_NAME = 'inbox-nav-v9';
+const CACHE_NAME = 'inbox-nav-static-v1';
 
 // Install event - cache resources (only cache actual files, not directories)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Don't cache favicons - always fetch fresh from network
-      // Only cache pages, not static assets that might change
-      const urlsToCache = [
-        '/',
-        '/dashboard',
-        '/dashboard/products',
-        '/dashboard/inboxes',
-        '/dashboard/domains',
-      ];
-      
-      // Use Promise.allSettled to avoid failing on individual cache misses
+      // Pre-cache only core static assets that rarely change
+      const urlsToCache = [];
+
       return Promise.allSettled(
-        urlsToCache.map(url => 
-          cache.add(url).catch(err => {
+        urlsToCache.map((url) =>
+          cache.add(url).catch((err) => {
             console.warn(`Failed to cache ${url}:`, err);
             return null;
-          })
-        )
+          }),
+        ),
       );
     }).then(() => {
       // Skip waiting to activate immediately
@@ -32,55 +24,49 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  // Never attempt to cache non-GET requests; just pass through to network
-  if (event.request.method !== 'GET') {
-    event.respondWith(fetch(event.request));
+  const { request } = event;
+
+  // Only handle GET requests for static assets.
+  if (request.method !== 'GET') {
     return;
   }
 
-  // Don't intercept navigation requests - let them go directly to network
-  // This prevents redirect issues with authentication and routing
-  if (event.request.mode === 'navigate') {
-    // Let navigation requests pass through without service worker interception
+  // Allow navigations to bypass the service worker so we always get fresh HTML.
+  if (request.mode === 'navigate') {
     return;
   }
-  
-  // NEVER cache favicons - always fetch fresh from network, no cache fallback
-  const isFavicon = event.request.url.includes('/favicon') || 
-                    event.request.url.includes('/apple-touch-icon') ||
-                    event.request.url.includes('/site.webmanifest') ||
-                    event.request.url.includes('/icon.');
-  
-  if (isFavicon) {
-    // Always fetch from network, never from cache
-    event.respondWith(
-      fetch(event.request, { cache: 'no-store', redirect: 'follow' })
-        .catch(() => {
-          // If network fails, don't show anything - don't fallback to cache
-          return new Response('', { status: 404 });
-        })
-    );
-    return;
-  }
-  
-  // For API requests, always use network with redirect: 'follow'
-  const isAPI = event.request.url.includes('/api/');
-  
+
+  const isAPI = request.url.includes('/api/');
   if (isAPI) {
-    event.respondWith(
-      fetch(event.request, { redirect: 'follow', cache: 'no-cache' })
-        .catch(() => new Response('Network error', { status: 503 }))
-    );
+    // Let API traffic hit the network directly; no caching to avoid stale data.
     return;
   }
-  
-  // For other requests (static assets), use cache-first strategy
+
+  const cacheableDestinations = new Set(['style', 'script', 'image', 'font']);
+  if (!cacheableDestinations.has(request.destination)) {
+    // For everything else (e.g., fetch/XHR), defer to the network.
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network with redirect handling
-        return response || fetch(event.request, { redirect: 'follow' });
-      })
+    caches.match(request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(request, { redirect: 'follow' }).then((networkResponse) => {
+        if (!networkResponse || !networkResponse.ok) {
+          return networkResponse;
+        }
+
+        const responseClone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, responseClone);
+        });
+
+        return networkResponse;
+      });
+    }),
   );
 });
 
