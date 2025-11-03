@@ -60,10 +60,12 @@ export function SignInPanel() {
     setIsGoogleLoading(true);
 
     try {
+      // Note: redirectUrlComplete is deprecated but still required in current version
+      // Will be replaced with fallbackRedirectUrl in future Clerk update
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sign-in",
-        fallbackRedirectUrl: "/dashboard",
+        redirectUrlComplete: "/dashboard",
       });
     } catch (err) {
       setIsGoogleLoading(false);
