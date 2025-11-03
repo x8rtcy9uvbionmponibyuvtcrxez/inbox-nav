@@ -63,7 +63,7 @@ export function SignInPanel() {
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sign-in",
-        redirectUrlComplete: "/dashboard",
+        fallbackRedirectUrl: "/dashboard",
       });
     } catch (err) {
       setIsGoogleLoading(false);
