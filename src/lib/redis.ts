@@ -43,24 +43,29 @@ export async function getCachedData<T>(
   try {
     // Ensure Redis is connected before attempting operations
     if (!client.isOpen) {
+      console.log(`[Cache] Connecting Redis for key: ${key}`);
       await client.connect();
     }
     
     // Try to get from cache
     const cached = await client.get(key);
     if (cached) {
+      console.log(`[Cache] Cache HIT for key: ${key}`);
       return JSON.parse(cached);
     }
     
+    console.log(`[Cache] Cache MISS for key: ${key}, fetching fresh data`);
     // Fetch fresh data
     const data = await fetcher();
     
     // Cache the data
     await client.setEx(key, ttlSeconds, JSON.stringify(data));
+    console.log(`[Cache] Cached data for key: ${key} with TTL ${ttlSeconds}s`);
     
     return data;
   } catch (error) {
-    console.error('Redis cache error:', error);
+    console.error(`[Cache] Redis cache error for key ${key}:`, error);
+    console.log(`[Cache] Falling back to direct fetch for key: ${key}`);
     // Fallback to direct fetch
     return await fetcher();
   }
