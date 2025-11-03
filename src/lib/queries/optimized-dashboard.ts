@@ -52,6 +52,7 @@ export async function getDashboardData(userId: string) {
                 status: true,
                 businessName: true,
                 forwardingDomain: true,
+                deletionDate: true,
               },
             },
             domains: {

@@ -86,6 +86,10 @@ export async function POST(request: NextRequest) {
       console.warn(`[Cancel] Order ${order.id} has no Stripe subscription ID, cancelling locally only`)
     }
 
+    // Calculate deletion date: 30 days from order creation (subscription creation)
+    const deletionDate = new Date(order.createdAt)
+    deletionDate.setDate(deletionDate.getDate() + 30)
+
     // Update order status in database (only after Stripe success or safe fallback)
     const updatedOrder = await prisma.order.update({
       where: { id: order.id },
@@ -96,8 +100,15 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Verify the update succeeded
-    console.log(`[Cancel] Database updated for order ${order.id}, subscriptionStatus: ${updatedOrder.subscriptionStatus}`)
+    // Update all inboxes for this order with deletion date
+    await prisma.inbox.updateMany({
+      where: { orderId: order.id },
+      data: {
+        deletionDate: deletionDate,
+      },
+    })
+
+    console.log(`[Cancel] Database updated for order ${order.id}, subscriptionStatus: ${updatedOrder.subscriptionStatus}, deletionDate set to ${deletionDate.toISOString()}`)
 
     // Invalidate dashboard cache BEFORE returning - ensure it completes
     // Get clerkUserId from order.clerkUserId, onboardingData, or use auth userId

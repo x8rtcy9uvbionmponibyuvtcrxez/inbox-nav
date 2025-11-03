@@ -91,6 +91,7 @@ model Inbox {
   status           InboxStatus @default(PENDING)
   cancel_reason    String?
   cancelled_at     DateTime?
+  deletionDate     DateTime?   @map("deletion_date")
   is_active        Boolean     @default(true)
   order            Order       @relation(fields: [orderId], references: [id])
 
