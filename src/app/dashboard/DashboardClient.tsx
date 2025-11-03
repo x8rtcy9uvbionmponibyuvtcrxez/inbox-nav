@@ -379,9 +379,13 @@ export default function DashboardClient({
                   : (order?.quantity ?? 0);
                 const totalCost = order?.totalAmount ?? inboxCount * 300;
                 const isCancelled = order?.status === 'CANCELLED' || order?.subscriptionStatus === 'cancel_at_period_end' || order?.subscriptionStatus === 'cancelled' || order?.subscriptionStatus === 'canceled';
-                // Get forwarding URL from domains first (primary source), then from preferences
+                // Get forwarding URL in priority order:
+                // 1) From domains (authoritative once provisioned)
+                // 2) From onboarding.website (entered during onboarding)
+                // 3) From legacy preferences bag
                 const forwardingLabel =
                   order?.domains?.find((domain) => domain.forwardingUrl && domain.forwardingUrl.trim() !== "")?.forwardingUrl ||
+                  (record.website && record.website.trim() !== '' ? record.website : null) ||
                   forwardingFromPrefs ||
                   "—";
                 

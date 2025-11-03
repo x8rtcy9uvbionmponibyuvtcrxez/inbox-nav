@@ -136,15 +136,36 @@ function TagList({ items, emptyMessage }: { items: string[]; emptyMessage: strin
 
 function PersonaCard({ persona, index }: { persona: Persona; index: number }) {
   const initials = `${persona.firstName?.[0] ?? ''}${persona.lastName?.[0] ?? ''}`.toUpperCase();
+  const profileImage = typeof persona.profileImage === 'string' ? persona.profileImage : null;
+  const isDataUrl = profileImage?.startsWith('data:image/');
+  const personaName = `${persona.firstName ?? ''} ${persona.lastName ?? ''}`.trim() || 'Persona';
+  const slug = personaName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  const extensionMatch = isDataUrl ? profileImage.match(/^data:image\/([a-z0-9+]+);/i) : null;
+  const urlExtensionMatch =
+    !isDataUrl && profileImage
+      ? profileImage.match(/\.([a-z0-9]{2,5})(?:$|[?#])/i)
+      : null;
+  const inferredExtension = extensionMatch?.[1]?.toLowerCase() ?? urlExtensionMatch?.[1]?.toLowerCase() ?? 'png';
+  const downloadName = `${slug || `persona-${index + 1}`}.${inferredExtension}`;
+
   return (
     <div className="flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/60 p-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/20 text-sm font-semibold text-indigo-200">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-sm font-semibold text-indigo-200">
         {initials || index + 1}
       </div>
-      <div>
-        <p className="text-sm font-medium text-white">{`${persona.firstName ?? ''} ${persona.lastName ?? ''}`.trim() || 'Persona'}</p>
-        {persona.profileImage ? (
-          <p className="text-xs text-gray-500">Avatar supplied</p>
+      <div className="flex flex-1 flex-col gap-1">
+        <p className="text-sm font-medium text-white">{personaName}</p>
+        {profileImage ? (
+          <div className="flex items-center gap-3">
+            <p className="text-xs text-gray-500">Avatar supplied</p>
+            <a
+              href={profileImage}
+              download={downloadName}
+              className="text-xs font-medium text-indigo-200 hover:text-indigo-100"
+            >
+              Download avatar
+            </a>
+          </div>
         ) : (
           <p className="text-xs text-gray-500">No avatar</p>
         )}
@@ -274,6 +295,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
 
     return {
       ...raw,
+      website: (raw as { website?: string | null }).website, // Explicitly preserve website field
       domainPreferences,
       personas,
       internalTags,
@@ -564,7 +586,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
             />
             <InfoRow label="Customer ID (Clerk)" value={order.clerkUserId || '—'} />
             <InfoRow label="Domain Source" value={toTitle(onboarding?.domainSource ?? (isOwn ? 'OWN' : 'BUY_FOR_ME'))} />
-            <InfoRow label="Primary Forwarding URL" value={onboarding?.website ?? '—'} />
+            <InfoRow label="Primary Forwarding URL" value={onboarding?.website || '—'} />
             <InfoRow
               label="Warmup Tool"
               value={onboarding?.espProvider ? toTitle(onboarding.espProvider) : '—'}

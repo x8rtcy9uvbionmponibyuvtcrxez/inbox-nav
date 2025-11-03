@@ -323,6 +323,15 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     let onboarding;
     try {
       console.log("[ACTION] Step 2: Creating OnboardingData...");
+      console.log("[ACTION] 📝 Forwarding URL sources:", {
+        sessionForwardingUrl,
+        inputPrimaryForwardUrl: input.primaryForwardUrl,
+        finalWebsite: (sessionForwardingUrl && sessionForwardingUrl.trim() !== '') 
+          ? sessionForwardingUrl.trim() 
+          : (input.primaryForwardUrl && input.primaryForwardUrl.trim() !== '') 
+            ? input.primaryForwardUrl.trim() 
+            : null,
+      });
       
       const domainPreferenceList =
         (input.domainSource === 'OWN' || input.domainStatus === 'own')
@@ -341,7 +350,11 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
         clerkUserId: userId,
         productType: orderProductType,
         businessType: input.businessName,
-        website: sessionForwardingUrl ?? input.primaryForwardUrl,
+        website: (sessionForwardingUrl && sessionForwardingUrl.trim() !== '') 
+          ? sessionForwardingUrl.trim() 
+          : (input.primaryForwardUrl && input.primaryForwardUrl.trim() !== '') 
+            ? input.primaryForwardUrl.trim() 
+            : null,
         domainPreferences: {
           domains: domainPreferenceList,
           espCredentials: {

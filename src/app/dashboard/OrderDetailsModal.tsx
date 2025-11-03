@@ -72,6 +72,19 @@ type NormalizedPersona = {
   displayName: string;
 };
 
+function getPersonaDownloadMeta(profileImage: string | null, displayName: string, index: number) {
+  if (!profileImage) return null;
+  const isDataUrl = profileImage.startsWith("data:image/");
+  const dataExtension = isDataUrl ? profileImage.match(/^data:image\/([a-z0-9+]+);/i) : null;
+  const urlExtension = !isDataUrl ? profileImage.match(/\.([a-z0-9]{2,5})(?:$|[?#])/i) : null;
+  const extension = dataExtension?.[1]?.toLowerCase() ?? urlExtension?.[1]?.toLowerCase() ?? "png";
+  const slug = displayName.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").toLowerCase();
+  return {
+    href: profileImage,
+    download: `${slug || `persona-${index + 1}`}.${extension}`,
+  };
+}
+
 function normalizePersonas(value: unknown): NormalizedPersona[] {
   if (!Array.isArray(value)) return [];
   const personas: NormalizedPersona[] = [];
@@ -543,19 +556,35 @@ export default function OrderDetailsModal({ order, isOpen, onClose, onCancelled 
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              {personas.map((persona, index) => (
-                <div key={`${persona.displayName}-${index}`} className="flex items-center gap-3 rounded-lg bg-white/5 p-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white/80">
-                    {persona.initials}
+              {personas.map((persona, index) => {
+                const downloadMeta = getPersonaDownloadMeta(persona.profileImage, persona.displayName, index);
+                return (
+                  <div key={`${persona.displayName}-${index}`} className="flex items-center gap-3 rounded-lg bg-white/5 p-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white/80">
+                      {persona.initials}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white">{persona.displayName}</p>
+                      {persona.profileImage ? (
+                        <div className="flex items-center gap-3">
+                          <p className="text-xs text-white/50">Avatar supplied</p>
+                          {downloadMeta && (
+                            <a
+                              href={downloadMeta.href}
+                              download={downloadMeta.download}
+                              className="text-xs font-medium text-indigo-200 hover:text-indigo-100"
+                            >
+                              Download avatar
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-white/50">No avatar provided</p>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{persona.displayName}</p>
-                    <p className="text-xs text-white/50">
-                      {persona.profileImage ? 'Avatar supplied' : 'No avatar provided'}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

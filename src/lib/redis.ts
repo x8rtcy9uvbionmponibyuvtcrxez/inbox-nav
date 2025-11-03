@@ -63,13 +63,25 @@ export async function getCachedData<T>(
 
 export async function invalidateCache(pattern: string): Promise<void> {
   const client = getRedisClient();
-  
+
   if (!client) return;
-  
+
   try {
-    const keys = await client.keys(pattern);
-    if (keys.length > 0) {
-      await client.del(keys);
+    // Always attempt exact-key delete first (fast path)
+    await client.del(pattern);
+
+    // If a wildcard pattern is provided, scan and delete matches
+    const hasWildcard = pattern.includes('*') || pattern.includes('?') || pattern.includes('[');
+    if (hasWildcard) {
+      const keysToDelete: string[] = [];
+      const iterator = client.scanIterator({ MATCH: pattern, COUNT: 100 }) as AsyncIterableIterator<string>;
+      // Use SCAN to avoid blocking Redis on KEYS
+      for await (const key of iterator) {
+        keysToDelete.push(key);
+      }
+      if (keysToDelete.length > 0) {
+        await client.del(keysToDelete);
+      }
     }
   } catch (error) {
     console.error('Cache invalidation error:', error);
