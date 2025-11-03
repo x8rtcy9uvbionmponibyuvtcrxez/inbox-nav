@@ -1033,10 +1033,10 @@ const personaSummaryNames = personas
                 </p>
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-2 sm:items-start">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">Internal tags</label>
-                  <p className="text-xs text-white/50">For your own organization and tracking. Comma or Enter to add.</p>
+                  <p className="text-xs text-white/50 min-h-[2.5rem]">For your own organization and tracking. Comma or Enter to add.</p>
                   <TagInput
                     tags={internalTags}
                     onChange={setInternalTags}
@@ -1045,7 +1045,7 @@ const personaSummaryNames = personas
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">ESP tags</label>
-                  <p className="text-xs text-white/50">We&apos;ll add these tags in your sending platform (Instantly, Smartlead, etc.) so you can easily filter and organize your inboxes.</p>
+                  <p className="text-xs text-white/50 min-h-[2.5rem]">We&apos;ll add these tags in your sending platform (Instantly, Smartlead, etc.) so you can easily filter and organize your inboxes.</p>
                   <TagInput
                     tags={espTags}
                     onChange={setEspTags}
