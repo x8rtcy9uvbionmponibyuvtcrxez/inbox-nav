@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, use } from 'react';
 import Link from 'next/link';
 import CSVUpload from '../_components/CSVUpload';
+import BulkInboxUpdate from '../_components/BulkInboxUpdate';
 import { markOrderAsFulfilledAction, type CSVRow } from '../actions';
 import { revealSecret } from '@/lib/encryption';
 
@@ -253,6 +254,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
   const [fulfilling, setFulfilling] = useState(false);
   const [fulfillmentMessage, setFulfillmentMessage] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
 
   useEffect(() => {
     async function fetchOrder() {
@@ -796,7 +798,17 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
 
           <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-white">Inbox Status</h2>
+              <div className="flex items-center gap-4">
+                <h2 className="text-sm font-semibold text-white">Inbox Status</h2>
+                {totalInboxes > 0 && (
+                  <button
+                    onClick={() => setShowBulkUpdateModal(true)}
+                    className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Bulk Update CSV
+                  </button>
+                )}
+              </div>
               <span className="text-xs text-gray-500">{totalInboxes} total inboxes</span>
             </div>
             {totalInboxes === 0 ? (
@@ -870,6 +882,7 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                       <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Status</th>
                       <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Inboxes</th>
                       <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Forwarding</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-800">
@@ -879,6 +892,14 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                         <td className="px-4 py-2 text-gray-300">{toTitle(domain.status)}</td>
                         <td className="px-4 py-2 text-gray-200">{domain.inboxCount}</td>
                         <td className="px-4 py-2 text-gray-400">{domain.forwardingUrl || '—'}</td>
+                        <td className="px-4 py-2">
+                          <Link
+                            href={`/admin/orders/${order.id}/domains/${domain.id}/edit`}
+                            className="text-xs text-blue-400 hover:text-blue-300"
+                          >
+                            Edit
+                          </Link>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -963,6 +984,13 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
           ) : null}
         </div>
       </div>
+
+      {/* Bulk Inbox Update Modal */}
+      <BulkInboxUpdate
+        orderId={order.id}
+        isOpen={showBulkUpdateModal}
+        onClose={() => setShowBulkUpdateModal(false)}
+      />
     </div>
   );
 }
