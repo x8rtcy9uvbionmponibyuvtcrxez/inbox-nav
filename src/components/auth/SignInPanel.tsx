@@ -386,7 +386,7 @@ export function SignInPanel() {
           </form>
 
           <div className="mt-6 border-t border-white/10 pt-6 text-center text-sm text-white/82">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <button
               type="button"
               onClick={() => router.push("/sign-up")}
