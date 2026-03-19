@@ -1,9 +1,28 @@
 "use client";
 
-import { ClerkLoaded, SignUp } from "@clerk/nextjs";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ClerkLoaded, SignUp, useAuth } from "@clerk/nextjs";
 import { clerkDarkAppearance } from "@/lib/clerkAppearance";
 
 export default function SignUpPage() {
+  const router = useRouter();
+  const { isSignedIn, isLoaded } = useAuth();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push("/dashboard");
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  if (isLoaded && isSignedIn) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(34,34,42,0.85)_0%,_#060608_65%)] px-4">
+        <p className="text-white/70 text-sm">Redirecting to dashboard…</p>
+      </div>
+    );
+  }
+
   const signUpAppearance = {
     ...clerkDarkAppearance,
     elements: {
@@ -17,7 +36,6 @@ export default function SignUpPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(34,34,42,0.85)_0%,_#060608_65%)] px-4">
       <div className="w-full max-w-md">
-        {/* Header - aligned with sign-up form */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
             Inbox Navigator
@@ -26,8 +44,7 @@ export default function SignUpPage() {
             Email inbox management platform
           </p>
         </div>
-        
-        {/* Sign-up form */}
+
         <ClerkLoaded>
           <SignUp
             routing="path"

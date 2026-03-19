@@ -23,10 +23,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate quantity
-    if (quantity < 10 || quantity > 2000) {
+    // Validate quantity based on product type
+    const minQty = productType === 'AWS' ? 20 : productType === 'MICROSOFT' ? 1 : productType === 'PREWARMED' ? 1 : 10;
+    if (quantity < minQty || quantity > 2000) {
       return NextResponse.json(
-        { error: 'Quantity must be between 10 and 2000' },
+        { error: `Quantity must be between ${minQty} and 2000 for ${productType}` },
         { status: 400 }
       )
     }

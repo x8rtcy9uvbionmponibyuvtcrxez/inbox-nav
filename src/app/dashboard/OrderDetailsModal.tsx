@@ -234,6 +234,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, onCancelled 
   const [showAllInboxes, setShowAllInboxes] = useState(false);
   const [showAllDomains, setShowAllDomains] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
   const [cancelMessageType, setCancelMessageType] = useState<'success' | 'error' | null>(null);
   const [localOrder, setLocalOrder] = useState<OrderWithRelations | null>(order ?? null);
@@ -663,83 +664,95 @@ export default function OrderDetailsModal({ order, isOpen, onClose, onCancelled 
             </div>
           )}
           <div className="flex justify-end gap-3">
-          {hasSubscription && (
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (isCancelling) return;
-                
-                setIsCancelling(true);
-                setCancelMessage(null);
-                setCancelMessageType(null);
-                
-                try {
-                  const response = await fetch('/api/cancel-subscription', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderId: orderData?.id }),
-                  });
-                  
-                  const result = await response.json();
-                  
-                  if (!response.ok || !result?.success) {
-                    const errorMessage = result?.error || result?.message || 'Failed to cancel subscription';
-                    setCancelMessage(errorMessage);
-                    setCancelMessageType('error');
-                    return;
-                  }
-
-                  const successMessage = result?.message || 'Subscription cancelled successfully.';
-                  const stripeNotice = result?.stripeError ? ` Stripe notice: ${result.stripeError}` : '';
-                  
-                  if (currentOrder && orderData) {
-                    // Optimistically update local order state
-                    const updatedOrder: OrderWithRelations = {
-                      ...currentOrder,
-                      order: {
-                        ...orderData,
-                        subscriptionStatus: 'cancel_at_period_end',
-                        cancelledAt: new Date(),
-                      },
-                    };
-                    setLocalOrder(updatedOrder);
-                    // Inform parent so tables/lists can update immediately
-                    try {
-                      onCancelled?.(orderData.id);
-                    } catch {
-                      // ignore consumer errors
-                    }
-                  }
-
-                  setCancelMessage(`${successMessage}${stripeNotice}`);
-                  setCancelMessageType('success');
-                  
-                  // Force immediate hard reload to ensure cache is cleared and fresh data is fetched
-                  // Use a small delay to show success message first
-                  setTimeout(() => {
-                    onClose();
-                    // Force a hard reload with cache-busting
-                    window.location.href = window.location.href.split('?')[0] + '?refresh=' + Date.now();
-                  }, 1500);
-                } catch (error) {
-                  console.error('Failed to cancel subscription:', error);
-                  setCancelMessage('Failed to cancel subscription. Please try again.');
-                  setCancelMessageType('error');
-                } finally {
-                  setIsCancelling(false);
-                }
-              }}
-            >
+          {hasSubscription && !showCancelConfirm && (
               <button
-                type="submit"
+                type="button"
+                onClick={() => setShowCancelConfirm(true)}
                 disabled={isCancelling || isCancelled}
                 className="inline-flex items-center rounded-full border border-red-500/30 bg-red-500/15 px-4 py-2 text-sm font-medium text-red-200 hover:border-red-500/50 hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isCancelling ? 'Cancelling...' : 
-                 isCancelled ? 'Subscription Already Cancelled' : 
-                 'Cancel Subscription'}
+                {isCancelled ? 'Subscription Already Cancelled' : 'Cancel Subscription'}
               </button>
-            </form>
+          )}
+          {hasSubscription && showCancelConfirm && !isCancelled && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-red-200">Are you sure?</span>
+              <button
+                type="button"
+                disabled={isCancelling}
+                onClick={async () => {
+                  if (isCancelling) return;
+
+                  setIsCancelling(true);
+                  setCancelMessage(null);
+                  setCancelMessageType(null);
+
+                  try {
+                    const response = await fetch('/api/cancel-subscription', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ orderId: orderData?.id }),
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok || !result?.success) {
+                      const errorMessage = result?.error || result?.message || 'Failed to cancel subscription';
+                      setCancelMessage(errorMessage);
+                      setCancelMessageType('error');
+                      setShowCancelConfirm(false);
+                      return;
+                    }
+
+                    const successMessage = result?.message || 'Subscription cancelled successfully.';
+                    const stripeNotice = result?.stripeError ? ` Stripe notice: ${result.stripeError}` : '';
+
+                    if (currentOrder && orderData) {
+                      const updatedOrder: OrderWithRelations = {
+                        ...currentOrder,
+                        order: {
+                          ...orderData,
+                          subscriptionStatus: 'cancel_at_period_end',
+                          cancelledAt: new Date(),
+                        },
+                      };
+                      setLocalOrder(updatedOrder);
+                      try {
+                        onCancelled?.(orderData.id);
+                      } catch {
+                        // ignore consumer errors
+                      }
+                    }
+
+                    setCancelMessage(`${successMessage}${stripeNotice}`);
+                    setCancelMessageType('success');
+                    setShowCancelConfirm(false);
+
+                    setTimeout(() => {
+                      onClose();
+                      window.location.href = window.location.href.split('?')[0] + '?refresh=' + Date.now();
+                    }, 1500);
+                  } catch (error) {
+                    console.error('Failed to cancel subscription:', error);
+                    setCancelMessage('Failed to cancel subscription. Please try again.');
+                    setCancelMessageType('error');
+                    setShowCancelConfirm(false);
+                  } finally {
+                    setIsCancelling(false);
+                  }
+                }}
+                className="inline-flex items-center rounded-full border border-red-500/50 bg-red-500/25 px-4 py-2 text-sm font-medium text-red-200 hover:bg-red-500/35 transition-colors disabled:opacity-50"
+              >
+                {isCancelling ? 'Cancelling...' : 'Yes, cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCancelConfirm(false)}
+                className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 hover:border-white/40 transition-colors"
+              >
+                No, keep it
+              </button>
+            </div>
           )}
           <button
             onClick={onClose}

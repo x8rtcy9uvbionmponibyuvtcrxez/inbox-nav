@@ -457,14 +457,6 @@ const domainPlanSummary =
     : domainSource === 'BUY_FOR_ME'
       ? 'Our team will purchase and configure the domains you selected during checkout.'
       : 'List the domains you want us to use. We&apos;ll handle all the DNS configuration.';
-const personaSummaryNames = personas
-  .slice(0, numPersonas)
-  .map((persona, index) => {
-    const fullName = `${persona.firstName} ${persona.lastName}`.trim();
-    return fullName || `Persona ${index + 1}`;
-  })
-  .join(', ');
-
   const handleSubmit = async () => {
     console.log('[ONBOARDING] Handle submit start');
     setLoading(true);
@@ -1242,7 +1234,7 @@ const personaSummaryNames = personas
               {(error.includes('expired') || error.includes('not found') || error.includes('does not belong')) && (
                 <div className="mt-4 flex flex-wrap gap-3">
                   <button
-                    onClick={() => window.location.href = '/dashboard/products'}
+                    onClick={() => router.push('/dashboard/products')}
                     className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-white/90"
                   >
                     Restart checkout

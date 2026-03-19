@@ -18,7 +18,7 @@ export async function GET() {
         'Expires': '0',
       },
     })
-  } catch (error) {
+  } catch {
     // Fallback - return 404 to let Next.js handle default favicon
     return new NextResponse(null, { status: 404 })
   }
