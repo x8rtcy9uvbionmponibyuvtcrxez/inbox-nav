@@ -309,7 +309,7 @@ export default function DashboardClient({
           <Button asChild variant="primary" size="lg" className="gap-3 shadow-[0_10px_30px_-15px_rgba(255,255,255,0.8)] hover:shadow-[0_15px_40px_-15px_rgba(255,255,255,0.9)] transition-all duration-200">
             <Link href="/dashboard/products">
               <SparklesIcon className="h-5 w-5" />
-              Create Inbox
+              Create Inboxes
             </Link>
           </Button>
                  <Button variant="outline" size="lg" className="gap-3 hover:bg-white/5 transition-all duration-200">
