@@ -148,7 +148,7 @@ const ProductCard = memo(function ProductCard({ product, quantity, onQuantityCha
   );
 });
 
-type ProductType = "RESELLER" | "EDU" | "PREWARMED" | "AWS" | "MICROSOFT";
+type ProductType = "RESELLER" | "PREWARMED" | "AWS" | "MICROSOFT";
 
 type TabId = "google" | "microsoft" | "prewarmed" | "smtp";
 
@@ -183,7 +183,7 @@ const tabs: Tab[] = [
     id: "google",
     label: "Google Inboxes",
     emoji: "📧",
-    productIds: ["EDU", "RESELLER"]
+    productIds: ["RESELLER"]
   },
   {
     id: "microsoft",
@@ -206,22 +206,6 @@ const tabs: Tab[] = [
 ];
 
 const products: Product[] = [
-  {
-    id: "EDU",
-    name: "Edu Inboxes",
-    price: 1.5,
-    description: "Cost-efficient Google inboxes designed for high-volume sending at the best price.",
-    features: ["Lowest cost per inbox", "Built for large outbound volume", "Managed Google risk (isolation & spread)"],
-    color: "green",
-    priceId: "price_1SIoynBRlmSshMl5kKycrio6",
-    tab: "google",
-    pricingTiers: [
-      { minQty: 1, maxQty: 250, price: 1.50 },
-      { minQty: 250, maxQty: 500, price: 1.40 },
-      { minQty: 500, maxQty: 1000, price: 1.25 },
-      { minQty: 1000, maxQty: null, price: 1.00 },
-    ],
-  },
   {
     id: "RESELLER",
     name: "Premium Inboxes",
@@ -274,14 +258,12 @@ const products: Product[] = [
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("google");
   const [quantities, setQuantities] = useState<Record<ProductType, number>>({
-    EDU: 10,
     RESELLER: 10,
     PREWARMED: 10,
     AWS: 20,
     MICROSOFT: 1,
   });
   const [loading, setLoading] = useState<Record<ProductType, boolean>>({
-    EDU: false,
     RESELLER: false,
     PREWARMED: false,
     AWS: false,
