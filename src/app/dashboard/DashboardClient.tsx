@@ -32,6 +32,7 @@ type OrderWithRelations = {
     status?: string | null;
     subscriptionStatus: string;
     stripeSubscriptionId?: string | null;
+    stripeSessionId?: string | null;
     cancelledAt?: Date | null;
     cancellationReason?: string | null;
     inboxes: { id: string; email?: string; forwardingDomain?: string | null }[];
@@ -408,14 +409,28 @@ export default function DashboardClient({
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleOpenOrderDetails(record)}
-                        className="transition-opacity duration-200"
-                      >
-                        View Details
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        {(order?.status === 'PENDING' || order?.status === 'PAID') && !isCancelled && order?.stripeSessionId && (
+                          <Button
+                            asChild
+                            size="sm"
+                            variant="primary"
+                            className="transition-opacity duration-200"
+                          >
+                            <Link href={`/onboarding?session_id=${order.stripeSessionId}`}>
+                              Complete Onboarding
+                            </Link>
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => handleOpenOrderDetails(record)}
+                          className="transition-opacity duration-200"
+                        >
+                          View Details
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 );

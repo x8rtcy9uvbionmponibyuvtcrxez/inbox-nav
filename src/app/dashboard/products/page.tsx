@@ -148,7 +148,7 @@ const ProductCard = memo(function ProductCard({ product, quantity, onQuantityCha
   );
 });
 
-type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
+type ProductType = "RESELLER" | "EDU" | "PREWARMED" | "AWS" | "MICROSOFT";
 
 type TabId = "google" | "microsoft" | "prewarmed" | "smtp";
 
@@ -181,9 +181,9 @@ interface Tab {
 const tabs: Tab[] = [
   {
     id: "google",
-    label: "Google",
+    label: "Google Inboxes",
     emoji: "📧",
-    productIds: ["LEGACY", "RESELLER"]
+    productIds: ["EDU", "RESELLER"]
   },
   {
     id: "microsoft",
@@ -220,22 +220,6 @@ const products: Product[] = [
       { minQty: 250, maxQty: 500, price: 1.40 },
       { minQty: 500, maxQty: 1000, price: 1.25 },
       { minQty: 1000, maxQty: null, price: 1.00 },
-    ],
-  },
-  {
-    id: "LEGACY",
-    name: "Legacy Inboxes",
-    price: 2.5,
-    description: "Low cost Google inboxes for teams that want cost-effective inboxes",
-    features: ["Low risk of Google crackdown", "Send up to 15 emails/day/inbox", "US IP only"],
-    color: "orange",
-    priceId: "price_1RW8EkBRlmSshMl5LIGqjcHw",
-    tab: "google",
-    pricingTiers: [
-      { minQty: 1, maxQty: 100, price: 2.50 },
-      { minQty: 100, maxQty: 250, price: 2.25 },
-      { minQty: 250, maxQty: 500, price: 2.15 },
-      { minQty: 500, maxQty: null, price: 2.00 },
     ],
   },
   {
@@ -291,7 +275,6 @@ export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("google");
   const [quantities, setQuantities] = useState<Record<ProductType, number>>({
     EDU: 10,
-    LEGACY: 10,
     RESELLER: 10,
     PREWARMED: 10,
     AWS: 20,
@@ -299,7 +282,6 @@ export default function ProductsPage() {
   });
   const [loading, setLoading] = useState<Record<ProductType, boolean>>({
     EDU: false,
-    LEGACY: false,
     RESELLER: false,
     PREWARMED: false,
     AWS: false,
@@ -477,7 +459,7 @@ export default function ProductsPage() {
                 <h3 className="text-xl font-semibold text-[var(--text-primary)]">All plans include:</h3>
                 <div className="space-y-4">
                   {[
-                    "DNS setup (SDKIM, SPF, DMARC)",
+                    "DNS setup (DKIM, SPF, DMARC)",
                     "Complete DFY service",
                     "Integration with Instantly, Smartlead, Plusvibes and other platforms",
                     "Bring your domains for free",

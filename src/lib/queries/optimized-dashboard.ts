@@ -43,6 +43,7 @@ export async function getDashboardData(userId: string) {
             totalAmount: true,
             subscriptionStatus: true,
             stripeSubscriptionId: true,
+            stripeSessionId: true,
             cancelledAt: true,
             businessName: true,
             inboxes: {
