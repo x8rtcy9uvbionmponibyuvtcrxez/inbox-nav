@@ -13,10 +13,42 @@ type OrderWithRelations = Prisma.OnboardingDataGetPayload<{
   };
 }>;
 
+const ORDER_SELECT = {
+  id: true,
+  status: true,
+  productType: true,
+  quantity: true,
+  totalAmount: true,
+  subscriptionStatus: true,
+  stripeSubscriptionId: true,
+  stripeSessionId: true,
+  cancelledAt: true,
+  businessName: true,
+  createdAt: true,
+  inboxes: {
+    select: {
+      id: true,
+      email: true,
+      status: true,
+      businessName: true,
+      forwardingDomain: true,
+    },
+  },
+  domains: {
+    select: {
+      id: true,
+      domain: true,
+      status: true,
+      businessName: true,
+      forwardingUrl: true,
+    },
+  },
+} as const;
+
 export async function getDashboardData(userId: string) {
   // Use Promise.all for parallel queries instead of sequential
-  const [orders, inboxesCount, domainsCount, monthlySpend] = await Promise.all([
-    // Optimized orders query with selective fields
+  const [orders, pendingOrders, inboxesCount, domainsCount, monthlySpend] = await Promise.all([
+    // Orders with completed onboarding
     prisma.onboardingData.findMany({
       where: { clerkUserId: userId },
       select: {
@@ -34,42 +66,22 @@ export async function getDashboardData(userId: string) {
         inboxesPerDomain: true,
         calculatedDomainCount: true,
         specialRequirements: true,
-        order: {
-          select: {
-            id: true,
-            status: true,
-            productType: true,
-            quantity: true,
-            totalAmount: true,
-            subscriptionStatus: true,
-            stripeSubscriptionId: true,
-            stripeSessionId: true,
-            cancelledAt: true,
-            businessName: true,
-            inboxes: {
-              select: {
-                id: true,
-                email: true,
-                status: true,
-                businessName: true,
-                forwardingDomain: true,
-                // deletionDate: true, // Temporarily removed until migration is deployed
-              },
-            },
-            domains: {
-              select: {
-                id: true,
-                domain: true,
-                status: true,
-                businessName: true,
-                forwardingUrl: true,
-              },
-            },
-          },
-        },
+        order: { select: ORDER_SELECT },
       },
       orderBy: { createdAt: "desc" },
-      take: 50, // Limit to recent 50 orders for performance
+      take: 50,
+    }),
+
+    // Orders WITHOUT onboarding data (paid but never completed onboarding)
+    prisma.order.findMany({
+      where: {
+        clerkUserId: userId,
+        onboardingData: null,
+        status: { not: 'CANCELLED' },
+      },
+      select: ORDER_SELECT,
+      orderBy: { createdAt: "desc" },
+      take: 20,
     }),
     
     // Count LIVE and PENDING inboxes (excluding DELETED and CANCELLED)
@@ -120,8 +132,33 @@ export async function getDashboardData(userId: string) {
     }),
   ]);
 
+  // Convert pending orders (no onboarding) into the same shape as onboarded orders
+  const pendingAsOnboarded = pendingOrders.map((order) => ({
+    id: `pending-${order.id}`,
+    createdAt: order.createdAt,
+    businessType: order.businessName || null,
+    website: null,
+    domainPreferences: null,
+    personas: null,
+    domainRegistrar: null,
+    registrarUsername: null,
+    registrarPassword: null,
+    domainSource: null,
+    providedDomains: null,
+    inboxesPerDomain: null,
+    calculatedDomainCount: null,
+    specialRequirements: null,
+    needsOnboarding: true,
+    order,
+  }));
+
+  // Merge and sort by date descending
+  const allOrders = [...orders, ...pendingAsOnboarded].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   return {
-    orders: orders as OrderWithRelations[],
+    orders: allOrders as OrderWithRelations[],
     totalInboxes: inboxesCount,
     totalDomains: domainsCount,
     totalMonthlySpend: monthlySpend._sum.totalAmount || 0,

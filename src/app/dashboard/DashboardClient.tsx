@@ -23,6 +23,7 @@ type OrderWithRelations = {
   // Legacy/fallback configuration bag – may contain forwardingUrl for BUY_FOR_ME orders
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   domainPreferences?: any;
+  needsOnboarding?: boolean;
   order: {
     id: string;
     productType: string;
@@ -410,7 +411,7 @@ export default function DashboardClient({
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2">
-                        {(order?.status === 'PENDING' || order?.status === 'PAID') && !isCancelled && order?.stripeSessionId && (
+                        {record.needsOnboarding && !isCancelled && order?.stripeSessionId && (
                           <Button
                             asChild
                             size="sm"

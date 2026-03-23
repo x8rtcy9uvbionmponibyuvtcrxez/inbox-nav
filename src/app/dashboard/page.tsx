@@ -17,6 +17,7 @@ type OrderWithRelations = {
   specialRequirements?: string | null;
   domainPreferences?: unknown;
   personas?: unknown;
+  needsOnboarding?: boolean;
   order: {
     id: string;
     productType: string;
