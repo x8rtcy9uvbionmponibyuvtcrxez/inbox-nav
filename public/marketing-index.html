@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InboxNavigator — Scale Your Cold Email Infrastructure</title>
+<meta name="description" content="The only cold email infrastructure that does it all. DFY Google Workspace, Outlook, SMTP, and prewarmed inboxes with 99% inbox placement. Starting at $3/inbox/month. No setup fee, cancel anytime.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://inboxnavigator.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://inboxnavigator.com/">
+<meta property="og:title" content="InboxNavigator — Scale Your Cold Email Infrastructure">
+<meta property="og:description" content="DFY Google Workspace, Outlook, SMTP & prewarmed inboxes. 99% inbox placement, dedicated US IPs. Starting at $3/inbox/month.">
+<meta property="og:image" content="https://inboxnavigator.com/images/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="InboxNavigator — Scale Your Cold Email Infrastructure">
+<meta name="twitter:description" content="DFY Google Workspace, Outlook, SMTP & prewarmed inboxes. 99% inbox placement. Starting at $3/inbox/month.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "InboxNavigator",
+  "url": "https://inboxnavigator.com",
+  "description": "Done-for-you cold email infrastructure. Google Workspace, Outlook, SMTP, and prewarmed inboxes with industry-best deliverability.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "166 Geary Street",
+    "addressLocality": "San Francisco",
+    "addressRegion": "CA",
+    "addressCountry": "US"
+  }
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#ffffff;--bg-warm:#fdf5ef;--navy:#1e1054;--navy-mid:#2d1b69;
+--accent:#a855f7;--pink:#e84393;--orange:#f97316;
+--gradient:linear-gradient(135deg,#a855f7,#e84393,#f97316);
+--gradient-text:linear-gradient(90deg,#e84393,#f97316);
+--serif:'Instrument Serif',Georgia,serif;
+--sans:'Plus Jakarta Sans',-apple-system,sans-serif;
+--mono:'JetBrains Mono',monospace;
+--border:#ece8f0;--radius:24px;--radius-sm:12px;--radius-pill:100px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:#333;line-height:1.6;overflow-x:hidden;background:var(--bg)}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;background:none;font-family:inherit}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:400;color:var(--navy)}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* ── UTILITIES ── */
+.gradient-text{background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gradient-bg{background:var(--gradient)}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600}
+.tag.gradient{background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 36px;border-radius:var(--radius-pill);font-weight:700;font-size:15px;transition:all .3s ease}
+.btn-gradient{background:var(--gradient);color:#fff;box-shadow:0 4px 20px rgba(168,85,247,.3)}
+.btn-gradient:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(168,85,247,.4)}
+.btn-ghost{border:2px solid var(--navy);color:var(--navy)}
+.btn-ghost:hover{background:var(--navy);color:#fff}
+.section-warm{background:var(--bg-warm)}
+.section-navy{background:var(--navy)}
+/* Global section heading — consistent across all sections */
+section h2{font-family:var(--serif);font-size:clamp(28px,3.5vw,44px);font-weight:400;color:var(--navy);line-height:1.15}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── 1. BANNER BAR ── */
+.banner{background:var(--gradient);color:#fff;padding:10px 0;position:relative;overflow:hidden;z-index:1001}
+.banner.hidden{display:none}
+.banner-track{display:flex;animation:marquee-banner 20s linear infinite;white-space:nowrap}
+.banner-track span{font-family:var(--mono);font-size:13px;padding:0 60px;flex-shrink:0}
+.banner-close{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:#fff;font-size:18px;background:rgba(255,255,255,.15);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2}
+@keyframes marquee-banner{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── 2. NAVBAR ── */
+.navbar{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px;transition:box-shadow .3s}
+.navbar.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.06)}
+.navbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{font-family:var(--serif);font-size:24px;font-weight:400;color:var(--navy)}
+.logo span{background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:14px;font-weight:600;color:var(--navy);transition:color .2s}
+.nav-links a:hover{color:var(--pink)}
+.nav-right{display:flex;align-items:center;gap:20px}
+.nav-right .login{font-size:14px;font-weight:600;color:var(--navy)}
+.nav-right .btn{padding:10px 28px;font-size:14px}
+.mobile-toggle{display:none;flex-direction:column;gap:5px;width:28px}
+.mobile-toggle span{height:2px;background:var(--navy);border-radius:2px;transition:all .3s}
+.mobile-menu{display:none;position:absolute;top:68px;left:0;right:0;background:#fff;border-bottom:1px solid var(--border);padding:24px;flex-direction:column;gap:16px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-size:16px;font-weight:600;color:var(--navy);padding:8px 0}
+
+/* ── 3. HERO ── */
+.hero{padding:80px 0 60px;text-align:center;background:var(--bg)}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 16px 6px 6px;border-radius:var(--radius-pill);border:1px solid var(--border);margin-bottom:24px;font-size:13px;font-weight:600}
+.hero-tag .badge{background:var(--gradient);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:var(--radius-pill)}
+.hero h1{font-size:clamp(36px,5vw,64px);line-height:1.1;max-width:900px;margin:0 auto 24px;color:var(--navy)}
+.hero h1 .gradient-text{font-style:normal}
+.hero-sub{font-size:clamp(15px,1.5vw,18px);color:#666;max-width:720px;margin:0 auto 40px;line-height:1.7}
+.hero .btn{font-size:17px;padding:16px 44px}
+
+/* Dashboard mockup */
+.dashboard-wrap{position:relative;max-width:900px;margin:60px auto 0}
+.dashboard{background:var(--navy);border-radius:var(--radius);overflow:hidden;box-shadow:0 24px 80px rgba(30,16,84,.18)}
+.dash-chrome{display:flex;align-items:center;gap:8px;padding:14px 18px;background:rgba(0,0,0,.15)}
+.dash-dot{width:12px;height:12px;border-radius:50%}
+.dash-dot.r{background:#ff5f57}.dash-dot.y{background:#febc2e}.dash-dot.g{background:#28c840}
+.dash-body{display:flex;min-height:320px}
+.dash-sidebar{width:200px;padding:20px 16px;border-right:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.dash-sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;margin-bottom:4px;transition:all .2s}
+.dash-sidebar-item.active{background:rgba(168,85,247,.15);color:#fff}
+.dash-sidebar-item .icon{width:18px;height:18px;border-radius:4px;background:rgba(255,255,255,.1)}
+.dash-sidebar-item.active .icon{background:var(--gradient)}
+.dash-main{flex:1;padding:20px}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.dash-header h4{color:#fff;font-family:var(--sans);font-size:15px;font-weight:600}
+.dash-search{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 14px;color:rgba(255,255,255,.4);font-size:12px;width:180px}
+.email-row{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:10px;margin-bottom:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);transition:background .2s}
+.email-row:hover{background:rgba(255,255,255,.06)}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.email-info{flex:1;min-width:0}
+.email-name{color:#fff;font-size:13px;font-weight:600}
+.email-preview{color:rgba(255,255,255,.4);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.email-badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:4px 10px;border-radius:var(--radius-pill);white-space:nowrap}
+.badge-replied{background:rgba(40,200,64,.12);color:#28c840}
+.badge-opened{background:rgba(168,85,247,.12);color:#a855f7}
+.badge-sent{background:rgba(249,115,22,.12);color:#f97316}
+.email-time{color:rgba(255,255,255,.3);font-size:11px;font-family:var(--mono);white-space:nowrap}
+
+/* Floating stat cards */
+.float-stat{position:absolute;background:#fff;border-radius:16px;padding:16px 22px;box-shadow:0 8px 32px rgba(30,16,84,.12);z-index:2}
+.float-stat .num{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--navy)}
+.float-stat .label{font-size:12px;color:#888;margin-top:2px}
+.float-stat.left{left:-30px;bottom:80px;animation:float-y 4s ease-in-out infinite}
+.float-stat.right{right:-30px;top:60px;animation:float-y 4s ease-in-out infinite .5s}
+@keyframes float-y{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* ── 4. LOGO MARQUEE ── */
+.logo-marquee{padding:80px 0;text-align:center}
+.logo-marquee h2{max-width:700px;margin:0 auto 48px;line-height:1.2}
+.logo-marquee h2 em{font-style:italic}
+.marquee-track-wrap{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,black 10%,black 90%,transparent);mask-image:linear-gradient(90deg,transparent,black 10%,black 90%,transparent)}
+/* logo section — lifted from original */
+.in_logo_section{background-color:#170c41;padding:40px 0}
+.in_logo_heading{color:#fff;text-align:center;font-family:var(--serif);font-size:clamp(20px,2.5vw,28px);font-weight:400;line-height:1.4}
+.in_gradient_text_2{-webkit-text-fill-color:transparent;background-image:linear-gradient(70deg,#f99b52,#ff5b8a 0% 7%,#fba64b 77%,#f99b52);-webkit-background-clip:text;background-clip:text}
+.in_logo_loop{display:flex;gap:20px;margin-top:30px;overflow:hidden}
+.in_logos{flex:none;display:flex;gap:20px;align-items:center;width:100%;margin-right:50px;justify-content:space-between}
+.in_logo_img{flex:none;max-height:40px}
+@keyframes marquee-logos{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── 5. ABOUT ── */
+.about{padding:80px 0;text-align:center}
+.about h2{max-width:780px;margin:12px auto 24px}
+.about p{max-width:700px;margin:0 auto 36px;font-size:16px;color:#555;line-height:1.8}
+
+/* ── 6. FEATURES ── */
+.features{padding:80px 0}
+.feat-row{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"ftxt fimg";gap:48px;align-items:center;margin-bottom:80px}
+.feat-row.reverse{grid-template-areas:"fimg ftxt"}
+.feat-text{grid-area:ftxt}
+.feat-img{grid-area:fimg}
+.feat-text h3{font-family:var(--serif);font-size:clamp(24px,3vw,36px);color:var(--navy);margin:8px 0 20px;font-weight:400}
+.feat-box{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px}
+.feat-box p{font-size:15px;color:#666;line-height:1.85}
+.feat-img{display:flex;align-items:center;justify-content:center}
+.feat-img img{max-width:100%;height:auto;max-height:400px}
+@media(max-width:768px){.feat-row,.feat-row.reverse{grid-template-columns:1fr;grid-template-areas:"fimg" "ftxt";margin-bottom:48px}}
+
+/* feature-card styles kept for other sections */
+.feature-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:40px 32px;position:relative;overflow:hidden;transition:transform .3s,box-shadow .3s}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(30,16,84,.08)}
+.feature-num{font-family:var(--serif);font-style:italic;font-size:80px;color:rgba(30,16,84,.04);position:absolute;top:-8px;right:16px;line-height:1}
+.feature-badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:5px 14px;border-radius:var(--radius-pill);background:rgba(168,85,247,.08);color:var(--accent);margin-bottom:16px}
+.feature-card h3{font-size:22px;margin-bottom:12px;color:var(--navy)}
+.feature-card p{font-size:14px;color:#666;line-height:1.7}
+
+/* ── 7. PREWARMED ── */
+.prewarmed{padding:80px 0}
+.prewarmed .tag{display:block;text-align:center;margin-bottom:8px;font-size:10px;max-width:600px;margin-left:auto;margin-right:auto}
+.prewarmed>div>h2{text-align:center;margin-bottom:8px}
+.prewarmed-sub{text-align:center;max-width:650px;margin:0 auto 48px;font-size:15px;color:#666}
+.prewarm-grid{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto;gap:20px;margin-bottom:48px}
+.prewarm-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform .3s,box-shadow .3s}
+.prewarm-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(30,16,84,.08)}
+.prewarm-card-img{width:100%;aspect-ratio:16/10;background:var(--navy);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.prewarm-card-img img{width:100%;height:100%;object-fit:cover}
+.prewarm-card-body{padding:20px 24px 28px;text-align:left}
+.prewarm-card h3{font-size:18px;color:var(--navy);margin-bottom:8px;font-weight:700;text-align:left}
+.prewarm-card p{font-size:13px;color:#888;line-height:1.65;text-align:left}
+.prewarm-card.featured{background:var(--navy);color:#fff;border-color:transparent;grid-row:1/3;grid-column:3;padding:36px 28px;display:flex;flex-direction:column;justify-content:center}
+.prewarm-card.featured h3{color:#fff;font-family:var(--serif);font-size:clamp(28px,3vw,40px);font-weight:400;line-height:1.1;margin-bottom:16px}
+.prewarm-card.featured>p{color:rgba(255,255,255,.55);font-size:14px;line-height:1.7;margin-bottom:24px}
+.prewarm-card.featured .pricing-box{background:rgba(255,255,255,.06);border-radius:16px;padding:24px;border:1px solid rgba(255,255,255,.08)}
+.prewarm-card.featured .pricing-box .price-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+.prewarm-card.featured .price{font-family:var(--mono);font-size:40px;font-weight:700;color:#fff}
+.prewarm-card.featured .price-unit{font-size:16px;color:rgba(255,255,255,.5)}
+.prewarm-card.featured .price-note{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:12px;display:inline-block;background:rgba(168,85,247,.2);padding:3px 10px;border-radius:100px}
+.prewarm-card.featured .pricing-box h4{font-size:16px;font-weight:700;color:#fff;margin-bottom:10px}
+.prewarm-card.featured .feat-list{list-style:none;margin-bottom:20px}
+.prewarm-card.featured .feat-list li{font-size:13px;color:rgba(255,255,255,.7);padding:5px 0;display:flex;align-items:center;gap:8px}
+.prewarm-card.featured .feat-list li::before{content:'✓';color:#28c840;font-weight:700;font-size:12px}
+.prewarm-card.featured .btn{width:100%}
+.feature-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.strip-item{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px 20px;text-align:center}
+.strip-icon{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--navy),#4B2DAA);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.strip-icon svg{width:24px;height:24px}
+.strip-item h4{font-size:15px;color:var(--navy);font-family:var(--sans);font-weight:700;margin-bottom:6px}
+.strip-item p{font-size:12px;color:#888;line-height:1.6}
+@media(max-width:1024px){.prewarm-grid{grid-template-columns:1fr 1fr}.prewarm-card.featured{grid-row:auto;grid-column:1/-1}}
+@media(max-width:768px){.prewarm-grid{grid-template-columns:1fr}.feature-strip{grid-template-columns:1fr 1fr}}
+
+/* ── 8. WALL OF LOVE ── */
+.wall-of-love{padding:80px 0;overflow:hidden}
+.wall-of-love h2{text-align:center;margin:12px 0 8px}
+.wall-sub{text-align:center;color:#666;margin-bottom:48px;font-size:15px}
+.testimonial-track{display:flex;gap:24px;width:max-content;animation:marquee-scroll 50s linear infinite}
+.testimonial-track:hover{animation-play-state:paused}
+@keyframes marquee-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.test-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:28px;min-width:320px;max-width:320px;flex-shrink:0}
+.test-stars{color:#f5a623;font-size:14px;letter-spacing:2px;margin-bottom:12px}
+.test-card blockquote{font-size:13px;color:#555;line-height:1.7;margin-bottom:20px;font-style:normal}
+.test-author{display:flex;align-items:center;gap:12px}
+.test-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.test-name{font-weight:700;font-size:14px;color:var(--navy)}
+.test-role{font-size:11px;color:#888}
+
+/* ── 8b. VIDEO TESTIMONIALS ── */
+.video-test{padding:80px 0}
+.video-test-featured{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin-bottom:48px;grid-template-areas:"txt vid"}
+.video-test-featured>div:first-child{grid-area:txt}
+.video-test-featured .vt-video{grid-area:vid}
+.video-test-featured h3{font-family:var(--serif);font-size:clamp(24px,3vw,34px);color:var(--navy);font-weight:400;margin-bottom:16px}
+.video-test-featured p{font-size:14px;color:#666;line-height:1.75;margin-bottom:20px}
+.video-test-featured .vt-author{font-weight:700;font-size:15px;color:var(--navy)}
+.video-test-featured .vt-role{font-size:12px;color:#888}
+.vt-video{background:var(--navy);border-radius:var(--radius);aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.vt-video img{width:100%;height:100%;object-fit:cover}
+.vt-play{position:absolute;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s}
+.vt-play::after{content:'';width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:16px solid #fff;margin-left:3px}
+.vt-play:hover{background:rgba(168,85,247,.6);border-color:rgba(168,85,247,.8);transform:scale(1.08)}
+.video-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.video-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.vt-card-lg{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform .3s,box-shadow .3s}
+.vt-card-lg:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(30,16,84,.08)}
+.vt-card-lg .vt-card-thumb{aspect-ratio:4/3;position:relative;overflow:hidden;background:var(--navy);cursor:pointer}
+.vt-card-lg .vt-card-thumb .play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;z-index:2;transition:all .3s;pointer-events:none}
+.vt-card-lg .vt-card-thumb .play-icon::after{content:'';width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:16px solid #fff;margin-left:3px}
+.vt-card-lg:hover .play-icon{background:rgba(168,85,247,.7);border-color:rgba(168,85,247,.9);transform:translate(-50%,-50%) scale(1.1)}
+.vt-card-lg .vt-card-info{padding:20px}
+.vt-card-lg .vt-card-info h4{font-size:16px;color:var(--navy);margin-bottom:10px}
+@media(max-width:768px){.video-grid-3{grid-template-columns:1fr}}
+.vt-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform .3s,box-shadow .3s}
+.vt-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(30,16,84,.08)}
+.vt-card-thumb{aspect-ratio:4/3;background:var(--navy);position:relative;overflow:hidden}
+.vt-card-thumb img{width:100%;height:100%;object-fit:cover}
+.vt-card-info{padding:20px}
+.vt-card-info h4{font-size:16px;color:var(--navy);margin-bottom:10px}
+.vt-card-author{display:flex;align-items:center;gap:10px}
+.vt-card-author img{width:32px;height:32px;border-radius:50%;object-fit:cover}
+.vt-card-author .vt-name{font-size:13px;font-weight:600;color:var(--navy)}
+.vt-card-author .vt-role2{font-size:11px;color:#888}
+@media(max-width:1024px){.video-grid-4{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.video-test-featured{grid-template-columns:1fr;grid-template-areas:"vid" "txt"}.video-grid-4{grid-template-columns:1fr}}
+
+/* ── 9. WHAT MAKES US SPECIAL — Sticky Story Cards ── */
+.special{padding:80px 0}
+.story-cards-wrap{padding-bottom:40vh}
+.story-card{
+  background:#fdfaf7;
+  border-radius:28px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:48px 40px;
+  position:sticky;
+  top:80px;
+  overflow:hidden;
+  margin-bottom:24px;
+  box-shadow:0 4px 40px rgba(30,16,84,.06);
+}
+.story-card-text{flex:1;padding-right:40px}
+.story-card-text h3{font-family:var(--sans);font-size:clamp(20px,2.2vw,26px);color:var(--navy);margin-bottom:16px;font-weight:700}
+.story-card-text p{font-size:15px;color:#666;line-height:1.85}
+.story-card-img{flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.story-card-img img{width:280px;height:auto}
+@media(max-width:768px){.story-card{flex-direction:column;position:relative;top:auto;padding:32px}.story-card-text{padding-right:0;margin-bottom:24px}.story-card-img img{width:200px}.story-cards-wrap{padding-bottom:0}}
+
+/* Dashboard mockup graphics */
+.sc-mockup{background:#1e1054;border-radius:16px;overflow:hidden;width:100%;max-width:320px;box-shadow:0 8px 32px rgba(30,16,84,.15)}
+.sc-mockup-bar{background:linear-gradient(90deg,#1a1040,#2d1b69);padding:8px 14px;display:flex;align-items:center;gap:5px}
+.sc-mockup-bar .d{width:8px;height:8px;border-radius:50%}
+.sc-mockup-bar .d:nth-child(1){background:#ff5f57}
+.sc-mockup-bar .d:nth-child(2){background:#febc2e}
+.sc-mockup-bar .d:nth-child(3){background:#28c840}
+.sc-mockup-bar .t{margin-left:8px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.5px}
+.sc-mockup-body{padding:20px 18px}
+.sc-mockup-body .row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.sc-mockup-body .row:last-child{border-bottom:none}
+.sc-mockup-body .lbl{font-family:var(--sans);font-size:11px;color:rgba(255,255,255,.5)}
+.sc-mockup-body .val{font-family:var(--mono);font-size:11px;font-weight:600;color:#fff}
+.sc-mockup-body .badge{font-family:var(--mono);font-size:9px;font-weight:600;padding:3px 8px;border-radius:100px}
+.sc-mockup-body .badge-green{background:rgba(40,200,64,.12);color:#28c840}
+.sc-mockup-body .badge-purple{background:rgba(168,85,247,.12);color:#a855f7}
+.sc-mockup-body .badge-orange{background:rgba(249,115,22,.12);color:#f97316}
+.sc-mockup-body .title{font-family:var(--sans);font-size:12px;font-weight:700;color:#fff;margin-bottom:12px}
+.sc-mockup-body .meter{height:6px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:6px;overflow:hidden}
+.sc-mockup-body .meter-fill{height:100%;border-radius:3px}
+.sc-mockup-body .big-num{font-family:var(--mono);font-size:32px;font-weight:700;text-align:center;margin:8px 0}
+.sc-mockup-body .sub{font-size:10px;color:rgba(255,255,255,.35);text-align:center}
+.sc-mockup-body .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sc-mockup-body .grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.sc-mockup-body .stat-box{background:rgba(255,255,255,.04);border-radius:8px;padding:10px;text-align:center}
+.sc-mockup-body .stat-box .n{font-family:var(--mono);font-size:16px;font-weight:700;color:#fff}
+.sc-mockup-body .stat-box .l{font-size:9px;color:rgba(255,255,255,.35);margin-top:2px}
+.sc-mockup-body .chat-msg{background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;margin-bottom:6px;font-size:11px;color:rgba(255,255,255,.7);line-height:1.5}
+.sc-mockup-body .chat-msg.reply{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.15)}
+.sc-mockup-body .chat-from{font-size:9px;color:rgba(255,255,255,.3);margin-bottom:4px;font-family:var(--mono)}
+
+/* ── 10. IS THIS FOR YOU ── */
+.for-you{padding:80px 0}
+.for-you h2{text-align:center;margin:12px 0 8px}
+.for-you-sub{text-align:center;color:#666;margin-bottom:48px;font-size:15px;max-width:700px;margin-left:auto;margin-right:auto}
+.for-you-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:60px}
+.for-you-cta{text-align:center;max-width:600px;margin:0 auto}
+.for-you-cta h3{font-size:clamp(22px,2.5vw,32px);margin-bottom:16px;color:var(--navy)}
+.for-you-cta p{color:#666;font-size:15px;margin-bottom:28px}
+
+/* ── 11. STATISTICS ── */
+.statistics{padding:80px 0;position:relative;overflow:hidden}
+.statistics::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(168,85,247,.15),transparent 50%),radial-gradient(circle at 80% 50%,rgba(232,67,147,.1),transparent 50%)}
+.stats-grid{display:flex;justify-content:center;align-items:center;gap:0;text-align:center;position:relative;z-index:1}
+.stat-item{flex:1;padding:0 40px}
+.stat-item .num{font-family:var(--serif);font-weight:400;line-height:1}
+.stat-item .label{color:rgba(255,255,255,.5);font-size:14px;margin-top:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:2px;font-size:11px}
+.stat-divider{width:1px;height:80px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.15),transparent);flex-shrink:0}
+
+/* ── 12. PRICING ── */
+.pricing{padding:80px 0}
+.pricing h2{text-align:center;margin-bottom:40px}
+.pricing-tabs{display:flex;justify-content:center;gap:12px;margin-bottom:40px;flex-wrap:wrap}
+.pricing-tabs button{font-family:var(--mono);font-size:13px;font-weight:600;padding:10px 24px;border-radius:var(--radius-pill);border:2px solid var(--border);color:var(--navy);transition:all .3s}
+.pricing-tabs button.active{background:var(--gradient);color:#fff;border-color:transparent}
+.pricing-panel{display:none;max-width:520px;margin:0 auto}
+.pricing-panel.active{display:block}
+.pricing-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:48px 40px;text-align:center}
+.pricing-card .price{font-family:var(--mono);font-size:48px;font-weight:700;color:var(--navy)}
+.pricing-card .price-label{font-size:14px;color:#888;margin-bottom:8px}
+.pricing-card .price-desc{font-size:14px;color:#666;margin:12px 0 28px;line-height:1.6}
+.pricing-features{list-style:none;text-align:left;margin-bottom:32px}
+.pricing-features li{padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;color:#555;display:flex;align-items:center;gap:10px}
+.pricing-features li::before{content:'✓';font-weight:700;color:#28c840}
+.pricing-card .btn{width:100%}
+
+/* ── 13. OUR PROCESS — Card Grid ── */
+.process{padding:80px 0}
+.process-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:#fff}
+.process-card{padding:36px 32px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);transition:background .3s}
+.process-card:hover{background:rgba(168,85,247,.02)}
+.process-card:nth-child(2n){border-right:none}
+.process-card:nth-last-child(-n+2){border-bottom:none}
+.process-grid:has(:nth-child(5)):not(:has(:nth-child(6))) .process-card:nth-child(3){border-bottom:1px solid var(--border)}
+.process-icon{width:40px;height:40px;margin-bottom:20px}
+.process-icon svg{width:100%;height:100%}
+.process-card h3{font-size:17px;color:var(--navy);margin-bottom:10px;font-weight:700}
+.process-card p{font-size:13px;color:#888;line-height:1.7}
+/* Last row spans full if odd */
+.process-grid .process-card:last-child:nth-child(odd){grid-column:1/-1;border-right:none}
+@media(max-width:768px){.process-grid{grid-template-columns:1fr}.process-card{border-right:none!important}}
+
+/* ── 14. FAQ ── */
+.faq{padding:80px 0}
+.faq-sub{text-align:center;color:#666;margin-bottom:32px;font-size:15px}
+.faq-tabs{display:flex;justify-content:center;gap:12px;margin-bottom:40px;flex-wrap:wrap}
+.faq-tabs button{font-family:var(--mono);font-size:13px;font-weight:600;padding:10px 24px;border-radius:100px;border:2px solid var(--border);background:none;color:var(--navy);cursor:pointer;transition:all .3s}
+.faq-tabs button.active{background:var(--gradient);color:#fff;border-color:transparent}
+.faq-panel{display:none;max-width:1100px;margin:0 auto;column-count:2;column-gap:40px}
+.faq-panel.active{display:block}
+.faq-item{break-inside:avoid}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-q{width:100%;display:flex;justify-content:space-between;align-items:center;padding:20px 0;background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:16px;font-weight:600;color:var(--navy);text-align:left;gap:16px}
+.faq-q .icon{font-size:20px;color:var(--accent);transition:transform .3s;flex-shrink:0}
+.faq-item.open .faq-q .icon{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.faq-a p{padding:0 0 20px;font-size:14px;color:#666;line-height:1.75}
+
+/* ── 15. BOOK A DEMO ── */
+.demo{padding:80px 0;text-align:center}
+.demo h2{margin-bottom:40px}
+.demo-placeholder{max-width:700px;height:500px;margin:0 auto;background:var(--navy);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-family:var(--mono);font-size:16px}
+
+/* ── 16. MARQUEE BAR ── */
+.marquee-bar{background:var(--navy);padding:20px 0;overflow:hidden}
+.marquee-bar-track{display:flex;animation:marquee-bar 20s linear infinite;white-space:nowrap;width:max-content}
+.marquee-bar-track span{font-family:var(--mono);font-size:14px;font-weight:600;color:rgba(255,255,255,.7);padding:0 40px;flex-shrink:0}
+.marquee-bar-track span::after{content:'·';margin-left:40px;color:var(--accent)}
+@keyframes marquee-bar{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── 17. FOOTER ── */
+.footer{background:var(--navy);padding:60px 0 32px;color:rgba(255,255,255,.5)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-col h4{color:#fff;font-family:var(--sans);font-size:14px;font-weight:700;margin-bottom:16px}
+.footer-col p{font-size:13px;line-height:1.8}
+.footer-col a{font-size:13px;display:block;padding:4px 0;transition:color .2s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:24px;text-align:center;font-size:12px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+.prewarm-grid{grid-template-columns:repeat(3,1fr)}
+.prewarm-grid .prewarm-card:nth-child(4),.prewarm-grid .prewarm-card:nth-child(5){grid-column:auto}
+.special-grid{grid-template-columns:1fr 1fr}
+.special-row2{grid-template-columns:1fr}
+.footer-grid{grid-template-columns:1fr 1fr}
+.float-stat.left{left:10px}.float-stat.right{right:10px}
+}
+@media(max-width:768px){
+.nav-links{display:none}
+.mobile-toggle{display:flex}
+.for-you-grid,.feature-strip{grid-template-columns:1fr}
+.prewarm-grid{grid-template-columns:1fr}
+.stats-grid{flex-direction:column;gap:32px}.stat-divider{width:60px;height:1px}
+.special-grid{grid-template-columns:1fr}
+.special-row2{grid-template-columns:1fr}
+.footer-grid{grid-template-columns:1fr}
+.dash-sidebar{display:none}
+.test-card{min-width:280px;max-width:280px}
+.float-stat{display:none}
+.email-time{display:none}
+}
+@media(max-width:480px){
+.hero h1{font-size:32px}
+.pricing-card{padding:32px 24px}
+.pricing-card .price{font-size:36px}
+.container{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- 1. BANNER BAR -->
+<div class="banner" id="banner">
+<div class="banner-track">
+<span>One-stop shop for all your inbox needs — we have it all.</span>
+<span>One-stop shop for all your inbox needs — we have it all.</span>
+<span>One-stop shop for all your inbox needs — we have it all.</span>
+<span>One-stop shop for all your inbox needs — we have it all.</span>
+</div>
+<button class="banner-close" onclick="document.getElementById('banner').classList.add('hidden')">&times;</button>
+</div>
+
+<!-- 2. NAVBAR -->
+<nav class="navbar" id="navbar">
+<div class="navbar-inner">
+<a href="index.html" class="logo"><span>Inbox</span>Navigator</a>
+<div class="nav-links">
+<a href="index.html">Home</a>
+<a href="#pricing">Pricing</a>
+<a href="inboxnav-dfy.html">DFY</a>
+<a href="#demo">Contact</a>
+<a href="#faq">FAQ</a>
+</div>
+<div class="nav-right">
+<a href="https://app.inboxnavigator.com/sign-in" class="login">Log In</a>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient">Get Started</a>
+</div>
+<button class="mobile-toggle" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
+<span></span><span></span><span></span>
+</button>
+</div>
+<div class="mobile-menu" id="mobileMenu">
+<a href="index.html">Home</a><a href="#pricing">Pricing</a><a href="inboxnav-dfy.html">DFY</a><a href="#demo">Contact</a><a href="#faq">FAQ</a>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient" style="text-align:center">Get Started</a>
+</div>
+</nav>
+
+<!-- 3. HERO -->
+<section class="hero">
+<div class="container">
+<div class="reveal">
+<div class="hero-tag"><span class="badge">New</span> Aged Prewarmed Google Inboxes</div>
+<h1>Scale faster with <span class="gradient-text">cost-efficient, reliable</span> inbox infrastructure built for scale.</h1>
+<p class="hero-sub">The only inbox infrastructure that truly does it all—complete transparency, full-service reliability, and the most competitive rates for teams serious about achieving massive scale.</p>
+<a href="#pricing" class="btn btn-gradient">Start Scaling</a>
+</div>
+
+<div class="dashboard-wrap reveal">
+<div class="float-stat left">
+<div class="num">94.2%</div>
+<div class="label">Inbox placement</div>
+</div>
+<div class="float-stat right">
+<div class="num">12.4%</div>
+<div class="label">Avg reply rate</div>
+</div>
+<div class="dashboard">
+<div class="dash-chrome"><div class="dash-dot r"></div><div class="dash-dot y"></div><div class="dash-dot g"></div></div>
+<div class="dash-body">
+<div class="dash-sidebar">
+<div class="dash-sidebar-item active"><div class="icon"></div>Campaigns</div>
+<div class="dash-sidebar-item"><div class="icon"></div>Inboxes</div>
+<div class="dash-sidebar-item"><div class="icon"></div>Analytics</div>
+<div class="dash-sidebar-item"><div class="icon"></div>Domains</div>
+<div class="dash-sidebar-item"><div class="icon"></div>Settings</div>
+</div>
+<div class="dash-main">
+<div class="dash-header"><h4>Active Campaigns</h4><div class="dash-search">Search campaigns...</div></div>
+<div class="email-row">
+<div class="avatar" style="background:linear-gradient(135deg,#a855f7,#e84393)">JD</div>
+<div class="email-info"><div class="email-name">James Donovan</div><div class="email-preview">Re: Partnership opportunity — sounds great, let's connect next week...</div></div>
+<span class="email-badge badge-replied">Replied</span>
+<span class="email-time">2m ago</span>
+</div>
+<div class="email-row">
+<div class="avatar" style="background:linear-gradient(135deg,#f97316,#e84393)">SK</div>
+<div class="email-info"><div class="email-name">Sarah Kim</div><div class="email-preview">Intro call follow up — thanks for taking the time to chat...</div></div>
+<span class="email-badge badge-opened">Opened 3x</span>
+<span class="email-time">18m ago</span>
+</div>
+<div class="email-row">
+<div class="avatar" style="background:linear-gradient(135deg,#28c840,#a855f7)">MR</div>
+<div class="email-info"><div class="email-name">Mike Reynolds</div><div class="email-preview">Q4 outreach campaign — initial batch of 500 prospects loaded...</div></div>
+<span class="email-badge badge-sent">Sent</span>
+<span class="email-time">1h ago</span>
+</div>
+<div class="email-row">
+<div class="avatar" style="background:linear-gradient(135deg,#e84393,#f97316)">AL</div>
+<div class="email-info"><div class="email-name">Amy Lopez</div><div class="email-preview">New lead magnet sequence — first touchpoint performing well...</div></div>
+<span class="email-badge badge-opened">Opened 3x</span>
+<span class="email-time">3h ago</span>
+</div>
+<div class="email-row">
+<div class="avatar" style="background:linear-gradient(135deg,#a855f7,#28c840)">TC</div>
+<div class="email-info"><div class="email-name">Tom Chen</div><div class="email-preview">SaaS demo request — interested in enterprise plan features...</div></div>
+<span class="email-badge badge-replied">Replied</span>
+<span class="email-time">5h ago</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 4. LOGO MARQUEE -->
+<section class="in_logo_section">
+<div class="container">
+<div>
+<h2 class="in_logo_heading">We supercharge <span class="in_gradient_text_2">the platforms you love with seamless integration</span></h2>
+<div class="in_logo_loop">
+<div class="in_logos"><img src="images/image-21.svg" loading="lazy" alt="" class="in_logo_img"><img src="images/Frame-1171276533.svg" loading="lazy" alt="" class="in_logo_img"><img src="images/Frame-1171276546.svg" loading="lazy" alt="" class="in_logo_img"><img src="images/Frame-1171276531.avif" loading="lazy" alt="" class="in_logo_img"><img src="images/image-23.svg" loading="lazy" alt="" class="in_logo_img"></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 5. ABOUT -->
+<section class="about section-warm" style="padding:80px 0">
+<div class="container reveal">
+<div class="tag gradient">Accelerate Success</div>
+<h2>Completely Managed Google Workspace &amp; Outlook Inboxes That Scale With You</h2>
+<p>Don't leave your outbound motion up to chance. Focus on closing deals and let us worry about your cold email infrastructure and deliverability. Inbox Navigator is your secret weapon in winning the outbound game. No setup fee. Flat rate. Cancel anytime. Bring your domains.</p>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient">BUY NOW</a>
+</div>
+</section>
+
+<!-- 6. FEATURES -->
+<section class="features">
+<div class="container">
+<div class="tag gradient" style="text-align:center;display:block">Accelerate Success</div>
+<h2 style="text-align:center;margin-bottom:56px">Here are more details</h2>
+
+<div class="feat-row reveal">
+  <div class="feat-text">
+    <div class="tag gradient">Accelerate Success</div>
+    <h3>Zero Effort Required</h3>
+    <div class="feat-box"><p>Fill out the onboarding form in 5 minutes and our team will take care of everything else, no matter how many inboxes you buy.<br><br>We set up your domains and inboxes — delivering them piping hot directly into your Smartlead/Instantly account.</p></div>
+  </div>
+  <div class="feat-img"><div class="sc-mockup">
+<div class="sc-mockup-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">onboarding.form</span></div>
+<div class="sc-mockup-body">
+<div class="title">Quick Setup</div>
+<div class="row"><span class="lbl">Company name</span><span class="badge badge-green">Done</span></div>
+<div class="row"><span class="lbl">ICP details</span><span class="badge badge-green">Done</span></div>
+<div class="row"><span class="lbl">Sending platform</span><span class="badge badge-green">Done</span></div>
+<div class="row"><span class="lbl">Domain preferences</span><span class="badge badge-green">Done</span></div>
+<div style="margin-top:12px;text-align:center;padding:8px;background:linear-gradient(135deg,#a855f7,#e84393);border-radius:8px;font-size:11px;font-weight:700;color:#fff">Setup Complete — Delivering Now</div>
+</div>
+</div></div>
+</div>
+
+<div class="feat-row reverse reveal">
+  <div class="feat-img"><div class="sc-mockup">
+<div class="sc-mockup-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">deliverability.monitor</span></div>
+<div class="sc-mockup-body">
+<div class="title">US-IP Deliverability</div>
+<div class="grid2">
+<div class="stat-box"><div class="n" style="color:#28c840">99%</div><div class="l">Inbox Rate</div></div>
+<div class="stat-box"><div class="n" style="color:#a855f7">0.5%</div><div class="l">Bounce Rate</div></div>
+</div>
+<div style="margin-top:12px">
+<div class="row"><span class="lbl">Region</span><span class="val" style="color:#28c840">US Only</span></div>
+<div class="row"><span class="lbl">IP Type</span><span class="val">Dedicated</span></div>
+<div class="row"><span class="lbl">Blacklist Status</span><span class="badge badge-green">Clean</span></div>
+</div>
+</div>
+</div></div>
+  <div class="feat-text">
+    <div class="tag gradient">Accelerate Success</div>
+    <h3>US-IP Based + High Deliverability</h3>
+    <div class="feat-box"><p>Don't let shady IP-based inbox providers and unreliable resellers destroy your deliverability and growth.<br><br>All of our inboxes are US-IP based and we use the latest best practices to make sure that you continue to get high deliverability in every single campaign that you launch.</p></div>
+  </div>
+</div>
+
+<div class="feat-row reveal">
+  <div class="feat-text">
+    <div class="tag gradient">Accelerate Success</div>
+    <h3>Affordable, Reliable &amp; Scalable</h3>
+    <div class="feat-box"><p>Cold email infrastructure that you can rely on, that delivers consistently and scales with you with zero setup fee, better prices.<br><br>Built by outbound experts for outbound astronauts.</p></div>
+  </div>
+  <div class="feat-img"><div class="sc-mockup">
+<div class="sc-mockup-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">cost.comparison</span></div>
+<div class="sc-mockup-body">
+<div class="title">Cost per Inbox / Month</div>
+<div style="margin-bottom:12px">
+<div class="lbl" style="margin-bottom:4px">Other Providers</div>
+<div class="meter"><div class="meter-fill" style="width:85%;background:linear-gradient(90deg,#e84393,rgba(232,67,147,.4))"></div></div>
+<div class="val" style="margin-top:4px;color:rgba(255,255,255,.4)">$6 — $8 / inbox</div>
+</div>
+<div>
+<div class="lbl" style="margin-bottom:4px">InboxNavigator</div>
+<div class="meter"><div class="meter-fill" style="width:35%;background:linear-gradient(90deg,#28c840,#a855f7)"></div></div>
+<div class="val" style="margin-top:4px;color:#28c840">$3 / inbox</div>
+</div>
+<div style="margin-top:12px;text-align:center;font-size:10px;color:rgba(255,255,255,.3)">Save 50%+ on infrastructure</div>
+</div>
+</div></div>
+</div>
+
+<div style="text-align:center;margin-top:48px"><a href="#plans-and-pricing" class="btn btn-gradient">BUY NOW</a></div>
+</div>
+</section>
+
+<!-- 7. PREWARMED -->
+<section class="prewarmed section-warm">
+<div class="container">
+<div class="tag gradient" style="text-align:center;display:block;font-size:9px;max-width:500px;margin:0 auto 8px">We beat Instantly in every single aspect when it comes to prewarmed infra</div>
+<h2 style="text-align:center;margin-bottom:8px">Prewarmed</h2>
+<p class="prewarmed-sub">Get prewarmed, ready-to-launch inboxes in record time and be live today + get free .com domains with every order.</p>
+<div class="prewarm-grid">
+<div class="prewarm-card reveal">
+<div class="prewarm-card-img"><img src="images/Frame-1171276536.svg" alt="Instant Scale"></div>
+<div class="prewarm-card-body">
+<h3>Instant Scale for Winning Campaigns</h3>
+<p>Take your top-performing campaigns to the next level with seamless scaling. No delays — just results.</p>
+</div>
+</div>
+<div class="prewarm-card reveal">
+<div class="prewarm-card-img"><img src="images/rescue.svg" alt="Rescue Campaigns"></div>
+<div class="prewarm-card-body">
+<h3>Rescue Campaigns in Crisis</h3>
+<p>When your reseller goes bust or your inboxes burn out, don't let your winning campaigns die. Use pre-warmed infrastructure to keep sending without missing a beat.</p>
+</div>
+</div>
+<div class="prewarm-card featured reveal">
+<h3>Skip The Wait, Start Scaling</h3>
+<p>Pre-warmed inboxes built to deliver game-changing results fast — limited availability for those ready to scale.</p>
+<div class="pricing-box">
+<div class="price-row"><span class="price">$7</span><span class="price-unit">/ Inbox</span></div>
+<div class="price-note">Limited stock</div>
+<h4>Prewarmed Google Inboxes</h4>
+<ul class="feat-list">
+<li>Premium US IP Only</li>
+<li>MOQ: 10 Inboxes</li>
+<li>FREE .COM DOMAIN</li>
+</ul>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/checkout/configure?product=PREWARMED&qty=10" class="btn btn-gradient">BUY NOW</a>
+</div>
+</div>
+<div class="prewarm-card reveal">
+<div class="prewarm-card-img"><img src="images/customize.svg" alt="Customize"></div>
+<div class="prewarm-card-body">
+<h3>Customize Every Detail</h3>
+<p>Update the sender name, profile picture, and the forwarding URL to your choice and be live instantly.</p>
+</div>
+</div>
+<div class="prewarm-card reveal">
+<div class="prewarm-card-img"><img src="images/quality.svg" alt="Quality"></div>
+<div class="prewarm-card-body">
+<h3>Quality You Need, Prices You'll Love</h3>
+<p>Don't let Instantly overcharge you — Inbox Navigator offers premium pre-warmed infrastructure with competitive pricing, no hidden fees, and no compromises.</p>
+</div>
+</div>
+</div>
+<div class="feature-strip">
+<div class="strip-item reveal">
+<div class="strip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+<h4>Deliverability Optimized</h4>
+<p>Engineered for the highest inbox placement rates, ensuring your emails consistently land where they matter most.</p>
+</div>
+<div class="strip-item reveal">
+<div class="strip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+<h4>High-Quality US IP Accounts</h4>
+<p>Accounts powered by premium US-based IPs for reliable performance and consistent deliverability.</p>
+</div>
+<div class="strip-item reveal">
+<div class="strip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+<h4>Seamless Sender Profile Updates</h4>
+<p>Effortlessly update profile pictures, sender names, and email addresses without compromising deliverability.</p>
+</div>
+<div class="strip-item reveal">
+<div class="strip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+<h4>Premium Domains with Full Control</h4>
+<p>Choose from professional-grade domains, set up seamless forwarding, and enjoy up to 3 users per domain.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 8. WALL OF LOVE -->
+<section class="wall-of-love section-warm">
+<div class="container">
+<div class="tag gradient" style="text-align:center;display:block">Accelerate Success</div>
+<h2>Wall of Love ❤️</h2>
+<p class="wall-sub">Hear what our satisfied customers have to say about us.</p>
+</div>
+<div class="testimonial-track">
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"I appreciate all the help I've received from Kunal and his team with my email setup and questions. Delivery was fast and I look forward to a continued partnership!"</blockquote><div class="test-author"><img src="images/Daniel-Wellington.webp" alt="Daniel Wellington - Founder, Marketing Agency" class="test-avatar"><div><div class="test-name">Daniel Wellington</div><div class="test-role">Founder, Marketing Agency</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"Inbox Navigator is 5 times cheaper, way easier to scale and they do the setup for you. I get to focus on the campaign creative while they take care of everything else."</blockquote><div class="test-author"><img src="images/Mitch-Hill.webp" alt="Mitch Hill - CEO, Lead Gen Agency Owner" class="test-avatar"><div><div class="test-name">Mitch Hill</div><div class="test-role">CEO - Lead Gen Agency Owner</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"We were spending over $600 a month for just 80 Google Workspace inboxes. That's when we switched to Inbox Nav and decided to buy 150 accounts — this was a game changer."</blockquote><div class="test-author"><img src="images/Conner-Baker_1.webp" alt="Conner Baker - Ecomm. Email Marketing Agency" class="test-avatar"><div><div class="test-name">Conner Baker</div><div class="test-role">Ecomm. Email Marketing Agency</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"For our B2B side, we were barely doing anything with just a handful of inboxes, Kunal set us with 40 inboxes delivered right into our Instantly smoothly and also helped us launch better campaigns."</blockquote><div class="test-author"><img src="images/Damian-Ross.webp" alt="Damian Ross - Course & coaching business" class="test-avatar"><div><div class="test-name">Damian Ross</div><div class="test-role">Course & coaching business</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"We're consistently booking over a dozen appointments every single month thanks to Inbox Navigator. They're fast, reliable, and effective."</blockquote><div class="test-author"><img src="images/Chris-Gibbins.webp" alt="Chris Gibbins - CTO, National Business" class="test-avatar"><div><div class="test-name">Chris Gibbins</div><div class="test-role">CTO, National Business</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"Wonderful experience working with the team at Inbox Navigator, onboarding process was a breeze. Thanks!"</blockquote><div class="test-author"><img src="images/Dhruv-Malhotra.webp" alt="Dhruv Malhotra - CEO, Eye Universal" class="test-avatar"><div><div class="test-name">Dhruv Malhotra</div><div class="test-role">CEO - Eye Universal</div></div></div></div>
+<!-- duplicate for seamless loop -->
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"I appreciate all the help I've received from Kunal and his team with my email setup and questions. Delivery was fast and I look forward to a continued partnership!"</blockquote><div class="test-author"><img src="images/Daniel-Wellington.webp" alt="Daniel Wellington - Founder, Marketing Agency" class="test-avatar"><div><div class="test-name">Daniel Wellington</div><div class="test-role">Founder, Marketing Agency</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"Inbox Navigator is 5 times cheaper, way easier to scale and they do the setup for you. I get to focus on the campaign creative while they take care of everything else."</blockquote><div class="test-author"><img src="images/Mitch-Hill.webp" alt="Mitch Hill - CEO, Lead Gen Agency Owner" class="test-avatar"><div><div class="test-name">Mitch Hill</div><div class="test-role">CEO - Lead Gen Agency Owner</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"We were spending over $600 a month for just 80 Google Workspace inboxes. That's when we switched to Inbox Nav and decided to buy 150 accounts — this was a game changer."</blockquote><div class="test-author"><img src="images/Conner-Baker_1.webp" alt="Conner Baker - Ecomm. Email Marketing Agency" class="test-avatar"><div><div class="test-name">Conner Baker</div><div class="test-role">Ecomm. Email Marketing Agency</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"For our B2B side, we were barely doing anything with just a handful of inboxes, Kunal set us with 40 inboxes delivered right into our Instantly smoothly and also helped us launch better campaigns."</blockquote><div class="test-author"><img src="images/Damian-Ross.webp" alt="Damian Ross - Course & coaching business" class="test-avatar"><div><div class="test-name">Damian Ross</div><div class="test-role">Course & coaching business</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"We're consistently booking over a dozen appointments every single month thanks to Inbox Navigator. They're fast, reliable, and effective."</blockquote><div class="test-author"><img src="images/Chris-Gibbins.webp" alt="Chris Gibbins - CTO, National Business" class="test-avatar"><div><div class="test-name">Chris Gibbins</div><div class="test-role">CTO, National Business</div></div></div></div>
+<div class="test-card"><div class="test-stars">★★★★★</div><blockquote>"Wonderful experience working with the team at Inbox Navigator, onboarding process was a breeze. Thanks!"</blockquote><div class="test-author"><img src="images/Dhruv-Malhotra.webp" alt="Dhruv Malhotra - CEO, Eye Universal" class="test-avatar"><div><div class="test-name">Dhruv Malhotra</div><div class="test-role">CEO - Eye Universal</div></div></div></div>
+</div>
+</section>
+
+<!-- 8b. VIDEO TESTIMONIALS -->
+<section class="video-test section-warm">
+<div class="container">
+<div class="tag gradient" style="text-align:center;display:block">Accelerate Success</div>
+<h2 style="text-align:center;margin-bottom:8px">What Our Clients Say</h2>
+<p style="text-align:center;color:#666;margin-bottom:48px">Feel the love!</p>
+
+<div class="video-grid-3">
+  <div class="vt-card-lg reveal">
+    <div class="vt-card-thumb"><img src="https://i.vimeocdn.com/video/2073797341-948a07e69575fc44811b9bcb0feb7c33e66881aca9bcada5303103c35c52049f-d_960" alt="Alfie Carter" style="width:100%;height:100%;object-fit:cover"><div class="play-icon"></div><div class="vt-play" onclick="this.parentElement.innerHTML='<iframe src=\'https://player.vimeo.com/video/1130193075?autoplay=1\' frameborder=\'0\' allow=\'autoplay;fullscreen\' allowfullscreen style=\'position:absolute;top:0;left:0;width:100%;height:100%\'></iframe>'"></div></div>
+    <div class="vt-card-info">
+      <h4>Inbox Nav is the best hands down</h4>
+      <div class="vt-card-author"><div><div class="vt-name">Alfie Carter</div><div class="vt-role2">Founder of Prosp.ai & Speel.AI</div></div></div>
+    </div>
+  </div>
+  <div class="vt-card-lg reveal">
+    <div class="vt-card-thumb"><img src="images/Aaron-Reid.webp" alt="Aaron Reid" style="width:100%;height:100%;object-fit:cover"><div class="play-icon"></div><div class="vt-play" onclick="this.parentElement.innerHTML='<iframe src=\'https://player.vimeo.com/video/1036432342?autoplay=1\' frameborder=\'0\' allow=\'autoplay;fullscreen\' allowfullscreen style=\'position:absolute;top:0;left:0;width:100%;height:100%\'></iframe>'"></div></div>
+    <div class="vt-card-info">
+      <h4>Unmatched Quality</h4>
+      <div class="vt-card-author"><img src="images/Aaron-Reid-2.avif" alt="Aaron Reid - Traction"><div><div class="vt-name">Aaron Reid</div><div class="vt-role2">Traction | Official Clay, Instantly and Smartlead Partner</div></div></div>
+    </div>
+  </div>
+  <div class="vt-card-lg reveal">
+    <div class="vt-card-thumb"><img src="images/Omar-Ismail_1.webp" alt="Omar Ismail" style="width:100%;height:100%;object-fit:cover"><div class="play-icon"></div><div class="vt-play" onclick="this.parentElement.innerHTML='<iframe src=\'https://player.vimeo.com/video/1036432285?autoplay=1\' frameborder=\'0\' allow=\'autoplay;fullscreen\' allowfullscreen style=\'position:absolute;top:0;left:0;width:100%;height:100%\'></iframe>'"></div></div>
+    <div class="vt-card-info">
+      <h4>Faster, Reliable, Efficient</h4>
+      <div class="vt-card-author"><img src="images/Omar-Ismail_1.webp" alt="Omar Ismail - Founder, Tenstrikes"><div><div class="vt-name">Omar Ismail</div><div class="vt-role2">Founder | Tenstrikes (High Ticket Lead Gen Agency)</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:48px"><a href="#plans-and-pricing" class="btn btn-gradient">BUY NOW</a></div>
+</div>
+</section>
+
+<!-- 9. WHAT MAKES US SPECIAL — Sticky Cards -->
+<section class="special">
+<div class="container">
+<div class="tag gradient" style="text-align:center;display:block">Accelerate Success</div>
+<h2 style="text-align:center;margin-bottom:8px">What Makes Us Special</h2>
+<p style="text-align:center;color:#888;margin-bottom:56px">Here's what happens next</p>
+<div class="story-cards-wrap">
+
+<div class="story-card">
+<div class="story-card-text">
+<h3>Diversified Infrastructure - DFY</h3>
+<p>Google Workspace, Outlook, prewarmed, SMTP — all under one roof. Place your order, fill a 3-minute form, and we build everything. You focus on campaigns. We handle the plumbing.</p>
+</div>
+<div class="story-card-img"><div class="sc-mockup">
+<div class="sc-mockup-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">infrastructure.overview</span></div>
+<div class="sc-mockup-body">
+<div class="title">Infrastructure Types</div>
+<div class="grid2">
+<div class="stat-box"><div class="n" style="font-size:14px">Google</div><div class="l">Google Workspace</div><div class="badge badge-green" style="margin-top:6px;display:inline-block">Active</div></div>
+<div class="stat-box"><div class="n" style="font-size:14px">Microsoft</div><div class="l">Azure 365</div><div class="badge badge-green" style="margin-top:6px;display:inline-block">Active</div></div>
+<div class="stat-box"><div class="n" style="font-size:14px">SMTP</div><div class="l">AWS Based</div><div class="badge badge-green" style="margin-top:6px;display:inline-block">Active</div></div>
+<div class="stat-box"><div class="n" style="font-size:14px">Prewarmed</div><div class="l">Ready to Send</div><div class="badge badge-purple" style="margin-top:6px;display:inline-block">Live</div></div>
+</div>
+<div style="margin-top:10px;text-align:center;font-size:10px;color:rgba(255,255,255,.3)">All types • One platform</div>
+</div>
+</div></div>
+</div>
+
+<div class="story-card">
+<div class="story-card-text">
+<h3>Isolated, Dedicated Infrastructure</h3>
+<p>Nothing is shared. Every inbox runs on its own dedicated IP, in its own isolated workspace. No shared servers, no shared tenants, no cross-contamination from other senders. Your infrastructure is yours alone.</p>
+</div>
+<div class="story-card-img"><div class="sc-mockup">
+<div class="sc-mockup-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">isolation.status</span></div>
+<div class="sc-mockup-body">
+<div class="title">Your Dedicated Environment</div>
+<div class="row"><span class="lbl">Workspace</span><span class="badge badge-purple">Isolated</span></div>
+<div class="row"><span class="lbl">IP Address</span><span class="badge badge-purple">Dedicated</span></div>
+<div class="row"><span class="lbl">Server</span><span class="badge badge-purple">Private</span></div>
+<div class="row"><span class="lbl">Tenant</span><span class="badge badge-purple">Single</span></div>
+<div class="row"><span class="lbl">Shared Users</span><span class="val" style="color:#28c840">0</span></div>
+<div style="margin-top:10px;padding:8px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.12);border-radius:8px;text-align:center;font-size:10px;color:#a855f7;font-weight:600">Zero cross-contamination</div>
+</div>
+</div></div>
+</div>
+
+<div class="story-card">
+<div class="story-card-text">
+<h3>Zero Hassle Domains</h3>
+<p>Bring your own domains or let us buy them for you — either way, we handle everything. SPF, DKIM, DMARC, forwarding, tracking, all configured end-to-end. You just tell us what you need.</p>
+</div>
+<div class="story-card-img"><div class="sc-mockup">
+<div class="sc-mockup-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">domain.setup</span></div>
+<div class="sc-mockup-body">
+<div class="title">Domain Configuration</div>
+<div class="row"><span class="lbl">Iloveinboxnav.com</span><span class="badge badge-green">Verified</span></div>
+<div style="padding:4px 0 8px">
+<div class="row"><span class="lbl" style="padding-left:12px">SPF</span><span class="val" style="color:#28c840">&#10003;</span></div>
+<div class="row"><span class="lbl" style="padding-left:12px">DKIM</span><span class="val" style="color:#28c840">&#10003;</span></div>
+<div class="row"><span class="lbl" style="padding-left:12px">DMARC</span><span class="val" style="color:#28c840">&#10003;</span></div>
+<div class="row"><span class="lbl" style="padding-left:12px">Forwarding</span><span class="val" style="color:#28c840">&#10003;</span></div>
+<div class="row"><span class="lbl" style="padding-left:12px">Tracking</span><span class="val" style="color:#28c840">&#10003;</span></div>
+</div>
+<div class="row"><span class="lbl">Iloveinboxnav.com</span><span class="badge badge-green">Verified</span></div>
+</div>
+</div></div>
+</div>
+
+<div class="story-card">
+<div class="story-card-text">
+<h3>Alfred to your Batman</h3>
+<p>We don't just set it up and disappear. Swap inboxes, update profiles, add seats — anything you need, anytime, at no extra cost. One Slack message and it's done.</p>
+</div>
+<div class="story-card-img"><div class="sc-mockup">
+<div class="sc-mockup-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">support.chat</span></div>
+<div class="sc-mockup-body">
+<div class="chat-msg"><div class="chat-from">You — 11:42 PM</div>Hey, can you swap 20 inboxes to new domains and update all sender names?</div>
+<div class="chat-msg reply"><div class="chat-from" style="color:#a855f7">InboxNav — 11:44 PM</div>Done! 20 inboxes swapped, sender names updated, DNS configured. All live and warming. &#10003;</div>
+<div class="chat-msg"><div class="chat-from">You — 11:45 PM</div>That was 2 minutes. Unreal.</div>
+<div style="margin-top:8px;text-align:center;font-size:10px;color:rgba(255,255,255,.25)">Avg response time: 4 minutes</div>
+</div>
+</div></div>
+</div>
+
+<div class="story-card">
+<div class="story-card-text">
+<h3>Industry Best Deliverability - <strong>Guaranteed</strong></h3>
+<p>Deliverability isn't set-and-forget. We actively monitor trends, adapt to policy changes, and tune your infrastructure daily. The result: consistent inbox placement that holds up campaign after campaign.</p>
+</div>
+<div class="story-card-img"><div class="sc-mockup">
+<div class="sc-mockup-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">deliverability.guarantee</span></div>
+<div class="sc-mockup-body" style="padding:32px 18px;text-align:center">
+<div class="big-num" style="background:linear-gradient(135deg,#a855f7,#e84393,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:56px;margin:16px 0 8px">99%</div>
+<div class="sub" style="font-size:13px">Inbox Placement Rate</div>
+</div>
+</div></div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- 10. IS THIS FOR YOU (HIDDEN) -->
+<section class="for-you section-warm" style="display:none">
+<div class="container">
+<div class="tag gradient" style="text-align:center;display:block">Accelerate Success</div>
+<h2>Is This for You?</h2>
+<p class="for-you-sub">Lead Gen Agencies | SaaS | Recruitment | Business Funding | Acquisition | Marketing Agency</p>
+<div class="for-you-grid">
+<div class="feature-card reveal">
+<h3>Sick and Tired of Unreliable Infra?</h3>
+<p>If you're tired of unreliable reseller Google Workspace and Outlook inboxes that die in 30 days — you're in the right place.</p>
+</div>
+<div class="feature-card reveal">
+<h3>Are You a Lead Gen Agency Owner?</h3>
+<p>Inbox Navigator is specially built for lead gen agency owners who want high deliverability while sending massive volumes for their clients.</p>
+</div>
+<div class="feature-card reveal">
+<h3>Need a Backup?</h3>
+<p>Outbound is dynamic, with new policies and regulations popping up every 2 weeks. Relying on a single inbox provider is too risky.</p>
+</div>
+<div class="feature-card reveal">
+<h3>Burnt by Other Inbox Providers?</h3>
+<p>Had a bad experience with server IP-based inbox providers? We did too. That's why we started Inbox Navigator.</p>
+</div>
+</div>
+<div class="for-you-cta reveal">
+<h3>Scale campaigns effortlessly and send thousands of emails per month with ease</h3>
+<p>Whether you're sending 10,000 or 100,000 emails a month, InboxNavigator gives you the infrastructure to do it reliably and affordably.</p>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient">BUY NOW</a>
+</div>
+</div>
+</section>
+
+<!-- 11. STATISTICS -->
+<section class="statistics section-navy" style="position:relative;overflow:hidden">
+<div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 40%,rgba(168,85,247,.12),transparent 70%),radial-gradient(ellipse 50% 50% at 80% 60%,rgba(232,67,147,.08),transparent 70%);pointer-events:none"></div>
+<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(168,85,247,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.02) 1px,transparent 1px);background-size:80px 80px;pointer-events:none;opacity:.5"></div>
+<div class="container" style="position:relative;z-index:2">
+<div class="tag" style="text-align:center;display:block;margin-bottom:16px;color:rgba(168,85,247,.7)">Accelerate Success</div>
+<h2 style="text-align:center;color:#fff;margin-bottom:56px">Our pride and glory</h2>
+<div class="stats-grid">
+<div class="stat-item reveal">
+<div class="num" style="font-size:clamp(48px,7vw,80px);font-style:italic;background:linear-gradient(135deg,#a855f7,#e84393);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">130+</div>
+<div class="label">Happy Clients</div>
+</div>
+<div class="stat-divider"></div>
+<div class="stat-item reveal">
+<div class="num" style="font-size:clamp(48px,7vw,80px);font-style:italic;background:linear-gradient(135deg,#e84393,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">14,000+</div>
+<div class="label">Inboxes Delivered</div>
+</div>
+<div class="stat-divider"></div>
+<div class="stat-item reveal">
+<div class="num" style="font-size:clamp(48px,7vw,80px);font-style:italic;background:linear-gradient(135deg,#f97316,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">48 Hour</div>
+<div class="label">Delivery</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 12. PRICING -->
+<section class="pricing" id="pricing">
+<div class="container">
+<h2>Pricing</h2>
+<div class="pricing-tabs">
+<button class="active" data-tab="google">Google</button>
+<button data-tab="microsoft">Microsoft</button>
+<button data-tab="prewarmed">Prewarmed</button>
+<button data-tab="smtp">SMTP</button>
+</div>
+
+<div class="pricing-panel active" id="tab-google">
+<div class="pricing-card">
+<div class="price">$3<span style="font-size:18px;font-weight:400;color:#888">/month</span></div>
+<div class="price-label">MOQ: 10</div>
+<p class="price-desc">Zero risk - Bulletproof inboxes built for scale and reliability</p>
+<ul class="pricing-features">
+<li>Low risk of Google crackdown</li>
+<li>US IP Only</li>
+<li>Send up to 15 emails/day/inbox</li>
+<li>Bring your own domains</li>
+<li>Complete DFY Service</li>
+<li>DNS setup included (SPF, DMARC, DKIM)</li>
+</ul>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient">BUY NOW</a>
+</div>
+</div>
+
+<div class="pricing-panel" id="tab-microsoft">
+<div class="pricing-card">
+<div class="price">$60<span style="font-size:18px;font-weight:400;color:#888">/month per domain</span></div>
+<p class="price-desc">Microsoft 365 enterprise inboxes based on Azure. Each domain includes 50 users.</p>
+<ul class="pricing-features">
+<li>Isolated tenants</li>
+<li>Up to 100 users/domain</li>
+<li>Send up to 200 emails/domain</li>
+<li>Same quality as Hypertide</li>
+<li>Performs better than standard Microsoft inboxes</li>
+</ul>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient">BUY NOW</a>
+</div>
+</div>
+
+<div class="pricing-panel" id="tab-prewarmed">
+<div class="pricing-card">
+<div class="price">$70<span style="font-size:18px;font-weight:400;color:#888">/month</span></div>
+<div class="price-label">10 prewarmed inboxes</div>
+<p class="price-desc">Pre-warmed and ready to send from day one</p>
+<ul class="pricing-features">
+<li>Free .com domains included</li>
+<li>Premium US IP Google Inboxes only</li>
+<li>Industry best deliverability</li>
+<li>Be live in under 24 hours</li>
+<li>Fully customizable</li>
+<li>Pre-warmed and ready-to-send</li>
+</ul>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient">BUY NOW</a>
+</div>
+</div>
+
+<div class="pricing-panel" id="tab-smtp">
+<div class="pricing-card">
+<div class="price">$1.25<span style="font-size:18px;font-weight:400;color:#888">/month</span></div>
+<div class="price-label">AWS based SMTP</div>
+<p class="price-desc">High-performance SMTP built on enterprise infrastructure</p>
+<ul class="pricing-features">
+<li>Built on AWS</li>
+<li>Dedicated IPs and isolated tenants</li>
+<li>Premium SMTP inboxes</li>
+<li>Send up to 15 emails/day/inbox</li>
+</ul>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient">BUY NOW</a>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 13. OUR PROCESS -->
+<section class="process section-warm">
+<div class="container">
+<div class="tag gradient" style="text-align:center;display:block">Accelerate Success</div>
+<h2 style="text-align:center;margin-bottom:8px">Our Process</h2>
+<p style="text-align:center;color:#888;margin-bottom:56px">Here's what happens next</p>
+<div class="process-grid">
+<div class="process-card reveal">
+<div class="process-icon"><svg viewBox="0 0 24 24" fill="none" stroke="url(#pg1)" stroke-width="1.5" stroke-linecap="round"><defs><linearGradient id="pg1" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#a855f7"/><stop offset="1" stop-color="#e84393"/></linearGradient></defs><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 12l2 2 4-4"/></svg></div>
+<h3>Select Your Plan and Place Your Order</h3>
+<p>Choose the number of Google Workspace and Outlook inboxes you want and place your order. You can bring your own domains at no extra charge or have us buy domains for you.</p>
+</div>
+<div class="process-card reveal">
+<div class="process-icon"><svg viewBox="0 0 24 24" fill="none" stroke="url(#pg2)" stroke-width="1.5" stroke-linecap="round"><defs><linearGradient id="pg2" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#e84393"/><stop offset="1" stop-color="#f97316"/></linearGradient></defs><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+<h3>3-Minute Onboarding</h3>
+<p>Fill out a brief onboarding form in just 3 minutes and give us all the details about your order like the domains you want to use, the usernames, profile pictures, configuration, and preferences — and our team takes care of everything else.</p>
+</div>
+<div class="process-card reveal">
+<div class="process-icon"><svg viewBox="0 0 24 24" fill="none" stroke="url(#pg3)" stroke-width="1.5" stroke-linecap="round"><defs><linearGradient id="pg3" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#f97316"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12l2 2 4-4"/></svg></div>
+<h3>Domain Setup</h3>
+<p>We handle the technical details — setting up SPF, DMARC, and DKIM records, along with domain forwarding and custom tracking for all your domains.</p>
+</div>
+<div class="process-card reveal">
+<div class="process-icon"><svg viewBox="0 0 24 24" fill="none" stroke="url(#pg4)" stroke-width="1.5" stroke-linecap="round"><defs><linearGradient id="pg4" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#a855f7"/><stop offset="1" stop-color="#f97316"/></linearGradient></defs><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 8h20"/><circle cx="7" cy="14" r="2"/></svg></div>
+<h3>Inbox Setup</h3>
+<p>We set up all of your Google Workspace &amp; Outlook inboxes along with profile pictures, email forwarding, and everything in between.</p>
+</div>
+<div class="process-card reveal">
+<div class="process-icon"><svg viewBox="0 0 24 24" fill="none" stroke="url(#pg5)" stroke-width="1.5" stroke-linecap="round"><defs><linearGradient id="pg5" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#e84393"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+<h3>Warming Up in Less Than 2 Days</h3>
+<p>We import the users directly into your Instantly/Smartlead and configure industry-best warmup settings completely DFY in less than 2 days.</p>
+</div>
+</div>
+<div style="text-align:center;margin-top:48px"><a href="#demo" class="btn btn-gradient">CONTACT US</a></div>
+</div>
+</section>
+
+<!-- 14. FAQ -->
+<section class="faq" id="faq">
+<div class="container">
+<h2 style="text-align:center;margin-bottom:8px">Frequently Asked Questions</h2>
+<p class="faq-sub">Get the Answers You're Looking For</p>
+<div class="faq-tabs">
+<button class="active" data-faq="general">General</button>
+<button data-faq="domains">Domains</button>
+<button data-faq="outlook">Outlook</button>
+</div>
+
+<div class="faq-panel active" id="faq-general">
+<div class="faq-item"><div class="faq-q"><h4>Can I set up profile pictures, master password, email forwarding?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes to all. You can customize everything: profile pictures, passwords, forwarding rules, signatures - whatever you need. We'll help with the technical setup to ensure everything works properly.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Can you guarantee deliverability?</h4><span class="icon">+</span></div><div class="faq-a"><p>After the initial month or two, your sending practices, nature of campaigns, level of personalization, and new regulation policies will influence your deliverability. We monitor and optimize continuously, but results also depend on your campaign quality.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Can you purchase new domains for me?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, we can buy domains for you at $15/domain. As standard, we only buy .com domains as they perform the best.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Do I have full control over the inboxes?</h4><span class="icon">+</span></div><div class="faq-a"><p>Absolutely. You get complete access to the inboxes and can easily log into them if you'd like to.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Do you have ongoing support?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, we provide ongoing monthly support to all of our clients. For clients with over 100 inboxes, we have a dedicated account manager and a private Slack channel for priority support.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Do you import them into my sending platform for me and how do you do it?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, we upload the accounts into your Smartlead/Instantly or any sending platform using OAuth, and we even turn on warmup for you.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Do you offer refunds?</h4><span class="icon">+</span></div><div class="faq-a"><p>We have a strict no-refund policy after the inboxes delivery process has started. In the case you want a refund immediately after placing an order for whatever reason, we'd be happy to process that.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>How is this better than IP-based providers?</h4><span class="icon">+</span></div><div class="faq-a"><p>Shared IPs from these providers are prone to blacklisting because they attract spammers and abusers. This means you're sharing servers with high-risk users, increasing the risk to your outbound emails. Our inboxes offer safer, dedicated infrastructure.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>How is this safer than IP-based inbox providers?</h4><span class="icon">+</span></div><div class="faq-a"><p>IP-based inbox providers share IPs among multiple users, increasing the risk of blacklisting. Our service provides dedicated, isolated infrastructure for each client.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>How long do I need to warm the inboxes up for?</h4><span class="icon">+</span></div><div class="faq-a"><p>We recommend a 3-week warmup period before you start sending cold emails.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>How long will it take to get everything set up?</h4><span class="icon">+</span></div><div class="faq-a"><p>Everything would get delivered in less than 72 hours.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>How many inboxes do you recommend per domain?</h4><span class="icon">+</span></div><div class="faq-a"><p>For optimal deliverability, we recommend 2-3 inboxes per domain, no more. This helps maintain high deliverability rates.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>How much volume can I send with Inbox Navigator?</h4><span class="icon">+</span></div><div class="faq-a"><p>We recommend 15-25 emails/day/inbox for optimal deliverability.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>If accounts get disconnected do you handle that?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, we handle all technical issues including disconnections at any point in time.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Is there any flexibility on pricing?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, we offer flexible pricing based on the specific needs and scale of your campaigns. Let's discuss your requirements, and we can work out a plan that fits.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Is this the same as SMTP based IP-based inbox providers?</h4><span class="icon">+</span></div><div class="faq-a"><p>No, our service is different. We provide genuine Google Workspace accounts with dedicated IPs, ensuring higher deliverability and safer infrastructure.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>What Sending tools do you integrate with?</h4><span class="icon">+</span></div><div class="faq-a"><p>We integrate with all major cold email platforms: Smartlead, Instantly, Lemlist, Pipl, Reply.io, and similar tools. Our inboxes work seamlessly with any tool that supports OAuth.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>What are the next steps?</h4><span class="icon">+</span></div><div class="faq-a"><p>Simple process: 1) Choose your package, 2) Complete quick onboarding form, 3) We'll set everything up within 48 hours, 4) Start sending.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>What happens when and if an account burns down?</h4><span class="icon">+</span></div><div class="faq-a"><p>We have a free replacement policy - if an inbox gets burned, we'll replace it at no cost (just cover domain costs if new domains are needed).</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>What is the deliverability like with Inbox Navigator inboxes?</h4><span class="icon">+</span></div><div class="faq-a"><p>Our clients typically see 70%+ inbox placement rates for cold outreach using best practices. Since we use real Google Workspace and Microsoft 365 accounts with dedicated IPs, deliverability is significantly higher than shared IP providers.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>What warm up settings do you use and recommend?</h4><span class="icon">+</span></div><div class="faq-a"><p>We recommend a 3-week warmup period, 50 warmup emails/day, 80% reply rate, and no gradual increase as the best warmup protocol.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>What's included in the service?</h4><span class="icon">+</span></div><div class="faq-a"><p>Everything you need: complete DFY inbox setup, technical configuration, domain management, custom tracking domains, warmup configuration, platform import, and ongoing support.</p></div></div>
+</div>
+
+<div class="faq-panel" id="faq-domains">
+<div class="faq-item"><div class="faq-q"><h4>Can I bring domains I currently own to Inbox Navigator?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, you can use your existing domains without any extra fees. Just make sure they aren't connected with any existing Google Workspace or Microsoft 365 account.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Can I use my current domains?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, but be aware that previously used domains may have reputation issues or low deliverability which can carry over to your brand new infrastructure.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Can I use my primary domain for outreach?</h4><span class="icon">+</span></div><div class="faq-a"><p>We recommend using secondary domains to protect your primary domain's reputation. This strategy helps mitigate risks associated with cold outreach.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Do I own the domains I purchase from Inbox Nav?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, you have full ownership of any domains purchased through us.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>How do I pay for domains?</h4><span class="icon">+</span></div><div class="faq-a"><p>You can buy domain credits — 1 credit = 1 .com domain. Domain credits don't expire, and you can redeem them anytime.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>What does your domain setup service include?</h4><span class="icon">+</span></div><div class="faq-a"><p>We handle all aspects: configuring domains, SPF, DMARC, and DKIM records, custom domain tracking, and domain forwarding.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Which platforms do you support for domain setup?</h4><span class="icon">+</span></div><div class="faq-a"><p>We support all domain providers — we don't discriminate.</p></div></div>
+</div>
+
+<div class="faq-panel" id="faq-outlook">
+<div class="faq-item"><div class="faq-q"><h4>Are these reseller inboxes?</h4><span class="icon">+</span></div><div class="faq-a"><p>No, these are not reseller inboxes. They're built specifically for you, giving you dedicated access and control with no shared infrastructure.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Do I get a dedicated IP?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, you'll get a dedicated IP for every set of 10 domains. This helps maintain high deliverability and keeps your sending reputation isolated.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>Do you import them into my sending platform?</h4><span class="icon">+</span></div><div class="faq-a"><p>Yes, we take care of that for you, ensuring a smooth integration with your sending platform.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>For Outlook, what all do we get?</h4><span class="icon">+</span></div><div class="faq-a"><p>You get the full package: technical setup, inbox and user creation, account import, and ongoing management. Basically, we handle everything.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>How much of my stack should be Outlook-based?</h4><span class="icon">+</span></div><div class="faq-a"><p>It depends on who you're targeting. If you're focusing on larger companies, 30-40% Outlook inboxes is ideal. For SMBs or startups, a lower percentage works fine.</p></div></div>
+<div class="faq-item"><div class="faq-q"><h4>What is a tenant in Microsoft?</h4><span class="icon">+</span></div><div class="faq-a"><p>A tenant is essentially the environment or workspace where your inboxes live. It's tied to an IP address, and its reputation directly affects your deliverability.</p></div></div>
+</div>
+</div>
+</section>
+
+<!-- 15. BOOK A DEMO -->
+<section class="demo section-warm">
+<div class="container reveal">
+<h2>Book a Demo Call Today</h2>
+<div class="demo-placeholder">Calendly Embed</div>
+</div>
+</section>
+
+<!-- 16. MARQUEE BAR -->
+<div class="marquee-bar">
+<div class="marquee-bar-track">
+<span>Built for Lead Gen Agency Owners</span>
+<span>Golden Standard of Deliverability</span>
+<span>Better than your Current Provider/Reseller</span>
+<span>Built for Lead Gen Agency Owners</span>
+<span>Golden Standard of Deliverability</span>
+<span>Better than your Current Provider/Reseller</span>
+</div>
+</div>
+
+<!-- 17. FOOTER -->
+<footer class="footer">
+<div class="container">
+<div class="footer-grid">
+<div class="footer-col">
+<h4>InboxNavigator</h4>
+<p>Minted Ventures Labs LLC<br>166 Geary Street<br>San Francisco, California, USA</p>
+</div>
+<div class="footer-col">
+<h4>Pages</h4>
+<a href="index.html">Home</a><a href="#pricing">Pricing</a><a href="inboxnav-dfy.html">DFY</a><a href="#demo">Contact</a><a href="#faq">FAQ</a>
+</div>
+<div class="footer-col">
+<h4>Help</h4>
+<a href="#demo">Contact</a><a href="#faq">FAQ</a>
+</div>
+<div class="footer-col">
+<h4>Legal</h4>
+<a href="terms.html">Terms</a><a href="privacy-policy.html">Privacy Policy</a><a href="cookie-policy.html">Cookies</a><a href="refund-return-policy.html">Return &amp; Refund Policy</a>
+</div>
+</div>
+<div class="footer-bottom">&copy; 2024 MSC. Built with love by Minted Ventures Labs LLC</div>
+</div>
+</footer>
+
+<script>
+/* ── Sticky navbar shadow ── */
+window.addEventListener('scroll',()=>{
+document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>10);
+});
+
+/* ── Scroll reveal ── */
+const obs=new IntersectionObserver((entries)=>{
+entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
+},{threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+/* ── Pricing tabs ── */
+document.querySelectorAll('.pricing-tabs button').forEach(btn=>{
+btn.addEventListener('click',()=>{
+document.querySelectorAll('.pricing-tabs button').forEach(b=>b.classList.remove('active'));
+document.querySelectorAll('.pricing-panel').forEach(p=>p.classList.remove('active'));
+btn.classList.add('active');
+document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+});
+});
+
+/* ── FAQ tabs ── */
+document.querySelectorAll('.faq-tabs button').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.faq-tabs button').forEach(function(b){b.classList.remove('active')});
+    document.querySelectorAll('.faq-panel').forEach(function(p){p.classList.remove('active')});
+    btn.classList.add('active');
+    document.getElementById('faq-'+btn.dataset.faq).classList.add('active');
+  });
+});
+
+/* ── FAQ accordion ── */
+document.querySelectorAll('.faq-q').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var item=btn.closest('.faq-item');
+    var answer=item.querySelector('.faq-a');
+    var isOpen=item.classList.contains('open');
+    // Close all others in same panel
+    item.closest('.faq-panel').querySelectorAll('.faq-item.open').forEach(function(openItem){
+      if(openItem!==item){
+        openItem.classList.remove('open');
+        openItem.querySelector('.faq-a').style.maxHeight=null;
+      }
+    });
+    if(isOpen){
+      item.classList.remove('open');
+      answer.style.maxHeight=null;
+    }else{
+      item.classList.add('open');
+      answer.style.maxHeight=answer.scrollHeight+'px';
+    }
+  });
+});
+</script>
+</body>
+</html>
