@@ -54,7 +54,7 @@ const PRODUCT_PRICE: Record<ProductType, number> = {
   [ProductType.RESELLER]: 3,
   [ProductType.PREWARMED]: 7,
   [ProductType.AWS]: 1.25,
-  [ProductType.MICROSOFT]: 60,
+  [ProductType.MICROSOFT]: 30,
 };
 
 const PRODUCT_MOQ: Record<ProductType, number> = {

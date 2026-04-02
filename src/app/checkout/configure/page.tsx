@@ -32,7 +32,7 @@ function getPricePerInbox(product: ProductType): number {
   if (product === "LEGACY") return 2.5;
   if (product === "PREWARMED") return 7;
   if (product === "AWS") return 1.25;
-  if (product === "MICROSOFT") return 60; // Per domain, not per inbox
+  if (product === "MICROSOFT") return 30; // Per domain, not per inbox
   return 3;
 }
 

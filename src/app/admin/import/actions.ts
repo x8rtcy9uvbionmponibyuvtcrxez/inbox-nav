@@ -179,7 +179,7 @@ export async function importCSVAction(csvData: CSVRow[]): Promise<ImportResult> 
           if (pt === ProductType.LEGACY) return 2.5;
           if (pt === ProductType.PREWARMED) return 7;
           if (pt === ProductType.AWS) return 1.25;
-          if (pt === ProductType.MICROSOFT) return 60;
+          if (pt === ProductType.MICROSOFT) return 30;
           return 3;
         };
         const pricePerInbox = getPricePerInbox(productType);

@@ -13,7 +13,7 @@ const INBOX_PRICING_USD: Record<ProductType, number> = {
   [ProductType.LEGACY]: 2.5,
   [ProductType.PREWARMED]: 7,
   [ProductType.AWS]: 1.25,
-  [ProductType.MICROSOFT]: 60, // Per domain, not per inbox
+  [ProductType.MICROSOFT]: 30, // Per domain, not per inbox
 }
 
 const INBOX_PRICE_IDS: Record<ProductType, string | undefined> = {

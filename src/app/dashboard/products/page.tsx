@@ -245,11 +245,11 @@ const products: Product[] = [
          {
            id: "MICROSOFT",
            name: "Microsoft Inboxes",
-           price: 60,
+           price: 30,
            description: "Microsoft 365 enterprise inboxes based on Azure",
            features: ["Isolated tenants", "50 users/domain", "Send up to 5 emails/day/inbox", "Same as Hypertide", "Performs better than regular Microsoft inboxes"],
            color: "purple",
-           priceId: "price_1SIqy8BRlmSshMl59Rsd7YT9",
+           priceId: "price_1SyoboBRlmSshMl5QJTR1fu0",
            tab: "microsoft",
          },
 ];
