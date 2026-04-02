@@ -148,7 +148,7 @@ const ProductCard = memo(function ProductCard({ product, quantity, onQuantityCha
   );
 });
 
-type ProductType = "RESELLER" | "PREWARMED" | "AWS" | "MICROSOFT";
+type ProductType = "RESELLER" | "EDU" | "LEGACY" | "PREWARMED" | "AWS" | "MICROSOFT";
 
 type TabId = "google" | "microsoft" | "prewarmed" | "smtp";
 
@@ -181,7 +181,7 @@ interface Tab {
 const tabs: Tab[] = [
   {
     id: "google",
-    label: "Google Inboxes",
+    label: "Google",
     emoji: "📧",
     productIds: ["RESELLER"]
   },
@@ -208,7 +208,7 @@ const tabs: Tab[] = [
 const products: Product[] = [
   {
     id: "RESELLER",
-    name: "Google Inboxes",
+    name: "Premium Inboxes",
     price: 3,
     description: "Safest Google inboxes — the recommended choice",
     features: ["Zero risk of Google crackdown", "Full admin access", "1 domain/workspace", "US IP only", "Send up to 15 emails/day/inbox"],
@@ -258,12 +258,14 @@ const products: Product[] = [
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("google");
   const [quantities, setQuantities] = useState<Record<ProductType, number>>({
+    EDU: 10,
     RESELLER: 10,
     PREWARMED: 10,
     AWS: 20,
     MICROSOFT: 1,
   });
   const [loading, setLoading] = useState<Record<ProductType, boolean>>({
+    EDU: false,
     RESELLER: false,
     PREWARMED: false,
     AWS: false,
@@ -410,7 +412,7 @@ export default function ProductsPage() {
                 </div>
               </nav>
 
-              <div className={`grid gap-6 grid-cols-1 ${filteredProducts.length === 1 ? 'max-w-lg mx-auto' : 'md:grid-cols-2'}`}>
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -441,7 +443,7 @@ export default function ProductsPage() {
                 <h3 className="text-xl font-semibold text-[var(--text-primary)]">All plans include:</h3>
                 <div className="space-y-4">
                   {[
-                    "DNS setup (DKIM, SPF, DMARC)",
+                    "DNS setup (SDKIM, SPF, DMARC)",
                     "Complete DFY service",
                     "Integration with Instantly, Smartlead, Plusvibes and other platforms",
                     "Bring your domains for free",

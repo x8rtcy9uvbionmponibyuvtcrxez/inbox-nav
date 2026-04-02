@@ -12,7 +12,9 @@ type TLD = ".com" | ".info";
 
 function normalizeProductType(value: string | null): ProductType {
   const v = (value || "EDU").toUpperCase();
-  return ["EDU", "LEGACY", "RESELLER", "PREWARMED", "AWS", "MICROSOFT"].includes(v) ? (v as ProductType) : "EDU";
+  // Hide LEGACY from new checkouts, redirect to EDU
+  if (v === "LEGACY") return "EDU";
+  return ["EDU", "RESELLER", "PREWARMED", "AWS", "MICROSOFT"].includes(v) ? (v as ProductType) : "EDU";
 }
 
 function getDefaultInboxesPerDomain(product: ProductType): number {
