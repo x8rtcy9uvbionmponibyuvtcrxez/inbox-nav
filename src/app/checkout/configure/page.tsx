@@ -201,9 +201,11 @@ function ConfigurePageContent() {
                   <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                     <div>
                   <h2 className="text-lg font-semibold text-[var(--text-primary)]">How many inboxes should we create per domain?</h2>
+                  {product !== "MICROSOFT" && (
                   <p className="text-sm text-[var(--text-secondary)]">
                     We recommend 2-3 inboxes per domain for optimal deliverability.
                   </p>
+                  )}
                     </div>
                     <span className="text-sm font-medium text-[var(--text-secondary)]">≈ {domainsNeeded} domains needed</span>
                   </div>
