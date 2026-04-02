@@ -17,11 +17,11 @@ const INBOX_PRICING_USD: Record<ProductType, number> = {
 }
 
 const INBOX_PRICE_IDS: Record<ProductType, string | undefined> = {
-  [ProductType.RESELLER]: process.env.STRIPE_PRICE_RESELLER_INBOX,
-  [ProductType.EDU]: process.env.STRIPE_PRICE_EDU_INBOX,
-  [ProductType.LEGACY]: process.env.STRIPE_PRICE_LEGACY_INBOX,
+  [ProductType.RESELLER]: process.env.STRIPE_PRICE_RESELLER,
+  [ProductType.EDU]: process.env.STRIPE_PRICE_EDU,
+  [ProductType.LEGACY]: process.env.STRIPE_PRICE_LEGACY,
   [ProductType.PREWARMED]: process.env.STRIPE_PRICE_PREWARMED_INBOX,
-  [ProductType.AWS]: process.env.STRIPE_PRICE_AWS_INBOX,
+  [ProductType.AWS]: process.env.STRIPE_PRICE_AWS,
   [ProductType.MICROSOFT]: process.env.STRIPE_PRICE_MICROSOFT_INBOX,
 }
 
