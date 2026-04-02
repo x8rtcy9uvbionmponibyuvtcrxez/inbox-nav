@@ -258,14 +258,12 @@ const products: Product[] = [
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("google");
   const [quantities, setQuantities] = useState<Record<ProductType, number>>({
-    EDU: 10,
     RESELLER: 10,
     PREWARMED: 10,
     AWS: 20,
     MICROSOFT: 1,
   });
   const [loading, setLoading] = useState<Record<ProductType, boolean>>({
-    EDU: false,
     RESELLER: false,
     PREWARMED: false,
     AWS: false,
