@@ -17,12 +17,12 @@ const INBOX_PRICING_USD: Record<ProductType, number> = {
 }
 
 const INBOX_PRICE_IDS: Record<ProductType, string | undefined> = {
-  [ProductType.RESELLER]: process.env.STRIPE_PRICE_RESELLER,
-  [ProductType.EDU]: process.env.STRIPE_PRICE_EDU,
-  [ProductType.LEGACY]: process.env.STRIPE_PRICE_LEGACY,
-  [ProductType.PREWARMED]: process.env.STRIPE_PRICE_PREWARMED_INBOX,
-  [ProductType.AWS]: process.env.STRIPE_PRICE_AWS,
-  [ProductType.MICROSOFT]: process.env.STRIPE_PRICE_MICROSOFT_INBOX,
+  [ProductType.RESELLER]: process.env.STRIPE_PRICE_RESELLER?.trim(),
+  [ProductType.EDU]: process.env.STRIPE_PRICE_EDU?.trim(),
+  [ProductType.LEGACY]: process.env.STRIPE_PRICE_LEGACY?.trim(),
+  [ProductType.PREWARMED]: process.env.STRIPE_PRICE_PREWARMED_INBOX?.trim(),
+  [ProductType.AWS]: process.env.STRIPE_PRICE_AWS?.trim(),
+  [ProductType.MICROSOFT]: process.env.STRIPE_PRICE_MICROSOFT_INBOX?.trim(),
 }
 
 const DOMAIN_PRICING_USD = {
@@ -192,6 +192,6 @@ export async function POST(request: NextRequest) {
     const stack = error instanceof Error ? error.stack : undefined
     console.error('checkout-with-domains error:', message)
     if (stack) console.error('stack:', stack)
-    return NextResponse.json({ error: 'Failed to create checkout session', debug: message }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 })
   }
 }
