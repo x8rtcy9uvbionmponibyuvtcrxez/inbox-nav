@@ -11,11 +11,20 @@ type DomainSource = "OWN" | "BUY_FOR_ME";
 type TLD = ".com" | ".info";
 
 function normalizeProductType(value: string | null): ProductType {
-  const v = (value || "EDU").toUpperCase();
-  // Hide LEGACY from new checkouts, redirect to EDU
-  if (v === "LEGACY") return "EDU";
-  return ["EDU", "RESELLER", "PREWARMED", "AWS", "MICROSOFT"].includes(v) ? (v as ProductType) : "EDU";
+  const v = (value || "RESELLER").toUpperCase();
+  // Legacy/EDU no longer sold — redirect to RESELLER
+  if (v === "LEGACY" || v === "EDU") return "RESELLER";
+  return ["RESELLER", "PREWARMED", "AWS", "MICROSOFT"].includes(v) ? (v as ProductType) : "RESELLER";
 }
+
+const PRODUCT_DISPLAY_NAMES: Record<ProductType, string> = {
+  RESELLER: "Google",
+  EDU: "Google",
+  LEGACY: "Google",
+  PREWARMED: "Prewarmed",
+  AWS: "AWS",
+  MICROSOFT: "Microsoft",
+};
 
 function getDefaultInboxesPerDomain(product: ProductType): number {
   if (product === "RESELLER") return 3;
@@ -131,9 +140,9 @@ function ConfigurePageContent() {
               <span className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
                 Configuration
               </span>
-              <h1>Configure your {product} order</h1>
+              <h1>Configure your {PRODUCT_DISPLAY_NAMES[product]} order</h1>
               <p className="text-base text-[var(--text-secondary)]">
-                {quantity} {product} inboxes @ {formatUsd(getPricePerInbox(product))} = {formatUsd(totalInboxPrice)}
+                {quantity} {PRODUCT_DISPLAY_NAMES[product]} inboxes @ {formatUsd(getPricePerInbox(product))} = {formatUsd(totalInboxPrice)}
                 {domainSource === "BUY_FOR_ME" && (
                   <>
                     {" "}• Domains: {domainsNeeded} × {formatUsd(tldPrice)} = {formatUsd(totalDomainPrice)}

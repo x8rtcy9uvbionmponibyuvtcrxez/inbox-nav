@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ClerkLoaded, SignUp, useAuth } from "@clerk/nextjs";
 import { clerkDarkAppearance } from "@/lib/clerkAppearance";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isSignedIn, isLoaded } = useAuth();
+
+  // Read redirect_url from query string (e.g. ?redirect_url=/checkout/configure?product=LEGACY)
+  const redirectUrl = searchParams.get("redirect_url") || "/dashboard";
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      router.push("/dashboard");
+      router.push(redirectUrl);
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoaded, isSignedIn, router, redirectUrl]);
 
   if (isLoaded && isSignedIn) {
     return (
@@ -50,6 +54,7 @@ export default function SignUpPage() {
             routing="path"
             path="/sign-up"
             signInUrl="/sign-in"
+            forceRedirectUrl={redirectUrl}
             appearance={signUpAppearance}
           />
         </ClerkLoaded>

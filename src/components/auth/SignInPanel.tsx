@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSignIn, useAuth } from "@clerk/nextjs";
 import { clerkCardClassName } from "@/lib/clerkAppearance";
 
 export function SignInPanel() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn, isLoaded, setActive } = useSignIn();
   const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+
+  const redirectUrl = searchParams.get("redirect_url") || "/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,12 +25,12 @@ export function SignInPanel() {
   const [resetMessage, setResetMessage] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
 
-  // Redirect to dashboard if already signed in
+  // Redirect if already signed in
   useEffect(() => {
     if (isAuthLoaded && isSignedIn) {
-      router.push("/dashboard");
+      router.push(redirectUrl);
     }
-  }, [isAuthLoaded, isSignedIn, router]);
+  }, [isAuthLoaded, isSignedIn, router, redirectUrl]);
 
   // Don't render sign-in form if already signed in
   if (isAuthLoaded && isSignedIn) {
@@ -53,7 +56,7 @@ export function SignInPanel() {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        router.push("/dashboard");
+        router.push(redirectUrl);
         return;
       }
 
@@ -85,7 +88,7 @@ export function SignInPanel() {
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sign-in",
-        redirectUrlComplete: "/dashboard",
+        redirectUrlComplete: redirectUrl,
       });
     } catch (err) {
       setIsGoogleLoading(false);
@@ -144,7 +147,7 @@ export function SignInPanel() {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        router.push("/dashboard");
+        router.push(redirectUrl);
         return;
       }
 
