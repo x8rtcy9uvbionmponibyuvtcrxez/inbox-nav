@@ -12,8 +12,8 @@ type TLD = ".com" | ".info";
 
 function normalizeProductType(value: string | null): ProductType {
   const v = (value || "RESELLER").toUpperCase();
-  // Legacy/EDU no longer sold — redirect to RESELLER
-  if (v === "LEGACY" || v === "EDU") return "RESELLER";
+  // Google is the customer-facing name for RESELLER; Legacy/EDU no longer sold
+  if (v === "GOOGLE" || v === "LEGACY" || v === "EDU") return "RESELLER";
   return ["RESELLER", "PREWARMED", "AWS", "MICROSOFT"].includes(v) ? (v as ProductType) : "RESELLER";
 }
 
