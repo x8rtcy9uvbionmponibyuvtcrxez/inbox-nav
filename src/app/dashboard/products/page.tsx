@@ -208,7 +208,7 @@ const tabs: Tab[] = [
 const products: Product[] = [
   {
     id: "RESELLER",
-    name: "Premium Inboxes",
+    name: "Google Inboxes",
     price: 3,
     description: "Safest Google inboxes — the recommended choice",
     features: ["Zero risk of Google crackdown", "Full admin access", "1 domain/workspace", "US IP only", "Send up to 15 emails/day/inbox"],
