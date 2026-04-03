@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useMemo, useEffect, Suspense } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { saveOnboardingAction } from "@/app/onboarding/actions";
 import { useRouter, useSearchParams } from "next/navigation";
 import TagInput from "./components/TagInput";
@@ -48,6 +49,17 @@ function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isSignedIn, isLoaded } = useAuth();
+
+  // Guest users must sign up before onboarding — redirect to sign-up
+  // with a redirect back to this page (preserving session_id).
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      const currentUrl = window.location.pathname + window.location.search;
+      router.replace(`/sign-up?redirect_url=${encodeURIComponent(currentUrl)}`);
+    }
+  }, [isLoaded, isSignedIn, router]);
 
   // URL parameters
   const [productType, setProductType] = useState<string | null>(null);

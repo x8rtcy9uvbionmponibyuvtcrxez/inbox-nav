@@ -8,6 +8,7 @@ const isPublicRoute = createRouteMatcher([
   '/onboarding(.*)',
   '/checkout(.*)',
   '/api/checkout-with-domains',
+  '/api/get-session',
   '/api/webhooks/stripe-subscription',
   '/api/webhooks/clerk',
 ]);
@@ -15,6 +16,7 @@ const isPublicRoute = createRouteMatcher([
 // Routes that should bypass Clerk entirely (no session/CSRF checking)
 const CLERK_BYPASS_PATHS = [
   '/api/checkout-with-domains',
+  '/api/get-session',
   '/api/webhooks/stripe-subscription',
   '/api/webhooks/clerk',
 ];

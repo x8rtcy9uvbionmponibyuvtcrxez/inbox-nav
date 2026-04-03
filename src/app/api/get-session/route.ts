@@ -4,11 +4,13 @@ import { getStripe } from '@/lib/stripe'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the authenticated user
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Auth is optional — guests can access their session after checkout
+    let userId: string | null = null
+    try {
+      const authResult = await auth()
+      userId = authResult.userId
+    } catch {
+      // Guest user — no Clerk session
     }
 
     // Get session_id from query params
@@ -58,8 +60,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Verify the session belongs to the current user
-    if (session.metadata?.clerkUserId !== userId) {
+    // Verify session ownership: if user is signed in, check it matches.
+    // For guest sessions (clerkUserId is empty), allow access by session_id
+    // (Stripe session IDs are unguessable, so possession = authorization).
+    const sessionOwner = session.metadata?.clerkUserId
+    if (sessionOwner && userId && sessionOwner !== userId) {
       return NextResponse.json(
         { error: 'Session does not belong to current user' },
         { status: 403 }
