@@ -192,6 +192,6 @@ export async function POST(request: NextRequest) {
     const stack = error instanceof Error ? error.stack : undefined
     console.error('checkout-with-domains error:', message)
     if (stack) console.error('stack:', stack)
-    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create checkout session', debug: message }, { status: 500 })
   }
 }
