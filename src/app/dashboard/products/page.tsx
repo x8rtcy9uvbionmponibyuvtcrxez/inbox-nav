@@ -414,7 +414,7 @@ export default function ProductsPage() {
                 </div>
               </nav>
 
-              <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+              <div className={`grid gap-6 grid-cols-1 ${filteredProducts.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : 'md:grid-cols-2'}`}>
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
