@@ -574,12 +574,25 @@ section { padding: 100px 0; position: relative; }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 36px 32px;
+  padding: 48px 40px;
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-card);
   transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
 }
+.problem-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.problem-icon svg { width: 26px; height: 26px; }
+.problem-card:nth-child(1) .problem-icon { background: rgba(168,85,247,.1); }
+.problem-card:nth-child(2) .problem-icon { background: rgba(232,67,147,.1); }
+.problem-card:nth-child(3) .problem-icon { background: rgba(249,115,22,.1); }
 .problem-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
@@ -621,14 +634,14 @@ section { padding: 100px 0; position: relative; }
 .problem-card:nth-child(2) .problem-num::after { background: var(--pink); }
 .problem-card:nth-child(3) .problem-num::after { background: var(--orange); }
 .problem-card h3 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   color: var(--navy);
   line-height: 1.3;
 }
 .problem-card p {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-2);
   line-height: 1.75;
 }
@@ -653,40 +666,57 @@ section { padding: 100px 0; position: relative; }
 }
 .method-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
 }
 .method-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 40px 36px;
+  padding: 44px 36px;
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-card);
   transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out), border-color 0.4s;
 }
+.method-card:nth-child(1) { grid-column: span 4; }
+.method-card:nth-child(2) { grid-column: span 2; }
+.method-card:nth-child(3) { grid-column: span 2; }
+.method-card:nth-child(4) { grid-column: span 4; }
+.method-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.method-card:hover::before { opacity: 1; }
+.method-card:nth-child(1)::before { background: var(--gradient); }
+.method-card:nth-child(2)::before { background: linear-gradient(90deg, var(--pink), var(--orange)); }
+.method-card:nth-child(3)::before { background: linear-gradient(90deg, var(--orange), var(--accent)); }
+.method-card:nth-child(4)::before { background: var(--gradient); }
 .method-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
   border-color: rgba(168,85,247,.15);
 }
-.method-card .step {
-  font-family: var(--serif);
-  font-size: 80px;
-  color: var(--navy);
-  opacity: .05;
-  position: absolute;
-  top: 12px;
-  right: 20px;
-  font-style: italic;
-  line-height: 1;
-  transition: opacity 0.4s, transform 0.4s;
+.method-card .method-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
 }
-.method-card:hover .step {
-  opacity: .08;
-  transform: scale(1.05) translateY(-4px);
-}
+.method-card .method-icon svg { width: 26px; height: 26px; }
+.method-card:nth-child(1) .method-icon { background: rgba(168,85,247,.1); }
+.method-card:nth-child(2) .method-icon { background: rgba(232,67,147,.1); }
+.method-card:nth-child(3) .method-icon { background: rgba(249,115,22,.1); }
+.method-card:nth-child(4) .method-icon { background: rgba(30,16,84,.08); }
 .method-card .step-badge {
   font-family: var(--mono);
   font-size: 10px;
@@ -702,18 +732,33 @@ section { padding: 100px 0; position: relative; }
 .method-card:nth-child(3) .step-badge { background: rgba(249,115,22,.08); color: var(--orange); }
 .method-card:nth-child(4) .step-badge { background: rgba(30,16,84,.06); color: var(--navy); }
 .method-card h3 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   margin-bottom: 10px;
   color: var(--navy);
   line-height: 1.3;
 }
 .method-card p {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-2);
   line-height: 1.75;
   position: relative;
 }
+.method-card .method-deco {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  opacity: 0.04;
+  transition: opacity 0.4s, transform 0.4s;
+}
+.method-card:hover .method-deco { opacity: 0.08; transform: scale(1.15); }
+.method-card:nth-child(1) .method-deco { background: var(--accent); }
+.method-card:nth-child(2) .method-deco { background: var(--pink); }
+.method-card:nth-child(3) .method-deco { background: var(--orange); }
+.method-card:nth-child(4) .method-deco { background: var(--navy); }
 
 /* ============================================
    PROCESS — STACKING CARDS (CSS sticky)
@@ -848,170 +893,6 @@ section { padding: 100px 0; position: relative; }
   .pcard { padding: 28px 20px 32px; }
 }
 
-/* ============================================
-   HOW WE WORK TOGETHER — TIMELINE
-   ============================================ */
-.timeline-track {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.timeline-row {
-  display: flex;
-  gap: 12px;
-}
-.tl-block {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 28px 24px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-  transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
-}
-.tl-block:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-card-hover);
-}
-/* Gradient left border instead of top bar */
-.tl-block::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 4px;
-  border-radius: 4px 0 0 4px;
-}
-.tl-setup::before { background: linear-gradient(180deg, #a855f7, rgba(168,85,247,.3)); }
-.tl-launch::before { background: linear-gradient(180deg, #e84393, rgba(232,67,147,.3)); }
-.tl-scale::before { background: linear-gradient(180deg, #f97316, rgba(249,115,22,.3)); }
-.tl-full::before { background: var(--gradient); }
-.tl-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 10px;
-}
-.tl-setup .tl-label { color: var(--accent); }
-.tl-launch .tl-label { color: var(--pink); }
-.tl-scale .tl-label { color: #f97316; }
-.tl-full .tl-label { color: var(--accent); }
-.tl-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 14px;
-  color: var(--navy);
-}
-.tl-items {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.tl-items span {
-  font-size: 13px;
-  color: var(--text-2);
-  padding-left: 16px;
-  position: relative;
-}
-.tl-items span::before {
-  content: '→';
-  position: absolute;
-  left: 0;
-  color: var(--text-3);
-  font-size: 12px;
-}
-.tl-connector {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 0;
-  position: relative;
-}
-.tl-connector-line {
-  width: 2px;
-  height: 28px;
-  background: linear-gradient(180deg, var(--border-2), var(--accent), var(--border-2));
-}
-.tl-connector-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--gradient);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 12px rgba(168,85,247,.3);
-}
-
-/* We handle / You handle */
-.collab-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-top: 56px;
-}
-.collab-col {
-  border-radius: var(--r-lg);
-  padding: 36px;
-  position: relative;
-  overflow: hidden;
-}
-.collab-us {
-  background: var(--navy);
-  color: #fff;
-  box-shadow: var(--shadow-card), var(--shadow-glow);
-}
-.collab-you {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-card);
-}
-.collab-col h3 {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.collab-badge {
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 5px 14px;
-  border-radius: 100px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-weight: 600;
-}
-.badge-us { background: rgba(168,85,247,.2); color: rgba(255,255,255,.9); }
-.badge-you { background: rgba(249,115,22,.1); color: #f97316; }
-.collab-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.collab-list li {
-  font-size: 14px;
-  padding-left: 20px;
-  position: relative;
-  line-height: 1.6;
-}
-.collab-us .collab-list li { color: rgba(255,255,255,.8); }
-.collab-you .collab-list li { color: var(--text-2); }
-.collab-list li::before {
-  content: '✦';
-  position: absolute;
-  left: 0;
-  font-size: 10px;
-}
-.collab-us .collab-list li::before { color: rgba(168,85,247,.6); }
-.collab-you .collab-list li::before { color: var(--orange); }
 
 /* ============================================
    TESTIMONIALS
@@ -1239,111 +1120,6 @@ section { padding: 100px 0; position: relative; }
   margin-top: 3px;
 }
 
-/* ============================================
-   PRICING
-   ============================================ */
-.pricing-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-top: 56px;
-  max-width: 840px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.price-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 40px 36px;
-  position: relative;
-  box-shadow: var(--shadow-card);
-  transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
-}
-.price-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card-hover);
-}
-.price-card.featured {
-  border: 2px solid transparent;
-  background: linear-gradient(var(--surface), var(--surface)) padding-box,
-              var(--gradient) border-box;
-  box-shadow: var(--shadow-card), 0 0 40px rgba(168,85,247,.1);
-  transform: scale(1.03);
-}
-.price-card.featured:hover {
-  transform: scale(1.03) translateY(-4px);
-  box-shadow: var(--shadow-card-hover), 0 0 60px rgba(168,85,247,.15);
-}
-.price-card.featured::before {
-  content: 'Most popular';
-  position: absolute;
-  top: -12px;
-  left: 28px;
-  background: var(--gradient);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 16px;
-  border-radius: 100px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 12px rgba(168,85,247,.25);
-}
-.price-name {
-  font-size: 13px;
-  color: var(--text-3);
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-weight: 600;
-}
-.price-amount {
-  font-family: var(--mono);
-  font-size: 40px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: var(--navy);
-}
-.price-amount span {
-  font-size: 15px;
-  color: var(--text-3);
-  font-weight: 400;
-}
-.price-desc {
-  font-size: 14px;
-  color: var(--text-2);
-  margin-bottom: 28px;
-  line-height: 1.6;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--border);
-}
-.price-features {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-.price-features li {
-  font-size: 14px;
-  color: var(--text-2);
-  padding-left: 22px;
-  position: relative;
-  line-height: 1.6;
-}
-.price-features li::before {
-  content: '✦';
-  position: absolute;
-  left: 0;
-  font-size: 10px;
-  color: var(--accent);
-  top: 3px;
-}
-.price-features li strong {
-  color: var(--navy);
-  font-weight: 600;
-}
 
 /* ============================================
    TRIAL SECTION
@@ -1398,47 +1174,6 @@ section { padding: 100px 0; position: relative; }
   position: relative;
 }
 
-/* ============================================
-   FINAL CTA
-   ============================================ */
-.final-cta {
-  text-align: center;
-  padding: 100px 0;
-  position: relative;
-  overflow: hidden;
-}
-.final-cta::before {
-  content: '';
-  position: absolute;
-  bottom: -200px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(168,85,247,.05) 0%, rgba(232,67,147,.03) 30%, transparent 60%);
-  pointer-events: none;
-}
-.final-cta h2 {
-  font-family: var(--serif);
-  font-size: 42px;
-  font-weight: 400;
-  margin-bottom: 14px;
-  color: var(--navy);
-  position: relative;
-}
-.final-cta > .container > p {
-  color: var(--text-2);
-  font-size: 16px;
-  margin-bottom: 32px;
-  position: relative;
-}
-.final-cta-buttons {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
-  position: relative;
-}
 
 /* ============================================
    FAQ
@@ -1537,10 +1272,11 @@ section { padding: 100px 0; position: relative; }
   .problem-grid { grid-template-columns: 1fr 1fr; }
   .problem-card:last-child { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; }
 
-  .method-grid { grid-template-columns: 1fr 1fr; }
-
-  .timeline-row { flex-wrap: wrap; }
-  .tl-block { flex: 1 1 calc(50% - 6px); min-width: calc(50% - 6px); }
+  .method-grid { grid-template-columns: repeat(2, 1fr); }
+  .method-card:nth-child(1),
+  .method-card:nth-child(2),
+  .method-card:nth-child(3),
+  .method-card:nth-child(4) { grid-column: span 1; }
 
   .testimonial-grid { grid-template-columns: 1fr 1fr; }
   .testimonial-card:last-child { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; }
@@ -1551,8 +1287,6 @@ section { padding: 100px 0; position: relative; }
 
   .video-grid { grid-template-columns: 1fr 1fr; }
   .video-card:last-child { grid-column: 1 / -1; max-width: 60%; margin: 0 auto; }
-
-  .pricing-grid { max-width: 600px; }
 
   .section-header h2, .comp-header h2, .method-header h2 { font-size: 36px; }
 
@@ -1611,6 +1345,10 @@ section { padding: 100px 0; position: relative; }
 
   /* Methodology */
   .method-grid { grid-template-columns: 1fr; }
+  .method-card:nth-child(1),
+  .method-card:nth-child(2),
+  .method-card:nth-child(3),
+  .method-card:nth-child(4) { grid-column: span 1; }
 
   /* Process */
   .process-step {
@@ -1623,13 +1361,6 @@ section { padding: 100px 0; position: relative; }
   .process-phase::after { display: none; }
   .process-content ul { flex-wrap: wrap; }
 
-  /* Timeline */
-  .timeline-row { flex-direction: column; }
-  .tl-block { flex: 1 1 100%; min-width: 100%; }
-
-  /* Collab */
-  .collab-grid { grid-template-columns: 1fr; }
-
   /* Testimonials */
   .testimonial-grid { grid-template-columns: 1fr; }
   .testimonial-card:last-child { max-width: 100%; }
@@ -1641,20 +1372,10 @@ section { padding: 100px 0; position: relative; }
   .video-grid { grid-template-columns: 1fr; }
   .video-card:last-child { max-width: 100%; }
 
-  /* Pricing */
-  .pricing-grid { grid-template-columns: 1fr; }
-  .price-card.featured { transform: none; }
-  .price-card.featured:hover { transform: translateY(-4px); }
-
   /* Trial */
   .trial-card { padding: 40px 28px; }
   .trial-card h2 { font-size: 30px; }
   .trial-card .trial-price { font-size: 44px; }
-
-  /* Final CTA */
-  .final-cta h2 { font-size: 30px; }
-  .final-cta-buttons { flex-direction: column; align-items: center; }
-  .final-cta-buttons .btn { width: 100%; max-width: 300px; }
 
   /* FAQ */
   .faq-question { font-size: 15px; padding: 20px 0; }
@@ -1679,22 +1400,21 @@ section { padding: 100px 0; position: relative; }
 <a href="/marketing-index.html" class="logo"><span>Inbox</span>Navigator</a>
 <div class="nav-links">
 <a href="/marketing-index.html">Home</a>
-<a href="#pricing">Pricing</a>
 <a href="#trial">Contact</a>
 <a href="#faq">FAQ</a>
 </div>
 <div class="nav-right">
 <a href="https://app.inboxnavigator.com/sign-in" class="login">Log In</a>
-<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient">Get Started</a>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient">Start Trial</a>
 </div>
 <button class="mobile-toggle" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
 <span></span><span></span><span></span>
 </button>
 </div>
 <div class="mobile-menu" id="mobileMenu">
-<a href="/marketing-index.html">Home</a><a href="#pricing">Pricing</a><a href="inboxnav-dfy.html">DFY</a><a href="#trial">Contact</a><a href="#faq">FAQ</a>
+<a href="/marketing-index.html">Home</a><a href="inboxnav-dfy.html">DFY</a><a href="#trial">Contact</a><a href="#faq">FAQ</a>
 <a href="https://app.inboxnavigator.com/sign-in">Log In</a>
-<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient" style="text-align:center">Get Started</a>
+<a href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products" class="btn btn-gradient" style="text-align:center">Start Trial</a>
 </div>
 </nav>
 
@@ -1707,8 +1427,7 @@ section { padding: 100px 0; position: relative; }
     <h1 class="reveal reveal-delay-1">Your competitors are reaching 5% of the market. <em><span class="grad-text">We'll cover all of it.</span></em></h1>
     <p class="hero-sub reveal reveal-delay-2">We own the cold email infrastructure other agencies rent from people like us. You get 2x the outreach volume at the same price. More emails, more replies, more pipeline.</p>
     <div class="hero-ctas reveal reveal-delay-3">
-      <a href="#trial" class="btn btn-accent">Start paid trial — $250</a>
-      <a href="#pricing" class="btn btn-ghost">See pricing</a>
+      <a href="#trial" class="btn btn-accent">Start Trial</a>
     </div>
   </div>
 </section>
@@ -1740,7 +1459,7 @@ section { padding: 100px 0; position: relative; }
 <div class="cta-banner">
   <div class="cta-banner-inner">
     <p>Other agencies rent their inboxes from companies like us. <span class="highlight grad-text">We skip the markup and pass the volume to you.</span></p>
-    <a href="#trial" class="btn btn-accent">Start your paid trial</a>
+    <a href="#trial" class="btn btn-accent">Start Trial</a>
   </div>
   <span class="cta-star" style="top:15%;left:10%;animation-delay:0s"></span>
   <span class="cta-star" style="top:25%;left:85%;animation-delay:1s"></span>
@@ -1794,26 +1513,22 @@ section { padding: 100px 0; position: relative; }
       <h2>You already know outbound works. The question is why it's not working faster.</h2>
     </div>
     <div class="problem-grid">
-      <div class="problem-card reveal"><div class="problem-num">01</div><h3>Your agency is throttling you</h3><p>They're paying $3–6 per inbox and passing the cost to you. That means 20–30 inboxes, 4K prospects a month, and 6+ months before you've even touched your full market. Your competitors got there first.</p></div>
-      <div class="problem-card reveal reveal-delay-1"><div class="problem-num">02</div><h3>Inbound hit a ceiling</h3><p>Content, referrals, and ads got you to this point. But you can't scale word of mouth. You can't post your way to 50 meetings a month. You need an outbound engine that runs whether you're online or not.</p></div>
-      <div class="problem-card reveal reveal-delay-2"><div class="problem-num">03</div><h3>Hiring an SDR is a gamble</h3><p>$60–80K fully loaded. Three months to ramp. They might quit after six. You're not just paying for outreach — you're paying for management, tools, training, and hope. For a third of that cost, we handle everything.</p></div>
+      <div class="problem-card reveal">
+        <div class="problem-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="problem-num">01</div><h3>Your agency is throttling you</h3><p>They're paying $3–6 per inbox and passing the cost to you. That means 20–30 inboxes, 4K prospects a month, and 6+ months before you've even touched your full market. Your competitors got there first.</p>
+      </div>
+      <div class="problem-card reveal reveal-delay-1">
+        <div class="problem-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#e84393" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
+        <div class="problem-num">02</div><h3>Inbound hit a ceiling</h3><p>Content, referrals, and ads got you to this point. But you can't scale word of mouth. You can't post your way to 50 meetings a month. You need an outbound engine that runs whether you're online or not.</p>
+      </div>
+      <div class="problem-card reveal reveal-delay-2">
+        <div class="problem-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div class="problem-num">03</div><h3>Hiring an SDR is a gamble</h3><p>$60–80K fully loaded. Three months to ramp. They might quit after six. You're not just paying for outreach — you're paying for management, tools, training, and hope. For a third of that cost, we handle everything.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     CTA BANNER 2
-     ============================================ -->
-<div class="cta-banner">
-  <div class="cta-banner-inner">
-    <p><span class="highlight grad-text">$250 proof of concept.</span> We send 2,000 emails to your ICP. You keep every reply.</p>
-    <a href="#trial" class="btn btn-accent">Start paid trial</a>
-  </div>
-  <span class="cta-star" style="top:20%;left:15%;animation-delay:0.3s"></span>
-  <span class="cta-star" style="top:30%;left:80%;animation-delay:1.2s"></span>
-  <span class="cta-star" style="top:75%;left:25%;animation-delay:0.8s"></span>
-  <span class="cta-star" style="top:65%;left:90%;animation-delay:1.8s"></span>
-</div>
 
 <!-- ============================================
      METHODOLOGY
@@ -1827,28 +1542,32 @@ section { padding: 100px 0; position: relative; }
     </div>
     <div class="method-grid">
       <div class="method-card reveal">
-        <span class="step">01</span>
+        <div class="method-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
         <div class="step-badge">Step 01</div>
         <h3>Golden ICP mapping</h3>
         <p>We start with the 20% of your TAM that drives 80% of your revenue. We map the segments, personas, and angles before a single email goes out. No guesswork — data-driven targeting from day one.</p>
+        <div class="method-deco"></div>
       </div>
       <div class="method-card reveal reveal-delay-1">
-        <span class="step">02</span>
+        <div class="method-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#e84393" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg></div>
         <div class="step-badge">Step 02</div>
         <h3>Volume split testing</h3>
-        <p>Multiple campaign angles running simultaneously against different segments. We're not testing subject lines — we're testing narratives. Different pain points, different hooks, different CTAs. All at volume because that's how you find signal fast.</p>
+        <p>Multiple campaign angles running simultaneously against different segments. We're testing narratives — different pain points, hooks, and CTAs. All at volume.</p>
+        <div class="method-deco"></div>
       </div>
       <div class="method-card reveal reveal-delay-2">
-        <span class="step">03</span>
+        <div class="method-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
         <div class="step-badge">Step 03</div>
         <h3>Message-market fit</h3>
-        <p>Within 30–60 days we know exactly what your market responds to. Which segments convert, which angles hit, which personas are worth pursuing. This is data you keep forever — even if you stop working with us.</p>
+        <p>Within 30–60 days we know exactly what your market responds to. Data you keep forever — even if you stop working with us.</p>
+        <div class="method-deco"></div>
       </div>
       <div class="method-card reveal reveal-delay-3">
-        <span class="step">04</span>
+        <div class="method-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#1e1054" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></div>
         <div class="step-badge">Step 04</div>
         <h3>Full TAM blitz</h3>
         <p>Once we find what works, we scale it across your entire addressable market at 2x the volume any other agency can deliver. Every prospect in your TAM touched every 30–60 days. No one left behind.</p>
+        <div class="method-deco"></div>
       </div>
     </div>
   </div>
@@ -1920,50 +1639,6 @@ section { padding: 100px 0; position: relative; }
   </div>
 </section>
 
-<!-- ============================================
-     HOW WE WORK TOGETHER
-     ============================================ -->
-<section>
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-tag grad-text">How we work together</span>
-      <h2>We run the engine. You close the deals.</h2>
-      <p>Here's exactly what happens from day one.</p>
-    </div>
-    <div class="timeline-track">
-      <div class="timeline-row">
-        <div class="tl-block tl-setup reveal"><div class="tl-label">Week 1</div><div class="tl-title">Onboarding + strategy</div><div class="tl-items"><span>ICP deep dive</span><span>TAM mapping</span><span>Copy written</span></div></div>
-        <div class="tl-block tl-setup reveal reveal-delay-1"><div class="tl-label">Week 2</div><div class="tl-title">Infrastructure + warmup</div><div class="tl-items"><span>Domains provisioned</span><span>Inboxes warming</span><span>Deliverability testing</span></div></div>
-        <div class="tl-block tl-launch reveal reveal-delay-2"><div class="tl-label">Week 3</div><div class="tl-title">First campaigns live</div><div class="tl-items"><span>2–3 angles launched</span><span>A/B split tests running</span><span>Initial monitoring</span></div></div>
-        <div class="tl-block tl-launch reveal reveal-delay-3"><div class="tl-label">Week 4</div><div class="tl-title">First data + optimization</div><div class="tl-items"><span>Reply data analyzed</span><span>Winning angles identified</span><span>Copy iterations shipped</span></div></div>
-      </div>
-      <div class="tl-connector"><div class="tl-connector-line"></div><div class="tl-connector-dot"></div></div>
-      <div class="timeline-row">
-        <div class="tl-block tl-scale reveal" style="flex:2"><div class="tl-label">Month 2</div><div class="tl-title">Message-market fit</div><div class="tl-items"><span>New copy variants tested</span><span>Intro offers tested</span><span>Follow-up sequences refined</span><span>Positive reply routing dialed</span><span>Weekly reporting with insights</span></div></div>
-        <div class="tl-block tl-full reveal reveal-delay-1" style="flex:2"><div class="tl-label">Month 3+</div><div class="tl-title">Full TAM coverage at scale</div><div class="tl-items"><span>Winning campaigns scaled to full TAM</span><span>New ICPs added if relevant</span><span>Continuous A/B testing</span><span>Isolated workspace for reply mgmt</span><span>Monthly strategy alignment</span></div></div>
-      </div>
-    </div>
-    <div class="collab-grid">
-      <div class="collab-col collab-us reveal"><h3><span class="collab-badge badge-us">We handle</span></h3><ul class="collab-list"><li>Infrastructure, domains, warmup, deliverability</li><li>Lead lists — sourced, cleaned, Clay-enriched</li><li>Campaign copy — multiple angles, A/B tested</li><li>Campaign management + optimization</li><li>Follow-up sequences automated</li><li>Isolated workspace — full visibility for you</li><li>Weekly reporting</li></ul></div>
-      <div class="collab-col collab-you reveal reveal-delay-1"><h3><span class="collab-badge badge-you">You handle</span></h3><ul class="collab-list"><li>Provide ICP details + value prop</li><li>Approve copy before we send</li><li>Respond to interested leads we route to you</li><li>Take the sales calls</li><li>Close deals</li><li>Give us lead quality feedback so we optimize</li></ul></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================
-     CTA BANNER 3
-     ============================================ -->
-<div class="cta-banner">
-  <div class="cta-banner-inner">
-    <p>Don't take our word for it. <span class="highlight grad-text">$250 gets you 2,000 emails to your ICP in 14 days.</span> Keep every reply.</p>
-    <a href="#trial" class="btn btn-accent">Start paid trial</a>
-  </div>
-  <span class="cta-star" style="top:10%;left:5%;animation-delay:0.2s"></span>
-  <span class="cta-star" style="top:40%;left:92%;animation-delay:1.4s"></span>
-  <span class="cta-star" style="top:85%;left:30%;animation-delay:0.6s"></span>
-  <span class="cta-star" style="top:50%;left:70%;animation-delay:2.1s"></span>
-  <span class="cta-star" style="top:20%;left:60%;animation-delay:1s"></span>
-</div>
 
 <!-- ============================================
      TEXT TESTIMONIALS
@@ -2039,55 +1714,6 @@ section { padding: 100px 0; position: relative; }
   </div>
 </section>
 
-<!-- ============================================
-     PRICING
-     ============================================ -->
-<section id="pricing">
-  <div class="container">
-    <div class="section-header reveal" style="text-align:center;max-width:100%">
-      <span class="section-tag grad-text">Pricing</span>
-      <h2 style="text-align:center">Simple pricing. Generous volume.</h2>
-      <p style="text-align:center;margin:0 auto">No setup fees. No per-inbox charges. No hidden costs. Cancel anytime.</p>
-    </div>
-    <div class="pricing-grid">
-      <div class="price-card reveal">
-        <div class="price-name">Starter</div>
-        <div class="price-amount">$1,500<span>/mo</span></div>
-        <div class="price-desc">For companies ready to launch outbound with serious volume.</div>
-        <ul class="price-features">
-          <li><strong>40 managed inboxes</strong> — warmed, monitored, deliverability managed</li>
-          <li><strong>~8,000 prospects contacted/mo</strong></li>
-          <li>1 ICP targeted</li>
-          <li>Custom cold email copy, A/B tested</li>
-          <li>Lead list built, cleaned, and verified</li>
-          <li>Campaign setup, launch, and management</li>
-          <li>Isolated workspace — full visibility</li>
-          <li>Weekly async report</li>
-          <li>60-day reply guarantee</li>
-        </ul>
-        <a href="#trial" class="btn btn-ghost" style="width:100%;text-align:center">Get started</a>
-      </div>
-      <div class="price-card featured reveal reveal-delay-1">
-        <div class="price-name">Growth</div>
-        <div class="price-amount">$3,500<span>/mo</span></div>
-        <div class="price-desc">For teams that want maximum coverage and Clay-enriched personalization.</div>
-        <ul class="price-features">
-          <li><strong>100 managed inboxes</strong> — warmed, monitored, deliverability managed</li>
-          <li><strong>~20,000 prospects contacted/mo</strong></li>
-          <li>Up to 3 ICPs targeted</li>
-          <li>Custom copy with A/B/C testing across angles</li>
-          <li>Clay-enriched personalization at scale</li>
-          <li>Lead list built, cleaned, enriched, and verified</li>
-          <li>Campaign setup, launch, and ongoing optimization</li>
-          <li>Isolated workspace — full visibility</li>
-          <li>Weekly 15-min reporting call</li>
-          <li>60-day reply guarantee</li>
-        </ul>
-        <a href="#trial" class="btn btn-accent" style="width:100%;text-align:center">Get started</a>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ============================================
      PAID TRIAL
@@ -2098,24 +1724,11 @@ section { padding: 100px 0; position: relative; }
       <h2>See it work before you commit.</h2>
       <div class="trial-price"><span class="grad-text">$250</span></div>
       <p>We send 2,000 emails to your exact ICP over 14 days. You keep every reply, every lead, every piece of data. If you move to a monthly plan, the $250 gets credited to your first invoice. If you don't, you walk away with real results and zero risk.</p>
-      <a href="#trial" class="btn btn-accent" data-rewardful="" style="font-size:15px;padding:15px 40px">Start your paid trial</a>
+      <a href="#trial" class="btn btn-accent" data-rewardful="" style="font-size:15px;padding:15px 40px">Start Trial</a>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     FINAL CTA
-     ============================================ -->
-<section class="final-cta">
-  <div class="container">
-    <h2 class="reveal">Your next 10 sales calls start here.</h2>
-    <p class="reveal reveal-delay-1">$250 paid trial or book an intro call. No commitment, no risk.</p>
-    <div class="final-cta-buttons reveal reveal-delay-2">
-      <a href="#trial" class="btn btn-accent">Start paid trial — $250</a>
-      <a href="#trial" class="btn btn-ghost">Book intro call</a>
-    </div>
-  </div>
-</section>
 
 <!-- ============================================
      FAQ
@@ -2192,7 +1805,7 @@ section { padding: 100px 0; position: relative; }
 </div>
 <div class="footer-col">
 <h4>Pages</h4>
-<a href="/marketing-index.html">Home</a><a href="#pricing">Pricing</a><a href="inboxnav-dfy.html">DFY</a><a href="#trial">Contact</a><a href="#faq">FAQ</a>
+<a href="/marketing-index.html">Home</a><a href="inboxnav-dfy.html">DFY</a><a href="#trial">Contact</a><a href="#faq">FAQ</a>
 </div>
 <div class="footer-col">
 <h4>Help</h4>
@@ -2237,25 +1850,6 @@ section { padding: 100px 0; position: relative; }
   }, { passive: true });
 })();
 
-// Stacking cards — subtle scale on covered cards via IntersectionObserver
-(function() {
-  if (window.innerWidth <= 900) return;
-  var cards = [].slice.call(document.querySelectorAll('.pcard'));
-  if (!cards.length) return;
-  var steps = 20;
-  var thresholds = [];
-  for (var s = 0; s <= steps; s++) thresholds.push(s / steps);
-  cards.forEach(function(card, i) {
-    if (i >= cards.length - 1) return;
-    var nextCard = cards[i + 1];
-    var observer = new IntersectionObserver(function(entries) {
-      var ratio = entries[0].intersectionRatio;
-      var scale = 1 - ratio * 0.03;
-      card.style.transform = 'scale(' + Math.max(scale, 0.97) + ')';
-    }, { threshold: thresholds });
-    observer.observe(nextCard);
-  });
-})();
 
 // FAQ accordion
 (function() {
