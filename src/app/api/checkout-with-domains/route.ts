@@ -32,8 +32,15 @@ const DOMAIN_PRICING_USD = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
-    // Auth is optional — guests can checkout without signing up first
+    // Auth is optional — guests can checkout without signing up first.
+    // When Clerk middleware is bypassed (guest checkout), auth() may throw.
+    let userId: string | null = null
+    try {
+      const authResult = await auth()
+      userId = authResult.userId
+    } catch {
+      // Guest user — no Clerk session available
+    }
 
     const body = await request.json() as {
       productType: ProductType
