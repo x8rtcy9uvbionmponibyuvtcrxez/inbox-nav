@@ -33,9 +33,7 @@ const DOMAIN_PRICING_USD = {
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Auth is optional — guests can checkout without signing up first
 
     const body = await request.json() as {
       productType: ProductType
@@ -121,27 +119,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const existingStripeCustomer = await prisma.order.findFirst({
-      where: {
-        clerkUserId: userId,
-        stripeCustomerId: { not: null },
-      },
-      orderBy: { createdAt: 'asc' },
-      select: { stripeCustomerId: true },
-    })
-
+    let existingStripeCustomer: { stripeCustomerId: string | null } | null = null
     let fallbackCustomerEmail: string | undefined
 
-    if (!existingStripeCustomer?.stripeCustomerId) {
-      try {
-        const client = await clerkClient()
-        const user = await client.users.getUser(userId)
-        const primaryEmailId = user.primaryEmailAddressId
-        const primaryEmail = user.emailAddresses?.find((addr) => addr.id === primaryEmailId)
-        fallbackCustomerEmail =
-          primaryEmail?.emailAddress ?? user.emailAddresses?.[0]?.emailAddress ?? undefined
-      } catch (clerkError) {
-        console.warn('Failed to load Clerk user for Stripe customer reuse:', clerkError)
+    if (userId) {
+      existingStripeCustomer = await prisma.order.findFirst({
+        where: {
+          clerkUserId: userId,
+          stripeCustomerId: { not: null },
+        },
+        orderBy: { createdAt: 'asc' },
+        select: { stripeCustomerId: true },
+      })
+
+      if (!existingStripeCustomer?.stripeCustomerId) {
+        try {
+          const client = await clerkClient()
+          const user = await client.users.getUser(userId)
+          const primaryEmailId = user.primaryEmailAddressId
+          const primaryEmail = user.emailAddresses?.find((addr) => addr.id === primaryEmailId)
+          fallbackCustomerEmail =
+            primaryEmail?.emailAddress ?? user.emailAddresses?.[0]?.emailAddress ?? undefined
+        } catch (clerkError) {
+          console.warn('Failed to load Clerk user for Stripe customer reuse:', clerkError)
+        }
       }
     }
 
@@ -150,7 +151,7 @@ export async function POST(request: NextRequest) {
       line_items: lineItems,
       allow_promotion_codes: true,
       metadata: {
-        clerkUserId: userId,
+        clerkUserId: userId || '',
         productType,
         quantity: String(quantity),
         inboxesPerDomain: String(body.inboxesPerDomain ?? ''),
