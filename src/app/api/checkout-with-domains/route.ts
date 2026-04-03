@@ -188,7 +188,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
-    console.error('checkout-with-domains error:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    const stack = error instanceof Error ? error.stack : undefined
+    console.error('checkout-with-domains error:', message)
+    if (stack) console.error('stack:', stack)
     return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 })
   }
 }
