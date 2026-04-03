@@ -25,6 +25,7 @@ const clerkHandler = clerkMiddleware((auth, req) => {
   }
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function middleware(req: NextRequest, event: any) {
   const path = req.nextUrl.pathname;
 
