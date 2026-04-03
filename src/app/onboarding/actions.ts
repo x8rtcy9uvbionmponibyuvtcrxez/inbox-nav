@@ -133,10 +133,11 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
     let order;
     try {
       if (input.sessionId) {
+        // Look for existing order by session ID — for guest-then-signup users,
+        // the order might be linked to the current user OR have no user yet.
         const existingOrder = await prisma.order.findFirst({
           where: {
             stripeSessionId: input.sessionId,
-            clerkUserId: userId,
           },
         });
 
@@ -151,7 +152,11 @@ export async function saveOnboardingAction(input: SaveOnboardingInput) {
             }
             const session = await stripe.checkout.sessions.retrieve(input.sessionId, { expand: ['subscription'] });
 
-            if (session.metadata?.clerkUserId !== userId) {
+            // For guest checkout, metadata.clerkUserId is empty — allow the
+            // newly signed-up user to claim this session. If clerkUserId IS set
+            // and doesn't match, reject it (session belongs to another user).
+            const sessionOwner = session.metadata?.clerkUserId;
+            if (sessionOwner && sessionOwner !== userId) {
               throw new Error("Session does not belong to current user");
             }
 
