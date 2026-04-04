@@ -35,13 +35,8 @@ export default function middleware(req: NextRequest, event: any) {
   const host = req.headers.get('host') || '';
   const path = req.nextUrl.pathname;
 
-  // Marketing domain: rewrite root to static marketing page
-  if (MARKETING_HOSTS.includes(host) && path === '/') {
-    return NextResponse.rewrite(new URL('/home.html', req.url));
-  }
-
-  // Marketing domain: let other static pages (like /inboxnav-dfy.html) pass through
-  // without Clerk auth
+  // Marketing domain: bypass Clerk auth entirely
+  // Marketing pages are proper Next.js routes in the (marketing) route group
   if (MARKETING_HOSTS.includes(host)) {
     return NextResponse.next();
   }
@@ -59,7 +54,7 @@ export default function middleware(req: NextRequest, event: any) {
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|[^?]*\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|xml|txt)).*)",
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],

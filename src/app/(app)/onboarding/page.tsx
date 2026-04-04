@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { saveOnboardingAction } from "@/app/onboarding/actions";
+import { saveOnboardingAction } from "@/app/(app)/onboarding/actions";
 import { useRouter, useSearchParams } from "next/navigation";
 import TagInput from "./components/TagInput";
 import ErrorBoundary from "@/components/ErrorBoundary";

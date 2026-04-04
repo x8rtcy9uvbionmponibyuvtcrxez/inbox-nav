@@ -1,5 +1,5 @@
 import { clerkClient } from '@clerk/nextjs/server';
-import { linkOrdersToUserAction } from '@/app/admin/import/actions';
+import { linkOrdersToUserAction } from '@/app/(app)/admin/import/actions';
 
 /**
  * Sends Clerk invitation to a user email
