@@ -2308,12 +2308,6 @@ export default function HomePage() {
         src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=W7Svnv"
         strategy="lazyOnload"
       />
-      <Script id="intercom-settings" strategy="lazyOnload">
-        {`window.intercomSettings={api_base:"https://api-iam.intercom.io",app_id:"ljme3f5a"};`}
-      </Script>
-      <Script id="intercom-widget" strategy="lazyOnload">
-        {`(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ljme3f5a';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();`}
-      </Script>
       <Script id="referralstack-stripe" strategy="lazyOnload">
         {`(function(){let timeoutId;const check=()=>{const referralCode=window.ReferralStack?.getReferral();const eventId=window.ReferralStack?.getReferralAndEventId()?.eventId;if(eventId){document.querySelectorAll('a[href*="buy.stripe.com"]').forEach((link)=>{const url=new URL(link.href);url.searchParams.set('client_reference_id',encodeURIComponent(referralCode));link.href=url;});}else{timeoutId=setTimeout(check,1000);}};setTimeout(()=>{clearTimeout(timeoutId);},10000);if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',check);}else{check();}})();`}
       </Script>
