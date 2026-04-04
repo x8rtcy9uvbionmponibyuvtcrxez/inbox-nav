@@ -1088,21 +1088,19 @@ section { padding: 100px 0; position: relative; }
   66% { transform: translate(-20px, 30px) scale(0.9); }
   100% { transform: translate(10px, -10px) scale(1.05); }
 }
-/* Decorative crosses */
-.cs-cross {
+/* Floating particles */
+.cases-bg .particle {
   position: absolute;
-  width: 12px;
-  height: 12px;
-  opacity: .15;
-  z-index: 1;
-}
-.cs-cross::before, .cs-cross::after {
-  content: '';
-  position: absolute;
+  border-radius: 50%;
   background: var(--accent);
+  animation: particleFloat linear infinite;
 }
-.cs-cross::before { width: 12px; height: 1px; top: 5.5px; left: 0; }
-.cs-cross::after { width: 1px; height: 12px; left: 5.5px; top: 0; }
+@keyframes particleFloat {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  5% { opacity: .8; }
+  90% { opacity: .6; }
+  100% { transform: translateY(-2500px) scale(0.3); opacity: 0; }
+}
 /* Case study block */
 .case-grid {
   display: flex;
@@ -2166,17 +2164,30 @@ section { padding: 100px 0; position: relative; }
     <div class="grid-line v" style="left:25%"></div>
     <div class="grid-line v" style="left:50%"></div>
     <div class="grid-line v" style="left:75%"></div>
-    <div class="glow-orb" style="width:400px;height:400px;background:rgba(168,85,247,.06);top:10%;left:-5%;animation-delay:0s"></div>
-    <div class="glow-orb" style="width:350px;height:350px;background:rgba(232,67,147,.05);bottom:5%;right:-5%;animation-delay:-4s"></div>
-    <div class="glow-orb" style="width:250px;height:250px;background:rgba(249,115,22,.04);top:50%;left:40%;animation-delay:-8s"></div>
+    <div class="glow-orb" style="width:500px;height:500px;background:rgba(168,85,247,.14);top:5%;left:-8%"></div>
+    <div class="glow-orb" style="width:450px;height:450px;background:rgba(232,67,147,.1);bottom:0;right:-8%;animation-delay:-5s"></div>
+    <!-- Floating particles -->
+    <div class="particle" style="width:2px;height:2px;left:3%;bottom:-10px;animation-duration:14s;animation-delay:0s"></div>
+    <div class="particle" style="width:3px;height:3px;left:8%;bottom:-10px;animation-duration:11s;animation-delay:-2s"></div>
+    <div class="particle" style="width:2px;height:2px;left:12%;bottom:-10px;animation-duration:16s;animation-delay:-7s"></div>
+    <div class="particle" style="width:2px;height:2px;left:18%;bottom:-10px;animation-duration:13s;animation-delay:-4s"></div>
+    <div class="particle" style="width:3px;height:3px;left:22%;bottom:-10px;animation-duration:15s;animation-delay:-9s"></div>
+    <div class="particle" style="width:2px;height:2px;left:28%;bottom:-10px;animation-duration:12s;animation-delay:-1s"></div>
+    <div class="particle" style="width:2px;height:2px;left:32%;bottom:-10px;animation-duration:17s;animation-delay:-6s"></div>
+    <div class="particle" style="width:3px;height:3px;left:37%;bottom:-10px;animation-duration:14s;animation-delay:-11s"></div>
+    <div class="particle" style="width:2px;height:2px;left:42%;bottom:-10px;animation-duration:13s;animation-delay:-3s"></div>
+    <div class="particle" style="width:2px;height:2px;left:47%;bottom:-10px;animation-duration:16s;animation-delay:-8s"></div>
+    <div class="particle" style="width:3px;height:3px;left:52%;bottom:-10px;animation-duration:11s;animation-delay:-5s"></div>
+    <div class="particle" style="width:2px;height:2px;left:57%;bottom:-10px;animation-duration:15s;animation-delay:-10s"></div>
+    <div class="particle" style="width:2px;height:2px;left:62%;bottom:-10px;animation-duration:12s;animation-delay:-2s"></div>
+    <div class="particle" style="width:3px;height:3px;left:67%;bottom:-10px;animation-duration:14s;animation-delay:-7s"></div>
+    <div class="particle" style="width:2px;height:2px;left:72%;bottom:-10px;animation-duration:17s;animation-delay:-4s"></div>
+    <div class="particle" style="width:2px;height:2px;left:77%;bottom:-10px;animation-duration:13s;animation-delay:-9s"></div>
+    <div class="particle" style="width:3px;height:3px;left:82%;bottom:-10px;animation-duration:11s;animation-delay:-1s"></div>
+    <div class="particle" style="width:2px;height:2px;left:87%;bottom:-10px;animation-duration:16s;animation-delay:-6s"></div>
+    <div class="particle" style="width:2px;height:2px;left:92%;bottom:-10px;animation-duration:14s;animation-delay:-12s"></div>
+    <div class="particle" style="width:3px;height:3px;left:97%;bottom:-10px;animation-duration:12s;animation-delay:-3s"></div>
   </div>
-  <!-- Decorative crosses -->
-  <div class="cs-cross" style="top:18%;left:24.5%;"></div>
-  <div class="cs-cross" style="top:18%;left:49.5%;"></div>
-  <div class="cs-cross" style="top:18%;left:74.5%;"></div>
-  <div class="cs-cross" style="top:48%;left:24.5%;"></div>
-  <div class="cs-cross" style="top:48%;right:25.5%;"></div>
-  <div class="cs-cross" style="top:78%;left:49.5%;"></div>
 
   <div class="container" style="position:relative;z-index:1">
     <div class="section-header reveal">
