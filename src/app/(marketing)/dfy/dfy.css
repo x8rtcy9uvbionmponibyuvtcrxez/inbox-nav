@@ -65,11 +65,11 @@
 .dfy-navbar .nav-right{display:flex;align-items:center;gap:20px}
 .dfy-navbar .nav-right .login{font-size:14px;font-weight:600;color:var(--navy)}
 .dfy-navbar .nav-right .btn{padding:10px 28px;font-size:14px}
-.mobile-toggle{display:none;flex-direction:column;gap:5px;width:28px;cursor:pointer;background:none;border:none}
-.mobile-toggle span{height:2px;background:var(--navy);border-radius:2px;transition:all .3s;display:block}
+.mobile-toggle{display:none;flex-direction:column;gap:5px;width:44px;height:44px;align-items:center;justify-content:center;padding:10px 8px;cursor:pointer;background:none;border:none}
+.mobile-toggle span{height:2px;width:100%;background:var(--navy);border-radius:2px;transition:all .3s;display:block}
 .mobile-menu{display:none;position:absolute;top:68px;left:0;right:0;background:#fff;border-bottom:1px solid var(--border);padding:24px;flex-direction:column;gap:16px;z-index:999}
 .mobile-menu.open{display:flex}
-.mobile-menu a{font-size:16px;font-weight:600;color:var(--navy);padding:8px 0;text-decoration:none}
+.mobile-menu a{font-size:16px;font-weight:600;color:var(--navy);padding:12px 0;min-height:44px;display:flex;align-items:center;text-decoration:none}
 
 /* ============================================
    BUTTONS
@@ -1265,13 +1265,13 @@
   .comp-col-us { transform: none; }
 
   .problem-grid { grid-template-columns: 1fr 1fr; }
-  .problem-card:last-child { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; }
+  .problem-card:last-child { grid-column: 1 / -1; max-width: 70%; margin: 0 auto; }
 
   .method-grid { grid-template-columns: repeat(2, 1fr); }
   .method-card:nth-child(1), .method-card:nth-child(2), .method-card:nth-child(3), .method-card:nth-child(4), .method-card:nth-child(5) { grid-column: span 1; }
 
   .testimonial-grid { grid-template-columns: 1fr 1fr; }
-  .testimonial-card:last-child { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; }
+  .testimonial-card:last-child { grid-column: 1 / -1; max-width: 70%; margin: 0 auto; }
 
   .case-body { grid-template-columns: 1fr; }
   .case-headline { font-size: 24px; }
@@ -1376,7 +1376,51 @@
   .final-cta-buttons .btn { width: 100%; max-width: 300px; }
 
   /* FAQ */
-  .faq-question { font-size: 15px; padding: 20px 0; }
+  .faq-question { font-size: 15px; padding: 20px 0; min-height: 44px; }
+  .faq-icon { width: 32px; height: 32px; }
+
+  /* Intro stat row */
+  .stat-cell { padding: 20px 16px; }
+  .stat-cell .num { font-size: 22px; }
+
+  /* CTA banner */
+  .cta-banner h2 { font-size: 28px; }
+
+  /* Comp header */
+  .comp-header h2 { font-size: 30px; }
+
+  /* Problem cards */
+  .problem-card { padding: 28px 24px; }
+
+  /* Method cards */
+  .method-card-body { padding: 20px 20px 24px; }
+  .method-card .method-visual { height: 120px; }
+
+  /* Case studies */
+  .cs-card { padding: 24px 20px; }
+
+  /* Video info */
+  .video-info { padding: 16px 20px; }
+
+  /* Testimonial cards */
+  .testimonial-card { padding: 24px; }
+  .testimonial-card blockquote { font-size: 15px; }
+}
+
+/* DFY extra small mobile */
+@media (max-width: 380px) {
+  .dfy-hero h1 { font-size: 28px; }
+  .hero-sub { font-size: 14px; }
+  .trial-card { padding: 32px 20px; }
+  .trial-card h2 { font-size: 26px; }
+  .trial-card .trial-price { font-size: 36px; }
+  .final-cta h2 { font-size: 26px; }
+  .section-header h2,
+  .comp-header h2,
+  .method-header h2,
+  .intro-section h2 { font-size: 26px; }
+  .pcard-title { font-size: 22px; }
+  .pcard { padding: 24px 16px 28px; }
 }
 
 /* ============================================

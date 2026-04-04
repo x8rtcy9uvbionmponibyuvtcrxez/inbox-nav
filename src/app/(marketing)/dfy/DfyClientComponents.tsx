@@ -69,10 +69,10 @@ export function DfyMobileMenu() {
         <span></span>
       </button>
       <div className={`mobile-menu${open ? " open" : ""}`}>
-        <Link href="/">Home</Link>
-        <Link href="/#pricing">Pricing</Link>
-        <Link href="/#demo">Contact</Link>
-        <Link href="/#faq">FAQ</Link>
+        <Link href="/" onClick={() => setOpen(false)}>Home</Link>
+        <Link href="/#pricing" onClick={() => setOpen(false)}>Pricing</Link>
+        <Link href="/#demo" onClick={() => setOpen(false)}>Contact</Link>
+        <Link href="/#faq" onClick={() => setOpen(false)}>FAQ</Link>
         <a
           href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products"
           className="btn btn-gradient"

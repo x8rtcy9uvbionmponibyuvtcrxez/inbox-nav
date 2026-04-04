@@ -131,3 +131,26 @@ ol {
   white-space: nowrap;
   border: 0;
 }
+
+/* ---- Mobile Responsive ---- */
+@media (max-width: 768px) {
+  .section {
+    padding: 64px 0;
+  }
+  .section-sm {
+    padding: 48px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .container,
+  .container-narrow {
+    padding: 0 16px;
+  }
+  .section {
+    padding: 48px 0;
+  }
+  .section-sm {
+    padding: 36px 0;
+  }
+}

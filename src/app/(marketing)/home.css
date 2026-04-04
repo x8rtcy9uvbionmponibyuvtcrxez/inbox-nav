@@ -107,8 +107,8 @@ h4 {
   color: #fff;
   font-size: 18px;
   background: rgba(255, 255, 255, 0.15);
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -190,10 +190,15 @@ h4 {
   display: none;
   flex-direction: column;
   gap: 5px;
-  width: 28px;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px;
 }
 .mobile-toggle span {
   height: 2px;
+  width: 100%;
   background: var(--navy);
   border-radius: 2px;
   transition: all 0.3s;
@@ -217,7 +222,14 @@ h4 {
   font-size: 16px;
   font-weight: 600;
   color: var(--navy);
-  padding: 8px 0;
+  padding: 12px 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.mobile-menu .btn {
+  justify-content: center;
+  margin-top: 8px;
 }
 
 /* ── 3. HERO ── */
@@ -1850,6 +1862,12 @@ h4 {
   .float-stat.right {
     right: 10px;
   }
+  .feature-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+  .for-you-grid {
+    gap: 20px;
+  }
 }
 @media (max-width: 768px) {
   .nav-links {
@@ -1868,6 +1886,9 @@ h4 {
   .stats-grid {
     flex-direction: column;
     gap: 32px;
+  }
+  .stat-item {
+    padding: 0 20px;
   }
   .stat-divider {
     width: 60px;
@@ -1895,10 +1916,80 @@ h4 {
   .email-time {
     display: none;
   }
+  /* Hero CTA full-width on mobile */
+  .hero .btn {
+    width: 100%;
+    max-width: 340px;
+    padding: 16px 32px;
+  }
+  /* FAQ single column on mobile */
+  .faq-panel {
+    column-count: 1;
+  }
+  .faq-q {
+    font-size: 15px;
+    padding: 16px 0;
+    min-height: 44px;
+  }
+  /* Pricing tabs smaller on mobile */
+  .pricing-tabs button {
+    padding: 10px 18px;
+    font-size: 12px;
+  }
+  .pricing-tabs {
+    gap: 8px;
+  }
+  /* Reduce section padding */
+  .section {
+    padding: 64px 0;
+  }
+  .section-sm {
+    padding: 48px 0;
+  }
+  .hero {
+    padding: 60px 0 48px;
+  }
+  .about,
+  .features,
+  .prewarmed,
+  .wall-of-love,
+  .video-test,
+  .special,
+  .for-you,
+  .statistics,
+  .pricing,
+  .process,
+  .faq,
+  .demo {
+    padding: 56px 0;
+  }
+  /* Demo placeholder responsive height */
+  .demo-placeholder {
+    height: 350px;
+  }
+  /* Logo marquee */
+  .logo-marquee {
+    padding: 48px 0;
+  }
+  .logo-marquee h2 {
+    margin-bottom: 32px;
+  }
+  /* Footer spacing */
+  .footer {
+    padding: 48px 0 24px;
+  }
+  .footer-grid {
+    gap: 32px;
+    margin-bottom: 32px;
+  }
 }
 @media (max-width: 480px) {
   .hero h1 {
     font-size: 32px;
+  }
+  .hero-sub {
+    font-size: 14px;
+    margin-bottom: 28px;
   }
   .pricing-card {
     padding: 32px 24px;
@@ -1908,5 +1999,55 @@ h4 {
   }
   .container {
     padding: 0 16px;
+  }
+  .container-narrow {
+    padding: 0 16px;
+  }
+  /* Feature strip 1 col already at 768, ensure good padding */
+  .strip-item {
+    padding: 24px 16px;
+  }
+  /* Story cards image */
+  .story-card {
+    padding: 24px 20px;
+  }
+  .story-card-img img {
+    width: 160px;
+  }
+  /* Prewarm featured card padding */
+  .prewarm-card.featured {
+    padding: 28px 20px;
+  }
+  .prewarm-card.featured h3 {
+    font-size: 26px;
+  }
+  .prewarm-card.featured .price {
+    font-size: 32px;
+  }
+  /* Banner text */
+  .banner-track span {
+    font-size: 11px;
+    padding: 0 32px;
+  }
+  /* Section headings */
+  section h2 {
+    font-size: clamp(24px, 7vw, 32px);
+  }
+  /* Feature card padding */
+  .feature-card {
+    padding: 28px 24px;
+  }
+  /* Process cards */
+  .process-card {
+    padding: 28px 24px;
+  }
+  /* For you cta */
+  .for-you-cta h3 {
+    font-size: 22px;
+  }
+  /* Demo section */
+  .demo-placeholder {
+    height: 280px;
+    font-size: 14px;
   }
 }
