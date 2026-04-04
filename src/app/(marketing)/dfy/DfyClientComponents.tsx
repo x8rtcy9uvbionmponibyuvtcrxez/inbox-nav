@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 
 /* ──────────────────────────────────────────────
    Scroll Reveal
@@ -68,10 +69,10 @@ export function DfyMobileMenu() {
         <span></span>
       </button>
       <div className={`mobile-menu${open ? " open" : ""}`}>
-        <a href="/">Home</a>
-        <a href="/#pricing">Pricing</a>
-        <a href="/#demo">Contact</a>
-        <a href="/#faq">FAQ</a>
+        <Link href="/">Home</Link>
+        <Link href="/#pricing">Pricing</Link>
+        <Link href="/#demo">Contact</Link>
+        <Link href="/#faq">FAQ</Link>
         <a
           href="https://app.inboxnavigator.com/sign-up?redirect_url=/dashboard/products"
           className="btn btn-gradient"

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Script from "next/script";
 import BannerBar from "./components/BannerBar";
 import MobileMenu from "./components/MobileMenu";
@@ -270,14 +271,14 @@ export default function HomePage() {
       {/* ── 2. NAVBAR ── */}
       <nav className="navbar" id="navbar">
         <div className="navbar-inner">
-          <a href="/" className="logo">
+          <Link href="/" className="logo">
             <span>Inbox</span>Navigator
-          </a>
+          </Link>
           <div className="nav-links">
-            <a href="/">Home</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#demo">Contact</a>
-            <a href="#faq">FAQ</a>
+            <Link href="/">Home</Link>
+            <Link href="#pricing">Pricing</Link>
+            <Link href="#demo">Contact</Link>
+            <Link href="#faq">FAQ</Link>
           </div>
           <div className="nav-right">
             <a
@@ -316,9 +317,9 @@ export default function HomePage() {
               competitive rates for teams serious about achieving massive
               scale.
             </p>
-            <a href="#pricing" className="btn btn-gradient">
+            <Link href="#pricing" className="btn btn-gradient">
               Start Scaling
-            </a>
+            </Link>
           </div>
 
           <div
@@ -2217,9 +2218,9 @@ export default function HomePage() {
             </div>
           </div>
           <div style={{ textAlign: "center", marginTop: 48 }}>
-            <a href="#demo" className="btn btn-gradient">
+            <Link href="#demo" className="btn btn-gradient">
               CONTACT US
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -2275,21 +2276,21 @@ export default function HomePage() {
             </div>
             <div className="footer-col">
               <h4>Pages</h4>
-              <a href="/">Home</a>
-              <a href="#pricing">Pricing</a>
-              <a href="#demo">Contact</a>
+              <Link href="/">Home</Link>
+              <Link href="#pricing">Pricing</Link>
+              <Link href="#demo">Contact</Link>
             </div>
             <div className="footer-col">
               <h4>Help</h4>
-              <a href="#demo">Contact</a>
-              <a href="#faq">FAQ</a>
+              <Link href="#demo">Contact</Link>
+              <Link href="#faq">FAQ</Link>
             </div>
             <div className="footer-col">
               <h4>Legal</h4>
-              <a href="/terms">Terms</a>
-              <a href="/privacy">Privacy Policy</a>
-              <a href="/cookies">Cookies</a>
-              <a href="/refund">Return &amp; Refund Policy</a>
+              <Link href="/terms">Terms</Link>
+              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/cookies">Cookies</Link>
+              <Link href="/refund">Return &amp; Refund Policy</Link>
             </div>
           </div>
           <div className="footer-bottom">

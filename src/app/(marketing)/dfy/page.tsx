@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./dfy.css";
 import {
   ScrollReveal,
@@ -84,14 +85,14 @@ export default function DfyPage() {
           ============================================ */}
       <nav className="dfy-navbar" id="navbar">
         <div className="navbar-inner">
-          <a href="/" className="logo">
+          <Link href="/" className="logo">
             <span>Inbox</span>Navigator
-          </a>
+          </Link>
           <div className="nav-links">
-            <a href="/">Home</a>
-            <a href="/#pricing">Pricing</a>
-            <a href="/#demo">Contact</a>
-            <a href="/#faq">FAQ</a>
+            <Link href="/">Home</Link>
+            <Link href="/#pricing">Pricing</Link>
+            <Link href="/#demo">Contact</Link>
+            <Link href="/#faq">FAQ</Link>
           </div>
           <div className="nav-right">
             <a
@@ -131,12 +132,12 @@ export default function DfyPage() {
             emails, more replies, more pipeline.
           </p>
           <div className="hero-ctas reveal reveal-delay-3">
-            <a href="#trial" className="btn btn-accent">
+            <Link href="#trial" className="btn btn-accent">
               Start your trial
-            </a>
-            <a href="#method" className="btn btn-ghost">
+            </Link>
+            <Link href="#method" className="btn btn-ghost">
               See how it works
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -200,9 +201,9 @@ export default function DfyPage() {
               Now we run your outbound on it. 2x the volume, same price.
             </span>
           </p>
-          <a href="#trial" className="btn btn-accent">
+          <Link href="#trial" className="btn btn-accent">
             Start your trial
-          </a>
+          </Link>
         </div>
         <span
           className="cta-star"
@@ -373,9 +374,9 @@ export default function DfyPage() {
               pay.
             </span>
           </p>
-          <a href="#trial" className="btn btn-accent">
+          <Link href="#trial" className="btn btn-accent">
             Start your trial
-          </a>
+          </Link>
         </div>
         <span
           className="cta-star"
@@ -1817,9 +1818,9 @@ export default function DfyPage() {
             </span>{" "}
             You keep every lead, every conversation, every piece of data.
           </p>
-          <a href="#trial" className="btn btn-accent">
+          <Link href="#trial" className="btn btn-accent">
             Start your trial
-          </a>
+          </Link>
         </div>
         <span
           className="cta-star"
@@ -2266,13 +2267,13 @@ export default function DfyPage() {
               If you decide to continue, we scale it. If not, you walk away with
               real pipeline and zero risk.
             </p>
-            <a
+            <Link
               href="#"
               className="btn btn-accent"
               style={{ fontSize: "15px", padding: "15px 40px" }}
             >
               Start your trial
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -2313,21 +2314,21 @@ export default function DfyPage() {
             </div>
             <div className="footer-col">
               <h4>Pages</h4>
-              <a href="/">Home</a>
-              <a href="/#pricing">Pricing</a>
-              <a href="/#demo">Contact</a>
+              <Link href="/">Home</Link>
+              <Link href="/#pricing">Pricing</Link>
+              <Link href="/#demo">Contact</Link>
             </div>
             <div className="footer-col">
               <h4>Help</h4>
-              <a href="/#demo">Contact</a>
-              <a href="/#faq">FAQ</a>
+              <Link href="/#demo">Contact</Link>
+              <Link href="/#faq">FAQ</Link>
             </div>
             <div className="footer-col">
               <h4>Legal</h4>
-              <a href="/terms">Terms</a>
-              <a href="/privacy">Privacy Policy</a>
-              <a href="/cookies">Cookies</a>
-              <a href="/refund">Return &amp; Refund Policy</a>
+              <Link href="/terms">Terms</Link>
+              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/cookies">Cookies</Link>
+              <Link href="/refund">Return &amp; Refund Policy</Link>
             </div>
           </div>
           <div className="footer-bottom">

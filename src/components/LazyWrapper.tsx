@@ -20,10 +20,10 @@ export function LazyWrapper({
 }
 
 // Lazy load heavy components
-export const LazyOrderDetailsModal = lazy(() => import('../app/dashboard/OrderDetailsModal'));
-export const LazyInboxesClient = lazy(() => import('../app/dashboard/inboxes/InboxesClient'));
-export const LazyDomainsClient = lazy(() => import('../app/dashboard/domains/DomainsClient'));
-export const LazyProductsPage = lazy(() => import('../app/dashboard/products/page'));
+export const LazyOrderDetailsModal = lazy(() => import('../app/(app)/dashboard/OrderDetailsModal'));
+export const LazyInboxesClient = lazy(() => import('../app/(app)/dashboard/inboxes/InboxesClient'));
+export const LazyDomainsClient = lazy(() => import('../app/(app)/dashboard/domains/DomainsClient'));
+export const LazyProductsPage = lazy(() => import('../app/(app)/dashboard/products/page'));
 
 // Higher-order component for lazy loading
 export function withLazyLoading<T extends object>(
