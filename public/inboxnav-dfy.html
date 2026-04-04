@@ -1052,64 +1052,167 @@ section { padding: 100px 0; position: relative; }
 /* ============================================
    CASE STUDIES
    ============================================ */
+/* Case studies — dark immersive section */
+#cases {
+  background: #0c0a14;
+  padding: 100px 0 110px;
+  position: relative;
+  overflow: hidden;
+}
+#cases .section-header h2 { color: #f5f5f5; }
+#cases .section-header p { color: #777; }
+#cases .section-tag { color: var(--accent); background: none; -webkit-text-fill-color: var(--accent); }
+/* Animated floating grid bg */
+.cases-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.cases-bg .grid-line {
+  position: absolute;
+  background: rgba(168,85,247,.04);
+}
+.cases-bg .grid-line.h { height: 1px; width: 100%; }
+.cases-bg .grid-line.v { width: 1px; height: 100%; }
+.cases-bg .glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: orbFloat 12s ease-in-out infinite alternate;
+}
+@keyframes orbFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.1); }
+  66% { transform: translate(-20px, 30px) scale(0.9); }
+  100% { transform: translate(10px, -10px) scale(1.05); }
+}
+/* Decorative crosses */
+.cs-cross {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  opacity: .15;
+  z-index: 1;
+}
+.cs-cross::before, .cs-cross::after {
+  content: '';
+  position: absolute;
+  background: var(--accent);
+}
+.cs-cross::before { width: 12px; height: 1px; top: 5.5px; left: 0; }
+.cs-cross::after { width: 1px; height: 12px; left: 5.5px; top: 0; }
+/* Case study block */
 .case-grid {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 64px;
   margin-top: 56px;
+  position: relative;
+  z-index: 1;
 }
-.case-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0;
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-  transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
-}
-.case-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-card-hover);
-}
-.case-col {
-  padding: 32px;
-}
-.case-col:first-child {
-  background: var(--bg-warm);
+.case-study {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 20px;
 }
-.case-col:not(:last-child) {
-  border-right: 1px solid var(--border);
+.case-headline {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 400;
+  color: #f0f0f0;
+  line-height: 1.3;
+  max-width: 700px;
 }
-.case-card .case-company {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: var(--navy);
-}
-.case-card .case-industry {
-  font-size: 11px;
-  color: var(--text-3);
+.case-company-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-.case-col h4 {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  font-family: var(--mono);
-  margin-bottom: 10px;
+  color: #666;
+  margin-bottom: 12px;
 }
-.case-col p {
+.case-company-tag .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.case-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.case-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cs-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  flex: 1;
+}
+.cs-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.cs-card-header h4 {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #f0f0f0;
+}
+.cs-card-header .cs-icon {
+  width: 28px;
+  height: 28px;
+  opacity: .4;
+}
+.cs-card p {
   font-size: 14px;
-  color: var(--text-2);
-  line-height: 1.7;
+  color: #999;
+  line-height: 1.75;
+}
+/* Result card — accent border */
+.cs-card--result {
+  border-color: rgba(168,85,247,.2);
+  background: rgba(168,85,247,.03);
+}
+.cs-card--result .cs-card-header h4 {
+  color: var(--accent);
+}
+.cs-card--result .cs-card-header {
+  border-bottom-color: rgba(168,85,247,.12);
+}
+.cs-result-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cs-result-list li {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.65;
+}
+.cs-result-list li .arrow {
+  color: var(--accent);
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 /* ============================================
@@ -1503,9 +1606,9 @@ section { padding: 100px 0; position: relative; }
   .testimonial-grid { grid-template-columns: 1fr 1fr; }
   .testimonial-card:last-child { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; }
 
-  .case-card { grid-template-columns: 1fr; }
-  .case-col:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); }
-  .case-col:first-child { padding: 24px 32px; }
+  .case-body { grid-template-columns: 1fr; }
+  .case-headline { font-size: 24px; }
+  #cases { padding: 80px 0; }
 
   .video-grid { grid-template-columns: 1fr 1fr; }
   .video-card:last-child { grid-column: 1 / -1; max-width: 60%; margin: 0 auto; }
@@ -1595,7 +1698,10 @@ section { padding: 100px 0; position: relative; }
   .testimonial-card:last-child { max-width: 100%; }
 
   /* Case studies */
-  .case-card { grid-template-columns: 1fr; }
+  .case-body { grid-template-columns: 1fr; }
+  .case-headline { font-size: 22px; }
+  #cases { padding: 64px 0; }
+  .case-grid { gap: 48px; }
 
   /* Videos */
   .video-grid { grid-template-columns: 1fr; }
@@ -2051,33 +2157,106 @@ section { padding: 100px 0; position: relative; }
 <!-- ============================================
      CASE STUDIES
      ============================================ -->
-<section>
-  <div class="container">
+<section id="cases">
+  <!-- Animated background -->
+  <div class="cases-bg">
+    <div class="grid-line h" style="top:20%"></div>
+    <div class="grid-line h" style="top:50%"></div>
+    <div class="grid-line h" style="top:80%"></div>
+    <div class="grid-line v" style="left:25%"></div>
+    <div class="grid-line v" style="left:50%"></div>
+    <div class="grid-line v" style="left:75%"></div>
+    <div class="glow-orb" style="width:400px;height:400px;background:rgba(168,85,247,.06);top:10%;left:-5%;animation-delay:0s"></div>
+    <div class="glow-orb" style="width:350px;height:350px;background:rgba(232,67,147,.05);bottom:5%;right:-5%;animation-delay:-4s"></div>
+    <div class="glow-orb" style="width:250px;height:250px;background:rgba(249,115,22,.04);top:50%;left:40%;animation-delay:-8s"></div>
+  </div>
+  <!-- Decorative crosses -->
+  <div class="cs-cross" style="top:18%;left:24.5%;"></div>
+  <div class="cs-cross" style="top:18%;left:49.5%;"></div>
+  <div class="cs-cross" style="top:18%;left:74.5%;"></div>
+  <div class="cs-cross" style="top:48%;left:24.5%;"></div>
+  <div class="cs-cross" style="top:48%;right:25.5%;"></div>
+  <div class="cs-cross" style="top:78%;left:49.5%;"></div>
+
+  <div class="container" style="position:relative;z-index:1">
     <div class="section-header reveal">
-      <span class="section-tag grad-text">Case studies</span>
+      <span class="section-tag">Case studies</span>
       <h2>The results behind the claims</h2>
     </div>
     <div class="case-grid">
-      <div class="case-card reveal">
-        <div class="case-col"><div class="case-company">ProperWebsites</div><div class="case-industry">Website Design Agency</div></div>
-        <div class="case-col"><h4 class="grad-text">Challenge</h4><p>Yarden's agency had grown entirely on referrals. Some months had 8 qualified calls, others had zero. No outbound system, no SDR, and no predictable way to fill the pipeline. Every new project started with "who do I know?"</p></div>
-        <div class="case-col"><h4 class="grad-text">Strategy</h4><p>We mapped their ICP across three verticals (e-commerce, professional services, SaaS), built Clay-enriched prospect lists, and launched multi-angle campaigns at volume. Tested two core offers in week one. Killed the loser by week three, scaled the winner.</p></div>
+
+      <!-- Case 1: Proper Websites -->
+      <div class="case-study reveal">
+        <div class="case-company-tag"><span class="dot"></span> Proper Websites &middot; Website Design Agency</div>
+        <div class="case-headline">From Referral-Dependent to 14 Qualified Sales Calls in 30 Days</div>
+        <div class="case-body">
+          <div class="case-left">
+            <div class="cs-card">
+              <div class="cs-card-header">
+                <h4>Challenge</h4>
+                <svg class="cs-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><circle cx="12" cy="16" r=".5" fill="#fff"/></svg>
+              </div>
+              <p>Yarden's agency had grown entirely on referrals. Some months had 8 qualified calls, others had zero. No outbound system, no SDR, and no predictable way to fill the pipeline. Every new project started with "who do I know?"</p>
+            </div>
+            <div class="cs-card">
+              <div class="cs-card-header">
+                <h4>Strategy</h4>
+                <svg class="cs-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24A2.5 2.5 0 0 0 14.5 2z"/></svg>
+              </div>
+              <p>We mapped their ICP across three verticals (e-commerce, professional services, SaaS), built Clay-enriched prospect lists, and launched multi-angle campaigns at volume. Tested two core offers in week one. Killed the loser by week three, scaled the winner.</p>
+            </div>
+          </div>
+          <div class="cs-card cs-card--result">
+            <div class="cs-card-header">
+              <h4>Result</h4>
+              <svg class="cs-icon" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <ul class="cs-result-list">
+              <li><span class="arrow">&rarr;</span>40+ positive replies in the first 30 days</li>
+              <li><span class="arrow">&rarr;</span>14 qualified sales calls booked from cold outbound alone</li>
+              <li><span class="arrow">&rarr;</span>Pipeline went from referral-dependent to repeatable</li>
+              <li><span class="arrow">&rarr;</span>Outbound system now generates consistent deal flow month over month</li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="case-card reveal" style="margin-top:-1px">
-        <div class="case-col" style="background:transparent;border-right:1px solid var(--border)"><div class="case-company" style="visibility:hidden">.</div></div>
-        <div class="case-col"><h4 class="grad-text">Outcome</h4><p>40+ positive replies in the first 30 days. 14 qualified sales calls booked from cold outbound alone. Pipeline went from referral-dependent to repeatable.</p></div>
-        <div class="case-col"></div>
+
+      <!-- Case 2: Kalypso -->
+      <div class="case-study reveal reveal-delay-1">
+        <div class="case-company-tag"><span class="dot" style="background:var(--pink)"></span> Kalypso &middot; B2B SaaS</div>
+        <div class="case-headline">From Untouched TAM to Fastest-Growing Acquisition Channel in 60 Days</div>
+        <div class="case-body">
+          <div class="case-left">
+            <div class="cs-card">
+              <div class="cs-card-header">
+                <h4>Challenge</h4>
+                <svg class="cs-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><circle cx="12" cy="16" r=".5" fill="#fff"/></svg>
+              </div>
+              <p>Dagem had strong product-market fit but no way to reach their very specific ICP at scale. Their TAM was clearly defined but virtually untouched. Previous cold email attempts were low-volume and generic, generating a handful of replies with no real pipeline behind them.</p>
+            </div>
+            <div class="cs-card">
+              <div class="cs-card-header">
+                <h4>Strategy</h4>
+                <svg class="cs-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24A2.5 2.5 0 0 0 14.5 2z"/></svg>
+              </div>
+              <p>Started with high-precision, Clay-enriched campaigns targeting their exact ICP. Used the initial data to find message-market fit fast. Once we had a proven offer, scaled volume across the full TAM and began cycling it on repeat.</p>
+            </div>
+          </div>
+          <div class="cs-card cs-card--result">
+            <div class="cs-card-header">
+              <h4>Result</h4>
+              <svg class="cs-icon" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <ul class="cs-result-list">
+              <li><span class="arrow">&rarr;</span>30+ qualified positive replies per month by week 6</li>
+              <li><span class="arrow">&rarr;</span>Multiple demos booked per week from cold outbound alone</li>
+              <li><span class="arrow">&rarr;</span>Full TAM now being cycled every quarter</li>
+              <li><span class="arrow">&rarr;</span>Outbound became their fastest-growing acquisition channel within 60 days</li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="case-card reveal reveal-delay-1" style="margin-top:20px">
-        <div class="case-col"><div class="case-company">Kalypso</div><div class="case-industry">B2B SaaS</div></div>
-        <div class="case-col"><h4 class="grad-text">Challenge</h4><p>Dagem had strong product-market fit but no way to reach their very specific ICP at scale. Their TAM was clearly defined but virtually untouched. Previous cold email attempts were low-volume and generic, generating a handful of replies with no real pipeline behind them.</p></div>
-        <div class="case-col"><h4 class="grad-text">Strategy</h4><p>Started with high-precision, Clay-enriched campaigns targeting their exact ICP. Used the initial data to find message-market fit fast. Once we had a proven offer, scaled volume across the full TAM and began cycling it on repeat.</p></div>
-      </div>
-      <div class="case-card reveal reveal-delay-1" style="margin-top:-1px">
-        <div class="case-col" style="background:transparent;border-right:1px solid var(--border)"><div class="case-company" style="visibility:hidden">.</div></div>
-        <div class="case-col"><h4 class="grad-text">Outcome</h4><p>30+ qualified positive replies per month by week 6. Multiple demos booked per week from cold outbound alone. Full TAM now being cycled every quarter. Outbound became their fastest-growing acquisition channel within 60 days.</p></div>
-        <div class="case-col"></div>
-      </div>
+
     </div>
   </div>
 </section>
