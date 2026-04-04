@@ -80,6 +80,16 @@ const nextConfig: NextConfig = {
   
   // Compression
   compress: true,
+
+  // Rewrites: serve static marketing pages
+  async rewrites() {
+    return [
+      {
+        source: '/',
+        destination: '/home.html',
+      },
+    ];
+  },
   
   // Headers for better caching and CDN optimization
   async headers() {
