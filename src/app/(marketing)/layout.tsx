@@ -50,6 +50,11 @@ export default function MarketingLayout({
       className={`${instrumentSerif.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
       style={{ background: "#ffffff" }}
     >
+      <head>
+        <link rel="preconnect" href="https://player.vimeo.com" />
+        <link rel="preconnect" href="https://i.vimeocdn.com" />
+        <link rel="preconnect" href="https://f.vimeocdn.com" />
+      </head>
       <body className={plusJakartaSans.className}>{children}</body>
     </html>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export default function VideoPlayer({
   thumbnailSrc,
@@ -12,9 +12,33 @@ export default function VideoPlayer({
   vimeoId: string;
 }) {
   const [playing, setPlaying] = useState(false);
+  const [preloaded, setPreloaded] = useState(false);
+
+  const preload = useCallback(() => {
+    if (!preloaded) {
+      setPreloaded(true);
+    }
+  }, [preloaded]);
 
   return (
-    <div className="vt-card-thumb">
+    <div className="vt-card-thumb" onMouseEnter={preload}>
+      {preloaded && !playing && (
+        <iframe
+          src={`https://player.vimeo.com/video/${vimeoId}`}
+          frameBorder="0"
+          allow="fullscreen"
+          allowFullScreen
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+        />
+      )}
       {playing ? (
         <iframe
           src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1`}
