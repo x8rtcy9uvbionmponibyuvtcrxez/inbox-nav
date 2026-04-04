@@ -81,15 +81,8 @@ const nextConfig: NextConfig = {
   // Compression
   compress: true,
 
-  // Rewrites: serve static marketing pages
-  async rewrites() {
-    return [
-      {
-        source: '/',
-        destination: '/home.html',
-      },
-    ];
-  },
+  // Host-based routing for marketing vs app is handled in middleware.ts
+  // (inboxnavigator.com → /home.html, app.inboxnavigator.com → Next.js app)
   
   // Headers for better caching and CDN optimization
   async headers() {
