@@ -7,11 +7,40 @@ export const metadata: Metadata = {
   title: "Refund and Return Policy",
   description:
     "InboxNavigator's refund and return policy for cold email infrastructure services. Understand our cancellation terms, refund eligibility, and how to request a refund.",
+  alternates: {
+    canonical: "https://inboxnavigator.com/refund",
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://inboxnavigator.com",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Refund and Return Policy",
+      item: "https://inboxnavigator.com/refund",
+    },
+  ],
 };
 
 export default function RefundPolicyPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
+
       <nav className="legal-nav">
         <Link href="/">
           <Image
@@ -24,6 +53,12 @@ export default function RefundPolicyPage() {
         </Link>
         <Link href="/">Home</Link>
       </nav>
+
+      <div className="legal-breadcrumb">
+        <Link href="/">Home</Link>
+        <span>/</span>
+        Refund and Return Policy
+      </div>
 
       <main className="legal-page">
         <h1>Refund and Return Policy</h1>

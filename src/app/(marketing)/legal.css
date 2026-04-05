@@ -28,6 +28,29 @@
   width: auto;
 }
 
+.legal-breadcrumb {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px 24px 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.legal-breadcrumb a {
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.legal-breadcrumb a:hover {
+  color: var(--navy);
+}
+
+.legal-breadcrumb span {
+  margin: 0 6px;
+  color: #d1d5db;
+}
+
 .legal-page {
   max-width: 800px;
   margin: 0 auto;

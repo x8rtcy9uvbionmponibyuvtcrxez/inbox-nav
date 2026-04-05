@@ -7,11 +7,40 @@ export const metadata: Metadata = {
   title: "Cookie Policy",
   description:
     "Learn how InboxNavigator uses cookies and similar tracking technologies on our website. Details on cookie types, purposes, and how to manage your preferences.",
+  alternates: {
+    canonical: "https://inboxnavigator.com/cookies",
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://inboxnavigator.com",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Cookie Policy",
+      item: "https://inboxnavigator.com/cookies",
+    },
+  ],
 };
 
 export default function CookiePolicyPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
+
       <nav className="legal-nav">
         <Link href="/">
           <Image
@@ -24,6 +53,12 @@ export default function CookiePolicyPage() {
         </Link>
         <Link href="/">Home</Link>
       </nav>
+
+      <div className="legal-breadcrumb">
+        <Link href="/">Home</Link>
+        <span>/</span>
+        Cookie Policy
+      </div>
 
       <main className="legal-page">
         <h1>Cookie Policy</h1>

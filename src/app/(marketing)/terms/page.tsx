@@ -7,11 +7,40 @@ export const metadata: Metadata = {
   title: "Terms of Use",
   description:
     "Terms and conditions for using InboxNavigator's cold email infrastructure services, including Google Workspace inboxes, Outlook inboxes, and managed email setup.",
+  alternates: {
+    canonical: "https://inboxnavigator.com/terms",
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://inboxnavigator.com",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Terms of Use",
+      item: "https://inboxnavigator.com/terms",
+    },
+  ],
 };
 
 export default function TermsPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
+
       <nav className="legal-nav">
         <Link href="/">
           <Image
@@ -24,6 +53,12 @@ export default function TermsPage() {
         </Link>
         <Link href="/">Home</Link>
       </nav>
+
+      <div className="legal-breadcrumb">
+        <Link href="/">Home</Link>
+        <span>/</span>
+        Terms of Use
+      </div>
 
       <main className="legal-page">
         <h1>Terms of Use</h1>

@@ -7,11 +7,40 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "How InboxNavigator collects, uses, and protects your personal data. Read our full privacy policy covering data handling, user rights, and international data transfers.",
+  alternates: {
+    canonical: "https://inboxnavigator.com/privacy",
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://inboxnavigator.com",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Privacy Policy",
+      item: "https://inboxnavigator.com/privacy",
+    },
+  ],
 };
 
 export default function PrivacyPolicyPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
+
       <nav className="legal-nav">
         <Link href="/">
           <Image
@@ -24,6 +53,12 @@ export default function PrivacyPolicyPage() {
         </Link>
         <Link href="/">Home</Link>
       </nav>
+
+      <div className="legal-breadcrumb">
+        <Link href="/">Home</Link>
+        <span>/</span>
+        Privacy Policy
+      </div>
 
       <main className="legal-page">
         <h1>Privacy Policy</h1>

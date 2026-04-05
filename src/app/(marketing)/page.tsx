@@ -489,31 +489,31 @@ export default function HomePage() {
                 <img
                   src="/images/image-21.svg"
                   loading="lazy"
-                  alt=""
+                  alt="Smartlead logo"
                   className="in_logo_img"
                 />
                 <img
                   src="/images/Frame-1171276533.svg"
                   loading="lazy"
-                  alt=""
+                  alt="Instantly logo"
                   className="in_logo_img"
                 />
                 <img
                   src="/images/Frame-1171276546.svg"
                   loading="lazy"
-                  alt=""
+                  alt="Lemlist logo"
                   className="in_logo_img"
                 />
                 <img
                   src="/images/plusvibe-logo.svg"
                   loading="lazy"
-                  alt=""
+                  alt="Plusvibe logo"
                   className="in_logo_img"
                 />
                 <img
                   src="/images/image-23.svg"
                   loading="lazy"
-                  alt=""
+                  alt="Reply.io logo"
                   className="in_logo_img"
                 />
               </div>
