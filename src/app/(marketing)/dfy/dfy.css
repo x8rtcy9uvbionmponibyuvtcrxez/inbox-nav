@@ -127,7 +127,7 @@
 /* ============================================
    SECTION HEADERS
    ============================================ */
-.section-header { margin-bottom: 56px; }
+.section-header { margin-bottom: 56px; text-align: center; }
 .section-header h2 {
   font-family: var(--font-serif);
   font-size: 42px;
@@ -141,6 +141,8 @@
   color: var(--text-2);
   font-size: 16px;
   max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
   line-height: 1.7;
 }
 .section-tag {
@@ -540,7 +542,7 @@
 /* ============================================
    METHODOLOGY
    ============================================ */
-.method-header { margin-bottom: 56px; }
+.method-header { margin-bottom: 56px; text-align: center; }
 .method-header h2 {
   font-family: var(--font-serif);
   font-size: 42px;
@@ -553,6 +555,8 @@
   color: var(--text-2);
   font-size: 16px;
   max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
   line-height: 1.7;
 }
 .method-grid {
