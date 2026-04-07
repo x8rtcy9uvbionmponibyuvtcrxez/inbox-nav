@@ -82,7 +82,7 @@ const nextConfig: NextConfig = {
   compress: true,
 
   // Host-based routing for marketing vs app is handled in middleware.ts
-  // (inboxnavigator.com → /home.html, app.inboxnavigator.com → Next.js app)
+  // (inboxnavigator.com → (marketing) route group, app.inboxnavigator.com → (app) route group)
   
   // Headers for better caching and CDN optimization
   async headers() {

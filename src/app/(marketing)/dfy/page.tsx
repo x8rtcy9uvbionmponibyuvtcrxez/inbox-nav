@@ -21,7 +21,7 @@ export const metadata: Metadata = {
       "We own the cold email infrastructure other agencies rent. Get 2x the outreach volume at the same price. More emails, more replies, more pipeline.",
     type: "website",
     url: "https://inboxnavigator.com/dfy",
-    images: ["https://inboxnavigator.com/images/og-image.png"],
+    images: ["https://inboxnavigator.com/images/inbox-navigator-og-image-p-500.webp"],
   },
   twitter: {
     card: "summary_large_image",
@@ -133,7 +133,7 @@ export default function DfyPage() {
             emails, more replies, more pipeline.
           </p>
           <div className="hero-ctas reveal reveal-delay-3">
-            <Link href="#trial" className="btn btn-accent">
+            <Link href="#book" className="btn btn-accent">
               Start your trial
             </Link>
             <Link href="#method" className="btn btn-ghost">
@@ -202,7 +202,7 @@ export default function DfyPage() {
               Now we run your outbound on it. 2x the volume, same price.
             </span>
           </p>
-          <Link href="#trial" className="btn btn-accent">
+          <Link href="#book" className="btn btn-accent">
             Start your trial
           </Link>
         </div>
@@ -375,7 +375,7 @@ export default function DfyPage() {
               pay.
             </span>
           </p>
-          <Link href="#trial" className="btn btn-accent">
+          <Link href="#book" className="btn btn-accent">
             Start your trial
           </Link>
         </div>
@@ -1819,7 +1819,7 @@ export default function DfyPage() {
             </span>{" "}
             You keep every lead, every conversation, every piece of data.
           </p>
-          <Link href="#trial" className="btn btn-accent">
+          <Link href="#book" className="btn btn-accent">
             Start your trial
           </Link>
         </div>
@@ -2257,7 +2257,7 @@ export default function DfyPage() {
               real pipeline and zero risk.
             </p>
             <Link
-              href="#"
+              href="#book"
               className="btn btn-accent"
               style={{ fontSize: "15px", padding: "15px 40px" }}
             >
@@ -2282,6 +2282,31 @@ export default function DfyPage() {
             </h2>
           </div>
           <FaqAccordion items={faqItems} />
+        </div>
+      </section>
+
+      {/* ============================================
+          BOOK A CALL
+          ============================================ */}
+      <section id="book" className="warm-bg">
+        <div className="container">
+          <div
+            className="section-header reveal"
+            style={{ textAlign: "center", maxWidth: "100%" }}
+          >
+            <span className="section-tag grad-text">Get started</span>
+            <h2 style={{ textAlign: "center" }}>Book a call</h2>
+          </div>
+          <div className="reveal">
+            <iframe
+              src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3rGJ1MFaQhDdAyuTAFoVCsLGZ59EQYQrMYvaV0kAwykYhm76QX98NVj_R4wXSUmiaW5l0ugPUx?gv=true"
+              style={{ border: 0, borderRadius: "16px" }}
+              width="100%"
+              height="600"
+              frameBorder="0"
+              loading="lazy"
+            />
+          </div>
         </div>
       </section>
 
