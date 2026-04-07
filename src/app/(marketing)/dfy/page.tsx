@@ -9,7 +9,7 @@ import {
   FaqAccordion,
   SmoothScroll,
 } from "./DfyClientComponents";
-import DfyVideoPlayer from "./DfyVideoPlayer";
+import VideoPlayer from "../components/VideoPlayer";
 
 export const metadata: Metadata = {
   title: "Done-For-You Cold Email That Actually Scales",
@@ -2206,27 +2206,37 @@ export default function DfyPage() {
             <span className="section-tag grad-text">Video testimonials</span>
             <h2>Hear it directly from them</h2>
           </div>
-          <div className="video-grid">
-            <div className="video-card reveal">
-              <DfyVideoPlayer
+          <div className="video-grid-2">
+            <div className="vt-card-lg reveal">
+              <VideoPlayer
                 thumbnailSrc="/images/dagem-thumb.jpg"
                 thumbnailAlt="Dagem - Kalypso testimonial"
                 vimeoId="1180760286"
               />
-              <div className="video-info">
-                <div className="name">Dagem</div>
-                <div className="role">Founder at Kalypso</div>
+              <div className="vt-card-info">
+                <h4>Outbound became our best performing channel</h4>
+                <div className="vt-card-author">
+                  <div>
+                    <div className="vt-name">Dagem</div>
+                    <div className="vt-role2">Founder at Kalypso</div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="video-card reveal reveal-delay-1">
-              <DfyVideoPlayer
+            <div className="vt-card-lg reveal">
+              <VideoPlayer
                 thumbnailSrc="/images/yarden-thumb.jpg"
                 thumbnailAlt="Yarden - Proper Websites testimonial"
                 vimeoId="1180762579"
               />
-              <div className="video-info">
-                <div className="name">Yarden</div>
-                <div className="role">Founder at Proper Websites</div>
+              <div className="vt-card-info">
+                <h4>It really changed our business</h4>
+                <div className="vt-card-author">
+                  <div>
+                    <div className="vt-name">Yarden</div>
+                    <div className="vt-role2">Founder at Proper Websites</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
