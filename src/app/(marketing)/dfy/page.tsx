@@ -9,6 +9,7 @@ import {
   FaqAccordion,
   SmoothScroll,
 } from "./DfyClientComponents";
+import VideoPlayer from "../components/VideoPlayer";
 
 export const metadata: Metadata = {
   title: "Done-For-You Cold Email That Actually Scales",
@@ -2024,11 +2025,10 @@ export default function DfyPage() {
                       </svg>
                     </div>
                     <p>
-                      Yarden&apos;s agency had grown entirely on referrals. Some
-                      months had 8 qualified calls, others had zero. No outbound
-                      system, no SDR, and no predictable way to fill the
-                      pipeline. Every new project started with &quot;who do I
-                      know?&quot;
+                      Yarden&apos;s agency had grown entirely on referrals.
+                      Good months brought in two or three leads per week, but
+                      other months volume just died down. No outbound system, no
+                      SDR, and no predictable way to fill the pipeline.
                     </p>
                   </div>
                   <div className="cs-card">
@@ -2073,12 +2073,12 @@ export default function DfyPage() {
                   </div>
                   <ul className="cs-result-list">
                     <li>
-                      <span className="arrow">&rarr;</span>40+ positive replies
-                      in the first 30 days
+                      <span className="arrow">&rarr;</span>40 leads per month
+                      from cold outbound
                     </li>
                     <li>
-                      <span className="arrow">&rarr;</span>14 qualified sales
-                      calls booked from cold outbound alone
+                      <span className="arrow">&rarr;</span>13-14 closed deals
+                      per month from cold outbound alone
                     </li>
                     <li>
                       <span className="arrow">&rarr;</span>Pipeline went from
@@ -2208,36 +2208,25 @@ export default function DfyPage() {
           </div>
           <div className="video-grid">
             <div className="video-card reveal">
-              <div className="video-embed">
-                <div className="video-placeholder">
-                  <div className="play-btn" />
-                </div>
-              </div>
+              <VideoPlayer
+                thumbnailSrc={`https://vumbnail.com/1180760286.jpg`}
+                thumbnailAlt="Dagem - Kalypso testimonial"
+                vimeoId="1180760286"
+              />
               <div className="video-info">
-                <div className="name">Sandor</div>
-                <div className="role">Founder, [Company]</div>
+                <div className="name">Dagem</div>
+                <div className="role">Founder at Kalypso</div>
               </div>
             </div>
             <div className="video-card reveal reveal-delay-1">
-              <div className="video-embed">
-                <div className="video-placeholder">
-                  <div className="play-btn" />
-                </div>
-              </div>
-              <div className="video-info">
-                <div className="name">D</div>
-                <div className="role">CEO, [Company]</div>
-              </div>
-            </div>
-            <div className="video-card reveal reveal-delay-2">
-              <div className="video-embed">
-                <div className="video-placeholder">
-                  <div className="play-btn" />
-                </div>
-              </div>
+              <VideoPlayer
+                thumbnailSrc={`https://vumbnail.com/1180762579.jpg`}
+                thumbnailAlt="Yarden - Proper Websites testimonial"
+                vimeoId="1180762579"
+              />
               <div className="video-info">
                 <div className="name">Yarden</div>
-                <div className="role">Founder, [Company]</div>
+                <div className="role">Founder at Proper Websites</div>
               </div>
             </div>
           </div>
