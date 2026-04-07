@@ -9,7 +9,7 @@ import {
   FaqAccordion,
   SmoothScroll,
 } from "./DfyClientComponents";
-import VideoPlayer from "../components/VideoPlayer";
+import DfyVideoPlayer from "./DfyVideoPlayer";
 
 export const metadata: Metadata = {
   title: "Done-For-You Cold Email That Actually Scales",
@@ -2208,8 +2208,8 @@ export default function DfyPage() {
           </div>
           <div className="video-grid">
             <div className="video-card reveal">
-              <VideoPlayer
-                thumbnailSrc={`https://vumbnail.com/1180760286.jpg`}
+              <DfyVideoPlayer
+                thumbnailSrc="/images/dagem-thumb.jpg"
                 thumbnailAlt="Dagem - Kalypso testimonial"
                 vimeoId="1180760286"
               />
@@ -2219,8 +2219,8 @@ export default function DfyPage() {
               </div>
             </div>
             <div className="video-card reveal reveal-delay-1">
-              <VideoPlayer
-                thumbnailSrc={`https://vumbnail.com/1180762579.jpg`}
+              <DfyVideoPlayer
+                thumbnailSrc="/images/yarden-thumb.jpg"
                 thumbnailAlt="Yarden - Proper Websites testimonial"
                 vimeoId="1180762579"
               />
