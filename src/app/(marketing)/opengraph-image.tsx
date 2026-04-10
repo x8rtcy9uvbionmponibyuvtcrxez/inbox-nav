@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt =
   "InboxNavigator — Scale faster with cost-efficient, reliable inbox infrastructure";
 export const size = { width: 1200, height: 630 };
