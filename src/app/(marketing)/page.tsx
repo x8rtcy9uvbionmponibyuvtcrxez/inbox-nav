@@ -23,7 +23,6 @@ export const metadata: Metadata = {
     title: "InboxNavigator - Scale Your Cold Email Infrastructure",
     description:
       "DFY Google Workspace, Outlook, SMTP & prewarmed inboxes. 99% inbox placement, dedicated US IPs. Starting at $3/inbox/month.",
-    images: ["https://inboxnavigator.com/images/inbox-navigator-og-image-p-500.webp"],
   },
   twitter: {
     card: "summary_large_image",
