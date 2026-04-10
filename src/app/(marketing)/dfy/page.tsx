@@ -2215,6 +2215,9 @@ export default function DfyPage() {
               />
               <div className="vt-card-info">
                 <h4>Outbound became our best performing channel</h4>
+                <p className="vt-card-excerpt">
+                  We went from having zero outbound pipeline to generating 40 leads per month. Cold email is now our number one source of new business.
+                </p>
                 <div className="vt-card-author">
                   <div>
                     <div className="vt-name">Dagem</div>
@@ -2231,6 +2234,9 @@ export default function DfyPage() {
               />
               <div className="vt-card-info">
                 <h4>It really changed our business</h4>
+                <p className="vt-card-excerpt">
+                  We&apos;re closing 13 to 14 deals a month now. Before working with InboxNavigator, we were getting maybe 2 to 3 leads a week from referrals alone.
+                </p>
                 <div className="vt-card-author">
                   <div>
                     <div className="vt-name">Yarden</div>
