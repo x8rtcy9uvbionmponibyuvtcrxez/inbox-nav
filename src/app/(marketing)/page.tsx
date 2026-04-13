@@ -165,26 +165,14 @@ const serviceJsonLd = {
   url: "https://inboxnavigator.com",
   serviceType: "Cold Email Infrastructure",
   areaServed: "Worldwide",
-  offers: [
-    {
-      "@type": "Offer",
-      name: "Google Workspace Inboxes",
-      priceCurrency: "USD",
-      price: "3.00",
-      priceSpecification: {
-        "@type": "UnitPriceSpecification",
-        price: "3.00",
-        priceCurrency: "USD",
-        referenceQuantity: {
-          "@type": "QuantitativeValue",
-          value: "1",
-          unitText: "inbox/month",
-        },
-      },
-      description:
-        "Fully managed Google Workspace inboxes with dedicated US IPs, technical setup, domain configuration, and ongoing support",
-    },
-  ],
+  offers: {
+    "@type": "Offer",
+    name: "Google Workspace Inboxes",
+    priceCurrency: "USD",
+    price: "3.00",
+    description:
+      "Fully managed Google Workspace inboxes with dedicated US IPs, technical setup, domain configuration, and ongoing support",
+  },
   aggregateRating: {
     "@type": "AggregateRating",
     ratingValue: "4.9",
