@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import BannerBar from "./components/BannerBar";
@@ -8,6 +9,7 @@ import FaqSection from "./components/FaqSection";
 import ScrollReveal from "./components/ScrollReveal";
 import NavbarScroll from "./components/NavbarScroll";
 import VideoPlayer from "./components/VideoPlayer";
+import LazyCalendly from "./components/LazyCalendly";
 import "./home.css";
 
 export const metadata: Metadata = {
@@ -220,15 +222,15 @@ export default function HomePage() {
         }}
       />
 
-      {/* ── Tracking Scripts ── */}
-      <Script id="gtm" strategy="afterInteractive">
+      {/* ── Tracking Scripts (all deferred to reduce TBT) ── */}
+      <Script id="gtm" strategy="lazyOnload">
         {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-M9CS985P');`}
       </Script>
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-8X4CYX7D3G"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
-      <Script id="ga4" strategy="afterInteractive">
+      <Script id="ga4" strategy="lazyOnload">
         {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8X4CYX7D3G');`}
       </Script>
       <Script id="reb2b" strategy="lazyOnload">
@@ -239,13 +241,13 @@ export default function HomePage() {
         data-referralstack="247d13e4-66af-4b38-af84-6aad969aaf91|dd78370f-ef6c-4c9f-9e97-0148913de9d3"
         strategy="lazyOnload"
       />
-      <Script id="rewardful-init" strategy="afterInteractive">
+      <Script id="rewardful-init" strategy="lazyOnload">
         {`(function(w,r){w._rwq=r;w[r]=w[r]||function(){(w[r].q=w[r].q||[]).push(arguments)}})(window,'rewardful');`}
       </Script>
       <Script
         src="https://r.wdfl.co/rw.js"
         data-rewardful="a49b0f"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
 
       {/* ── Client-side behaviors ── */}
@@ -480,13 +482,13 @@ export default function HomePage() {
                   className="in_logo_img"
                 />
                 <img
-                  src="/images/Frame-1171276533.svg"
+                  src="/images/Frame-1171276533.webp"
                   loading="lazy"
                   alt="Instantly logo"
                   className="in_logo_img"
                 />
                 <img
-                  src="/images/Frame-1171276546.svg"
+                  src="/images/Frame-1171276546.webp"
                   loading="lazy"
                   alt="Lemlist logo"
                   className="in_logo_img"
@@ -794,7 +796,7 @@ export default function HomePage() {
           <div className="prewarm-grid">
             <div className="prewarm-card reveal">
               <div className="prewarm-card-img">
-                <img src="/images/Frame-1171276536.svg" alt="Instant Scale" />
+                <img src="/images/Frame-1171276536.svg" alt="Instant Scale" loading="lazy" />
               </div>
               <div className="prewarm-card-body">
                 <h3>Instant Scale for Winning Campaigns</h3>
@@ -806,7 +808,7 @@ export default function HomePage() {
             </div>
             <div className="prewarm-card reveal">
               <div className="prewarm-card-img">
-                <img src="/images/rescue.svg" alt="Rescue Campaigns" />
+                <img src="/images/rescue.svg" alt="Rescue Campaigns" loading="lazy" />
               </div>
               <div className="prewarm-card-body">
                 <h3>Rescue Campaigns in Crisis</h3>
@@ -846,7 +848,7 @@ export default function HomePage() {
             </div>
             <div className="prewarm-card reveal">
               <div className="prewarm-card-img">
-                <img src="/images/customize.svg" alt="Customize" />
+                <img src="/images/customize.svg" alt="Customize" loading="lazy" />
               </div>
               <div className="prewarm-card-body">
                 <h3>Customize Every Detail</h3>
@@ -858,7 +860,7 @@ export default function HomePage() {
             </div>
             <div className="prewarm-card reveal">
               <div className="prewarm-card-img">
-                <img src="/images/quality.svg" alt="Quality" />
+                <img src="/images/quality.svg" alt="Quality" loading="lazy" />
               </div>
               <div className="prewarm-card-body">
                 <h3>Quality You Need, Prices You&apos;ll Love</h3>
@@ -974,10 +976,13 @@ export default function HomePage() {
               I look forward to a continued partnership!&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Daniel-Wellington.webp"
                 alt="Daniel Wellington - Founder, Marketing Agency"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Daniel Wellington</div>
@@ -993,10 +998,13 @@ export default function HomePage() {
               while they take care of everything else.&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Mitch-Hill.webp"
                 alt="Mitch Hill - CEO, Lead Gen Agency Owner"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Mitch Hill</div>
@@ -1012,10 +1020,13 @@ export default function HomePage() {
               decided to buy 150 accounts, this was a game changer.&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Conner-Baker_1.webp"
                 alt="Conner Baker - Ecomm. Email Marketing Agency"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Conner Baker</div>
@@ -1034,10 +1045,13 @@ export default function HomePage() {
               campaigns.&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Damian-Ross.webp"
                 alt="Damian Ross - Course & coaching business"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Damian Ross</div>
@@ -1055,10 +1069,13 @@ export default function HomePage() {
               reliable, and effective.&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Chris-Gibbins.webp"
                 alt="Chris Gibbins - CTO, National Business"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Chris Gibbins</div>
@@ -1073,10 +1090,13 @@ export default function HomePage() {
               Navigator, onboarding process was a breeze. Thanks!&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Dhruv-Malhotra.webp"
                 alt="Dhruv Malhotra - CEO, Eye Universal"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Dhruv Malhotra</div>
@@ -1093,10 +1113,13 @@ export default function HomePage() {
               I look forward to a continued partnership!&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Daniel-Wellington.webp"
                 alt="Daniel Wellington - Founder, Marketing Agency"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Daniel Wellington</div>
@@ -1112,10 +1135,13 @@ export default function HomePage() {
               while they take care of everything else.&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Mitch-Hill.webp"
                 alt="Mitch Hill - CEO, Lead Gen Agency Owner"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Mitch Hill</div>
@@ -1131,10 +1157,13 @@ export default function HomePage() {
               decided to buy 150 accounts, this was a game changer.&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Conner-Baker_1.webp"
                 alt="Conner Baker - Ecomm. Email Marketing Agency"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Conner Baker</div>
@@ -1153,10 +1182,13 @@ export default function HomePage() {
               campaigns.&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Damian-Ross.webp"
                 alt="Damian Ross - Course & coaching business"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Damian Ross</div>
@@ -1174,10 +1206,13 @@ export default function HomePage() {
               reliable, and effective.&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Chris-Gibbins.webp"
                 alt="Chris Gibbins - CTO, National Business"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Chris Gibbins</div>
@@ -1192,10 +1227,13 @@ export default function HomePage() {
               Navigator, onboarding process was a breeze. Thanks!&quot;
             </blockquote>
             <div className="test-author">
-              <img
+              <Image
                 src="/images/Dhruv-Malhotra.webp"
                 alt="Dhruv Malhotra - CEO, Eye Universal"
                 className="test-avatar"
+                width={80}
+                height={80}
+                loading="lazy"
               />
               <div>
                 <div className="test-name">Dhruv Malhotra</div>
@@ -1256,9 +1294,12 @@ export default function HomePage() {
               <div className="vt-card-info">
                 <h4>Unmatched Quality</h4>
                 <div className="vt-card-author">
-                  <img
+                  <Image
                     src="/images/Aaron-Reid-2.avif"
                     alt="Aaron Reid - Traction"
+                    width={64}
+                    height={64}
+                    loading="lazy"
                   />
                   <div>
                     <div className="vt-name">Aaron Reid</div>
@@ -1278,9 +1319,12 @@ export default function HomePage() {
               <div className="vt-card-info">
                 <h4>Faster, Reliable, Efficient</h4>
                 <div className="vt-card-author">
-                  <img
+                  <Image
                     src="/images/Omar-Ismail_1.webp"
                     alt="Omar Ismail - Founder, Tenstrikes"
+                    width={64}
+                    height={64}
+                    loading="lazy"
                   />
                   <div>
                     <div className="vt-name">Omar Ismail</div>
@@ -2227,11 +2271,7 @@ export default function HomePage() {
       <section className="demo section-warm" id="demo">
         <div className="container reveal">
           <h2>Book a Demo Call Today</h2>
-          <div
-            className="calendly-inline-widget"
-            data-url="https://calendly.com/inboxnavigator/demo"
-            style={{ minWidth: 320, height: 700 }}
-          ></div>
+          <LazyCalendly url="https://calendly.com/inboxnavigator/demo" />
         </div>
       </section>
 
@@ -2287,10 +2327,6 @@ export default function HomePage() {
       </footer>
 
       {/* ── Post-body Scripts ── */}
-      <Script
-        src="https://assets.calendly.com/assets/external/widget.js"
-        strategy="lazyOnload"
-      />
       <Script
         src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=W7Svnv"
         strategy="lazyOnload"
