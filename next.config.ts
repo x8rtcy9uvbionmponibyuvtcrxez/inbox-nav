@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   experimental: {
     optimizePackageImports: ['@heroicons/react', 'framer-motion', '@clerk/nextjs'],
-    optimizeCss: true,
   },
   
   // Turbopack configuration (moved from experimental.turbo)

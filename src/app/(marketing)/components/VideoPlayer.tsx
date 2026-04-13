@@ -58,6 +58,10 @@ export default function VideoPlayer({
           <img
             src={thumbnailSrc}
             alt={thumbnailAlt}
+            loading="lazy"
+            decoding="async"
+            // @ts-expect-error -- React 19 supports fetchPriority but types lag
+            fetchPriority="low"
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
           <div className="play-icon"></div>
