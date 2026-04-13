@@ -2362,7 +2362,7 @@ export default function DfyPage() {
             </div>
           </div>
           <div className="footer-bottom">
-            &copy; 2026 MSC. Built with love by Minted Ventures Labs LLC
+            &copy; 2026 InboxNavigator. All rights reserved.
           </div>
         </div>
       </footer>
