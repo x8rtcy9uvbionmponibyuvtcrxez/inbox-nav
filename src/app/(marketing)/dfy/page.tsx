@@ -2334,6 +2334,13 @@ export default function DfyPage() {
           <div className="footer-grid">
             <div className="footer-col">
               <h4>InboxNavigator</h4>
+              <p>
+                Minted Ventures Labs LLC
+                <br />
+                166 Geary Street
+                <br />
+                San Francisco, California, USA
+              </p>
             </div>
             <div className="footer-col">
               <h4>Pages</h4>
