@@ -2337,9 +2337,9 @@ export default function DfyPage() {
               <p>
                 Minted Ventures Labs LLC
                 <br />
-                166 Geary Street
+                80 N Gould Street
                 <br />
-                San Francisco, California, USA
+                Sheridan, Wyoming 82801, USA
               </p>
             </div>
             <div className="footer-col">

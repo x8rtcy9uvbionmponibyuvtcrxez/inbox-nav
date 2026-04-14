@@ -43,9 +43,10 @@ const organizationJsonLd = {
     "Done-for-you cold email infrastructure. Google Workspace, Outlook, SMTP, and prewarmed inboxes with industry-best deliverability.",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "166 Geary Street",
-    addressLocality: "San Francisco",
-    addressRegion: "CA",
+    streetAddress: "80 N Gould Street",
+    addressLocality: "Sheridan",
+    addressRegion: "WY",
+    postalCode: "82801",
     addressCountry: "US",
   },
 };
@@ -2296,9 +2297,9 @@ export default function HomePage() {
               <p>
                 Minted Ventures Labs LLC
                 <br />
-                166 Geary Street
+                80 N Gould Street
                 <br />
-                San Francisco, California, USA
+                Sheridan, Wyoming 82801, USA
               </p>
             </div>
             <div className="footer-col">
