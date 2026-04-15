@@ -538,24 +538,28 @@ h4 {
 .in_logo_loop {
   display: flex;
   justify-content: center;
-  margin-top: 40px;
+  margin-top: 32px;
 }
 .in_logos {
   display: flex;
-  gap: 64px;
+  gap: 56px;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  max-width: 820px;
   width: 100%;
 }
 .in_logo_img {
-  max-height: 40px;
+  height: 28px;
   width: auto;
+  max-width: 140px;
+  object-fit: contain;
   flex-shrink: 0;
+  opacity: 0.9;
 }
 @media (max-width: 768px) {
-  .in_logos { gap: 40px; }
-  .in_logo_img { max-height: 32px; }
+  .in_logos { gap: 32px; }
+  .in_logo_img { height: 24px; max-width: 110px; }
 }
 
 /* ── 5. ABOUT ── */
