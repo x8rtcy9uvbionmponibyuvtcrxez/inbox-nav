@@ -537,30 +537,25 @@ h4 {
 }
 .in_logo_loop {
   display: flex;
-  gap: 20px;
-  margin-top: 30px;
-  overflow: hidden;
+  justify-content: center;
+  margin-top: 40px;
 }
 .in_logos {
-  flex: none;
   display: flex;
-  gap: 20px;
+  gap: 64px;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   width: 100%;
-  margin-right: 50px;
-  justify-content: space-between;
 }
 .in_logo_img {
-  flex: none;
   max-height: 40px;
+  width: auto;
+  flex-shrink: 0;
 }
-@keyframes marquee-logos {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+@media (max-width: 768px) {
+  .in_logos { gap: 40px; }
+  .in_logo_img { max-height: 32px; }
 }
 
 /* ── 5. ABOUT ── */
