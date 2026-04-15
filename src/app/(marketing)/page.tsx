@@ -483,7 +483,7 @@ export default function HomePage() {
                   className="in_logo_img"
                 />
                 <img
-                  src="/images/Frame-1171276533.webp"
+                  src="/images/instantly-logo.svg"
                   loading="lazy"
                   alt="Instantly logo"
                   className="in_logo_img"
@@ -501,7 +501,7 @@ export default function HomePage() {
                   className="in_logo_img"
                 />
                 <img
-                  src="/images/image-23.svg"
+                  src="/images/reply-logo.svg"
                   loading="lazy"
                   alt="Reply.io logo"
                   className="in_logo_img"
