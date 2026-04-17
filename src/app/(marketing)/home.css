@@ -1,80 +1,9 @@
 /* ============================================
    InboxNavigator Homepage — Page-Specific Styles
+   (Tokens, .btn, .reveal, .tag, .section-header,
+    .section-warm/.section-navy, headings, prefers-reduced-motion
+    are all defined in marketing.css)
    ============================================ */
-
-/* ── UTILITIES ── */
-.tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  font-weight: 600;
-}
-.tag.gradient {
-  background: var(--gradient-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 36px;
-  border-radius: var(--radius-pill);
-  font-weight: 700;
-  font-size: 15px;
-  transition: all 0.3s ease;
-}
-.btn-gradient {
-  background: var(--gradient);
-  color: #fff;
-  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
-}
-.btn-gradient:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(168, 85, 247, 0.4);
-}
-.btn-ghost {
-  border: 2px solid var(--navy);
-  color: var(--navy);
-}
-.btn-ghost:hover {
-  background: var(--navy);
-  color: #fff;
-}
-.section-warm {
-  background: var(--bg-warm);
-}
-.section-navy {
-  background: var(--navy);
-}
-section h2 {
-  font-family: var(--font-serif);
-  font-size: clamp(28px, 3.5vw, 44px);
-  font-weight: 400;
-  color: var(--navy);
-  line-height: 1.15;
-}
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  color: var(--navy);
-}
-
-/* Scroll reveal */
-.reveal {
-  opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
 
 /* ── 1. BANNER BAR ── */
 .banner {
@@ -201,7 +130,7 @@ h4 {
   width: 100%;
   background: var(--navy);
   border-radius: 2px;
-  transition: all 0.3s;
+  transition: transform var(--t-base), opacity var(--t-base);
 }
 .mobile-menu {
   display: none;
@@ -269,7 +198,7 @@ h4 {
 }
 .hero-sub {
   font-size: clamp(15px, 1.5vw, 18px);
-  color: #666;
+  color: var(--text-2);
   max-width: 720px;
   margin: 0 auto 40px;
   line-height: 1.7;
@@ -332,7 +261,7 @@ h4 {
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 4px;
-  transition: all 0.2s;
+  transition: background var(--t-fast), color var(--t-fast);
 }
 .dash-sidebar-item.active {
   background: rgba(168, 85, 247, 0.15);
@@ -458,7 +387,7 @@ h4 {
 }
 .float-stat .label {
   font-size: 12px;
-  color: #888;
+  color: var(--text-3);
   margin-top: 2px;
 }
 .float-stat.left {
@@ -483,7 +412,7 @@ h4 {
 
 /* ── 4. LOGO MARQUEE ── */
 .logo-marquee {
-  padding: 80px 0;
+  padding: 96px 0;
   text-align: center;
 }
 .logo-marquee h2 {
@@ -564,7 +493,7 @@ h4 {
 
 /* ── 5. ABOUT ── */
 .about {
-  padding: 80px 0;
+  padding: 96px 0;
   text-align: center;
 }
 .about h2 {
@@ -575,13 +504,13 @@ h4 {
   max-width: 700px;
   margin: 0 auto 36px;
   font-size: 16px;
-  color: #555;
+  color: var(--text-2);
   line-height: 1.8;
 }
 
 /* ── 6. FEATURES ── */
 .features {
-  padding: 80px 0;
+  padding: 96px 0;
 }
 .feat-row {
   display: grid;
@@ -615,7 +544,7 @@ h4 {
 }
 .feat-box p {
   font-size: 15px;
-  color: #666;
+  color: var(--text-2);
   line-height: 1.85;
 }
 .feat-img {
@@ -680,13 +609,13 @@ h4 {
 }
 .feature-card p {
   font-size: 14px;
-  color: #666;
+  color: var(--text-2);
   line-height: 1.7;
 }
 
 /* ── 7. PREWARMED ── */
 .prewarmed {
-  padding: 80px 0;
+  padding: 96px 0;
 }
 .prewarmed .tag {
   display: block;
@@ -706,7 +635,7 @@ h4 {
   max-width: 650px;
   margin: 0 auto 48px;
   font-size: 15px;
-  color: #666;
+  color: var(--text-2);
 }
 .prewarm-grid {
   display: grid;
@@ -753,7 +682,7 @@ h4 {
 }
 .prewarm-card p {
   font-size: 13px;
-  color: #888;
+  color: var(--text-3);
   line-height: 1.65;
   text-align: left;
 }
@@ -875,7 +804,7 @@ h4 {
 }
 .strip-item p {
   font-size: 12px;
-  color: #888;
+  color: var(--text-3);
   line-height: 1.6;
 }
 @media (max-width: 1024px) {
@@ -898,7 +827,7 @@ h4 {
 
 /* ── 8. WALL OF LOVE ── */
 .wall-of-love {
-  padding: 80px 0;
+  padding: 96px 0;
   overflow: hidden;
 }
 .wall-of-love h2 {
@@ -907,7 +836,7 @@ h4 {
 }
 .wall-sub {
   text-align: center;
-  color: #666;
+  color: var(--text-2);
   margin-bottom: 48px;
   font-size: 15px;
 }
@@ -945,7 +874,7 @@ h4 {
 }
 .test-card blockquote {
   font-size: 13px;
-  color: #555;
+  color: var(--text-2);
   line-height: 1.7;
   margin-bottom: 20px;
   font-style: normal;
@@ -969,12 +898,12 @@ h4 {
 }
 .test-role {
   font-size: 11px;
-  color: #888;
+  color: var(--text-3);
 }
 
 /* ── 8b. VIDEO TESTIMONIALS ── */
 .video-test {
-  padding: 80px 0;
+  padding: 96px 0;
 }
 .video-test-featured {
   display: grid;
@@ -999,7 +928,7 @@ h4 {
 }
 .video-test-featured p {
   font-size: 14px;
-  color: #666;
+  color: var(--text-2);
   line-height: 1.75;
   margin-bottom: 20px;
 }
@@ -1010,7 +939,7 @@ h4 {
 }
 .video-test-featured .vt-role {
   font-size: 12px;
-  color: #888;
+  color: var(--text-3);
 }
 .vt-video {
   background: var(--navy);
@@ -1089,7 +1018,7 @@ h4 {
   align-items: center;
   justify-content: center;
   z-index: 2;
-  transition: all 0.3s;
+  transition: background var(--t-base), border-color var(--t-base), transform var(--t-base);
   pointer-events: none;
 }
 .vt-card-lg .vt-card-thumb .play-icon::after {
@@ -1167,7 +1096,7 @@ h4 {
 }
 .vt-card-author .vt-role2 {
   font-size: 11px;
-  color: #888;
+  color: var(--text-3);
 }
 @media (max-width: 1024px) {
   .video-grid-4 {
@@ -1186,16 +1115,16 @@ h4 {
 
 /* ── 9. WHAT MAKES US SPECIAL ── */
 .special {
-  padding: 80px 0;
-  background: #1a1a2e;
-  color: #fff;
+  padding: 96px 0;
+  background: var(--bg-dark);
+  color: var(--text-on-dark-1);
 }
 .story-cards-wrap {
   padding-bottom: 15vh;
 }
 .story-card {
   background: #fdfaf7;
-  border-radius: 28px;
+  border-radius: var(--radius);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1219,7 +1148,7 @@ h4 {
 }
 .story-card-text p {
   font-size: 15px;
-  color: #666;
+  color: var(--text-2);
   line-height: 1.85;
 }
 .story-card-img {
@@ -1410,7 +1339,7 @@ h4 {
 
 /* ── 10. IS THIS FOR YOU ── */
 .for-you {
-  padding: 80px 0;
+  padding: 96px 0;
 }
 .for-you h2 {
   text-align: center;
@@ -1418,7 +1347,7 @@ h4 {
 }
 .for-you-sub {
   text-align: center;
-  color: #666;
+  color: var(--text-2);
   margin-bottom: 48px;
   font-size: 15px;
   max-width: 700px;
@@ -1442,14 +1371,14 @@ h4 {
   color: var(--navy);
 }
 .for-you-cta p {
-  color: #666;
+  color: var(--text-2);
   font-size: 15px;
   margin-bottom: 28px;
 }
 
 /* ── 11. STATISTICS ── */
 .statistics {
-  padding: 80px 0;
+  padding: 96px 0;
   position: relative;
   overflow: hidden;
 }
@@ -1509,7 +1438,7 @@ h4 {
 
 /* ── 12. PRICING ── */
 .pricing {
-  padding: 80px 0;
+  padding: 96px 0;
 }
 .pricing h2 {
   text-align: center;
@@ -1530,7 +1459,7 @@ h4 {
   border-radius: var(--radius-pill);
   border: 2px solid var(--border);
   color: var(--navy);
-  transition: all 0.3s;
+  transition: background var(--t-base), color var(--t-base), border-color var(--t-base);
 }
 .pricing-tabs button.active {
   background: var(--gradient);
@@ -1560,12 +1489,12 @@ h4 {
 }
 .pricing-card .price-label {
   font-size: 14px;
-  color: #888;
+  color: var(--text-3);
   margin-bottom: 8px;
 }
 .pricing-card .price-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--text-2);
   margin: 12px 0 28px;
   line-height: 1.6;
 }
@@ -1578,7 +1507,7 @@ h4 {
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
   font-size: 14px;
-  color: #555;
+  color: var(--text-2);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1594,7 +1523,7 @@ h4 {
 
 /* ── 13. OUR PROCESS ── */
 .process {
-  padding: 80px 0;
+  padding: 96px 0;
 }
 .process-grid {
   display: grid;
@@ -1641,7 +1570,7 @@ h4 {
 }
 .process-card p {
   font-size: 13px;
-  color: #888;
+  color: var(--text-3);
   line-height: 1.7;
 }
 .process-grid .process-card:last-child:nth-child(odd) {
@@ -1659,11 +1588,11 @@ h4 {
 
 /* ── 14. FAQ ── */
 .faq {
-  padding: 80px 0;
+  padding: 96px 0;
 }
 .faq-sub {
   text-align: center;
-  color: #666;
+  color: var(--text-2);
   margin-bottom: 32px;
   font-size: 15px;
 }
@@ -1684,7 +1613,7 @@ h4 {
   background: none;
   color: var(--navy);
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background var(--t-base), color var(--t-base), border-color var(--t-base);
 }
 .faq-tabs button.active {
   background: var(--gradient);
@@ -1738,13 +1667,13 @@ h4 {
 .faq-a p {
   padding: 0 0 20px;
   font-size: 15px;
-  color: #666;
+  color: var(--text-2);
   line-height: 1.75;
 }
 
 /* ── 15. BOOK A DEMO ── */
 .demo {
-  padding: 80px 0;
+  padding: 96px 0;
   text-align: center;
 }
 .demo h2 {
