@@ -109,24 +109,13 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/api/dashboard',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=300, stale-while-revalidate=600, s-maxage=300',
-          },
-          {
-            key: 'CDN-Cache-Control',
-            value: 'max-age=300',
-          },
-        ],
-      },
-      {
+        // API routes return per-user / authenticated data by default.
+        // Never cache in shared caches unless a specific route opts in.
         source: '/api/(.*)',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=60, stale-while-revalidate=300',
+            value: 'private, no-store',
           },
         ],
       },

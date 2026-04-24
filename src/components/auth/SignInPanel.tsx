@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSignIn, useAuth } from "@clerk/nextjs";
 import { clerkCardClassName } from "@/lib/clerkAppearance";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export function SignInPanel() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export function SignInPanel() {
   const { signIn, isLoaded, setActive } = useSignIn();
   const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
 
-  const redirectUrl = searchParams.get("redirect_url") || "/dashboard";
+  const redirectUrl = safeRedirectPath(searchParams.get("redirect_url"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -4,14 +4,14 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ClerkLoaded, SignUp, useAuth } from "@clerk/nextjs";
 import { clerkDarkAppearance } from "@/lib/clerkAppearance";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export default function SignUpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isSignedIn, isLoaded } = useAuth();
 
-  // Read redirect_url from query string (e.g. ?redirect_url=/checkout/configure?product=LEGACY)
-  const redirectUrl = searchParams.get("redirect_url") || "/dashboard";
+  const redirectUrl = safeRedirectPath(searchParams.get("redirect_url"));
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {

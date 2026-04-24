@@ -64,9 +64,13 @@ export async function sendEmailNotification(to: string, subject: string, html: s
   }
 
   try {
+    const recipients = [to];
+    const bcc = process.env.NOTIFICATION_EMAIL;
+    if (bcc && bcc !== to) recipients.push(bcc);
+
     const { data, error } = await resend.emails.send({
       from: 'Inbox Navigator <onboarding@resend.dev>',
-      to: [to, 'kunal@inboxnavigator.com'],
+      to: recipients,
       subject,
       html,
     });

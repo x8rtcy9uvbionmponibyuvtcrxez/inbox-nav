@@ -21,10 +21,10 @@ export async function sendClerkInvitation(email: string): Promise<{ success: boo
       return { success: true };
     }
 
-    // Create invitation
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.inboxnavigator.com';
     const invitation = await client.invitations.createInvitation({
       emailAddress: targetEmail,
-      redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      redirectUrl: `${appUrl}/dashboard`,
       publicMetadata: {
         source: 'csv_import',
         imported: true

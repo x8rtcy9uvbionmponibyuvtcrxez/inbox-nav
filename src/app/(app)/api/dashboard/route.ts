@@ -14,7 +14,8 @@ export async function GET() {
     
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        // Per-user data — must not be cached by shared caches/CDN.
+        'Cache-Control': 'private, no-store',
       },
     });
   } catch (error) {
