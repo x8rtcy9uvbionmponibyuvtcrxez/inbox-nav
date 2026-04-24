@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Marketing domain serves static pages, not the app
 const MARKETING_HOSTS = ['inboxnavigator.com', 'www.inboxnavigator.com'];
+const APP_HOSTS = ['app.inboxnavigator.com'];
 
 const isPublicRoute = createRouteMatcher([
   '/',
@@ -39,6 +40,16 @@ export default function middleware(req: NextRequest, event: any) {
   // Marketing pages are proper Next.js routes in the (marketing) route group
   if (MARKETING_HOSTS.includes(host)) {
     return NextResponse.next();
+  }
+
+  // App subdomain: the only `/` page in the app lives in the (marketing) route
+  // group, so without this redirect app.inboxnavigator.com would render the
+  // marketing homepage. Send `/` to `/dashboard`; Clerk will bounce signed-out
+  // users to `/sign-in` since `/dashboard` is not in isPublicRoute.
+  if (APP_HOSTS.includes(host) && path === '/') {
+    const url = req.nextUrl.clone();
+    url.pathname = '/dashboard';
+    return NextResponse.redirect(url);
   }
 
   // Bypass Clerk entirely for public API routes — Clerk's internal
