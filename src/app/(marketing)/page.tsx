@@ -266,6 +266,7 @@ export default function HomePage() {
           </Link>
           <div className="nav-links">
             <Link href="/">Home</Link>
+            <Link href="/dfy">Done-For-You</Link>
             <Link href="#pricing">Pricing</Link>
             <Link href="#demo">Contact</Link>
             <Link href="#faq">FAQ</Link>
@@ -2156,6 +2157,7 @@ export default function HomePage() {
             <div className="footer-col">
               <h4>Pages</h4>
               <Link href="/">Home</Link>
+              <Link href="/dfy">Done-For-You</Link>
               <Link href="#pricing">Pricing</Link>
               <Link href="#demo">Contact</Link>
             </div>

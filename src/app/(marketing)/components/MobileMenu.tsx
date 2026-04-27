@@ -19,6 +19,7 @@ export default function MobileMenu() {
       </button>
       <div className={`mobile-menu${open ? " open" : ""}`} id="mobileMenu">
         <Link href="/" onClick={() => setOpen(false)}>Home</Link>
+        <Link href="/dfy" onClick={() => setOpen(false)}>Done-For-You</Link>
         <Link href="#pricing" onClick={() => setOpen(false)}>Pricing</Link>
         <Link href="#demo" onClick={() => setOpen(false)}>Contact</Link>
         <Link href="#faq" onClick={() => setOpen(false)}>FAQ</Link>
