@@ -1426,6 +1426,29 @@
 }
 
 /* ============================================
+   BOOK A CALL
+   ============================================ */
+.book-frame {
+  max-width: 920px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.book-frame iframe {
+  display: block;
+  width: 100%;
+  height: 720px;
+  border: 0;
+  background: #fff;
+}
+@media (max-width: 768px) {
+  .book-frame iframe { height: 820px; }
+}
+
+/* ============================================
    REDUCED MOTION
    ============================================ */
 @media (prefers-reduced-motion: reduce) {

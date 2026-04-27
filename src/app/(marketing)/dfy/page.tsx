@@ -2306,20 +2306,15 @@ export default function DfyPage() {
           ============================================ */}
       <section id="book" className="warm-bg">
         <div className="container">
-          <div
-            className="section-header reveal"
-            style={{ textAlign: "center", maxWidth: "100%" }}
-          >
+          <div className="section-header reveal">
             <span className="section-tag grad-text">Get started</span>
-            <h2 style={{ textAlign: "center" }}>Book a call</h2>
+            <h2>Book a call</h2>
+            <p>30 min intro call to see if we&apos;re a fit. If we are, your first 5 qualified leads are on us.</p>
           </div>
-          <div className="reveal">
+          <div className="book-frame reveal">
             <iframe
+              title="Book a call with InboxNavigator"
               src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3rGJ1MFaQhDdAyuTAFoVCsLGZ59EQYQrMYvaV0kAwykYhm76QX98NVj_R4wXSUmiaW5l0ugPUx?gv=true"
-              style={{ border: 0, borderRadius: "16px" }}
-              width="100%"
-              height="600"
-              frameBorder="0"
               loading="lazy"
             />
           </div>
